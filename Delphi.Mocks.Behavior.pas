@@ -107,6 +107,8 @@ begin
         if Assigned(FAction) then
           result := FAction(args,returnType);
       end;
+    else
+      // Hitcount Only
     end;
   finally
     //needs the finally as we may raise an exception above!

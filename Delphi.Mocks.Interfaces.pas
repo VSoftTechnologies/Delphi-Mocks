@@ -28,12 +28,12 @@ type
                       NeverWhen,      //Never called with specified params
                       AtLeastOnce,    //1 or more times
                       AtLeastOnceWhen,//1 or more times with specified params
-                      AtLeastX,       //x or more times
-                      AtLeastXWhen,   //x or more times with specified params
+                      AtLeast,       //x or more times
+                      AtLeastWhen,   //x or more times with specified params
                       AtMostOnce,     //0 or 1 times
                       AtMostOnceWhen, //0 or 1 times with specified params
-                      AtMostX,        //0 to X times
-                      AtMostXWhen,    //0 to X times with specified params
+                      AtMost,        //0 to X times
+                      AtMostWhen,    //0 to X times with specified params
                       Between,        //Between X & Y Inclusive times
                       BetweenWhen,    //Between X & Y Inclusive times with specified params
                       Exactly,        //Exactly X times
@@ -46,7 +46,12 @@ type
   IExpectation = interface
   ['{960B95B2-581D-4C18-A320-7E19190F29EF}']
     function GetExpectationType : TExpectationType;
-
+    function GetExpectationMet : boolean;
+    function Match(const Args : TArray<TValue>) : boolean;
+    procedure RecordHit;
+    function Report : string;
+    property ExpectationType : TExpectationType read GetExpectationType;
+    property ExpectationMet : boolean read GetExpectationMet;
   end;
 
 

@@ -117,6 +117,10 @@ begin
   if Result <> nil then
     exit;
 
+  result := FindBehavior(TBehaviorType.ReturnDefault,Args);
+  if Result <> nil then
+    exit;
+
   result := nil;
 
 end;
@@ -141,6 +145,7 @@ var
   behavior : IBehavior;
   returnVal : TValue;
 begin
+  Inc(FHitCount);
   behavior := FindBestBehavior(Args);
   if behavior <> nil then
     returnVal := behavior.Execute(Args,returnType)

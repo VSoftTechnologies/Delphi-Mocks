@@ -48,16 +48,16 @@ type
     procedure AtLeastOnce(const AMethodName : string);overload;
 
     function AtLeast(const times : Cardinal) : IWhen<T>;overload;
-    procedure AtLeast(const AMethodName : string);overload;
+    procedure AtLeast(const AMethodName : string; const times : Cardinal);overload;
 
     function AtMost(const times : Cardinal) : IWhen<T>;overload;
-    procedure AtMost(const AMethodName : string);overload;
+    procedure AtMost(const AMethodName : string; const times : Cardinal);overload;
 
     function Between(const a,b : Cardinal) : IWhen<T>;overload;
-    procedure Between(const AMethodName : string);overload;
+    procedure Between(const AMethodName : string; const a,b : Cardinal);overload;
 
     function Exactly(const times : Cardinal) : IWhen<T>;overload;
-    procedure Exactly(const AMethodName : string);overload;
+    procedure Exactly(const AMethodName : string; const times : Cardinal);overload;
 
     function Before(const AMethodName : string) : IWhen<T>;overload;
     procedure Before(const AMethodName : string; const ABeforeMethodName : string);overload;
