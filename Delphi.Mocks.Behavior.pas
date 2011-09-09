@@ -5,6 +5,7 @@ interface
 uses
   Rtti,
   SysUtils,
+  Delphi.Mocks,
   Delphi.Mocks.Interfaces;
 
 type
@@ -130,16 +131,17 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
 begin
   result := False;
   case FBehaviorType of
-    WillReturn: result := MatchArgs;
-    ReturnDefault: result := True;
-    WillRaise:
+    WillReturn      : result := MatchArgs;
+    ReturnDefault   : result := True;
+    WillRaise       :
     begin
       result := MatchArgs;
       if FExceptClass <> nil then
         raise FExceptClass.Create('Raised by Mock');
     end;
     WillRaiseAlways : result := True;
-    WillExecute:  result := MatchArgs;
+    WillExecuteWhen :  result := MatchArgs;
+    WillExecute     : result := True;
   end;
 end;
 

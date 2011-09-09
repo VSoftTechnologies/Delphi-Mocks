@@ -209,7 +209,7 @@ begin
         end;
         TBehaviorType.WillRaise:
         begin
-          methodData.WillRaiseWhen(FExceptClass,Args);
+          methodData.WillRaiseAlways(FExceptClass);
         end;
         TBehaviorType.WillExecuteWhen :
         begin

@@ -6,7 +6,7 @@
 			<MainSource>Sample1.dpr</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
-			<Platform Condition="'$(Platform)'==''">Win64</Platform>
+			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Console</AppType>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -89,14 +89,15 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="Delphi.Mocks.pas"/>
-			<DCCReference Include="Delphi.Mocks.InterfaceProxy.pas"/>
-			<DCCReference Include="Delphi.Mocks.Utils.pas"/>
-			<DCCReference Include="Delphi.Mocks.VirtualInterface.pas"/>
+			<DCCReference Include="Sample1Main.pas"/>
 			<DCCReference Include="Delphi.Mocks.Behavior.pas"/>
 			<DCCReference Include="Delphi.Mocks.Helpers.pas"/>
-			<DCCReference Include="Delphi.Mocks.When.pas"/>
-			<DCCReference Include="Delphi.Mocks.MethodData.pas"/>
+			<DCCReference Include="Delphi.Mocks.InterfaceProxy.pas"/>
 			<DCCReference Include="Delphi.Mocks.Interfaces.pas"/>
+			<DCCReference Include="Delphi.Mocks.MethodData.pas"/>
+			<DCCReference Include="Delphi.Mocks.Utils.pas"/>
+			<DCCReference Include="Delphi.Mocks.VirtualInterface.pas"/>
+			<DCCReference Include="Delphi.Mocks.When.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

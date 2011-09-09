@@ -6,6 +6,7 @@ uses
   Rtti,
   SysUtils,
   Generics.Collections,
+  Delphi.Mocks,
   Delphi.Mocks.Interfaces;
 
 type
@@ -45,7 +46,6 @@ type
 implementation
 
 uses
-  Delphi.Mocks,
   Delphi.Mocks.Behavior;
 
 { TMethodData }

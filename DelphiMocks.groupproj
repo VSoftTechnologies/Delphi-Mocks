@@ -27,10 +27,10 @@
 			<MSBuild Projects="Sample1.dproj" Targets="Make"/>
 		</Target>
 		<Target Name="Delphi_Mocks_Tests">
-			<MSBuild Projects="Test\Delphi.Mocks.Tests.dproj"/>
+			<MSBuild Projects="Tests\Delphi.Mocks.Tests.dproj"/>
 		</Target>
 		<Target Name="Delphi_Mocks_Tests:Clean">
-			<MSBuild Projects="Test\Delphi.Mocks.Tests.dproj" Targets="Clean"/>
+			<MSBuild Projects="Tests\Delphi.Mocks.Tests.dproj" Targets="Clean"/>
 		</Target>
 		<Target Name="Delphi_Mocks_Tests:Make">
 			<MSBuild Projects="Tests\Delphi.Mocks.Tests.dproj" Targets="Make"/>

@@ -7,14 +7,15 @@ program Sample1;
 uses
   SysUtils,
   Delphi.Mocks in 'Delphi.Mocks.pas',
-  Delphi.Mocks.InterfaceProxy in 'Delphi.Mocks.InterfaceProxy.pas',
-  Delphi.Mocks.Utils in 'Delphi.Mocks.Utils.pas',
-  Delphi.Mocks.VirtualInterface in 'Delphi.Mocks.VirtualInterface.pas',
+  Sample1Main in 'Sample1Main.pas',
   Delphi.Mocks.Behavior in 'Delphi.Mocks.Behavior.pas',
   Delphi.Mocks.Helpers in 'Delphi.Mocks.Helpers.pas',
-  Delphi.Mocks.When in 'Delphi.Mocks.When.pas',
+  Delphi.Mocks.InterfaceProxy in 'Delphi.Mocks.InterfaceProxy.pas',
+  Delphi.Mocks.Interfaces in 'Delphi.Mocks.Interfaces.pas',
   Delphi.Mocks.MethodData in 'Delphi.Mocks.MethodData.pas',
-  Delphi.Mocks.Interfaces in 'Delphi.Mocks.Interfaces.pas';
+  Delphi.Mocks.Utils in 'Delphi.Mocks.Utils.pas',
+  Delphi.Mocks.VirtualInterface in 'Delphi.Mocks.VirtualInterface.pas',
+  Delphi.Mocks.When in 'Delphi.Mocks.When.pas';
 
 begin
   try

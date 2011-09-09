@@ -9,11 +9,6 @@ uses
 procedure Test;
 
 
-implementation
-
-uses
-  SysUtils;
-
 type
   {$M+}
   IFoo = interface
@@ -28,48 +23,81 @@ type
     property MyProp : string read GetProp write SetProp;
     property IndexedProp[index : integer] : string read GetIndexProp write SetIndexedProp;
   end;
+  {$M-} //important because otherwise the code below will fail!
+
+
+implementation
+
+uses
+  SysUtils,
+  Rtti;
+
 
 procedure Test;
 var
   mock : TInterfaceMock<IFoo>;
+
   procedure TestImplicit(value : IFoo);
   begin
-    value.TestMe;
     value.Bar(1234567);
   end;
 begin
+  //create our mock
   mock := TInterfaceMock<IFoo>.Create;
-//  mock.Setup;
+
+  //Setup the behavior of our mock
+
+  //setup a default return value for method Bar
+  mock.Setup.WillReturnDefault('Bar','hello world');
+  //setup explicit return values when parameters are matched
   mock.Setup.WillReturn('blah blah').When.Bar(1);
   mock.Setup.WillReturn('goodbye world').When.Bar(2,'sdfsd');
-  mock.Setup.WillRaise(Exception).When.TestMe;
+  //method TestMe will raise an exception - using one that the debugger won't break on here!
+  mock.Setup.WillRaise(EMockException).When.TestMe;
+
+  //MyProp return value - note it really sets up the return value
+  //for the getter method
   mock.Setup.WillReturn('hello').When.MyProp;
-  mock.Setup.WillRaise(Exception).When.MyProp;
-  mock.Setup.WillReturnDefault('Bar','hello world');
+
+  //Why doesn't this compile!
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      //Note - args[0] is the Self interface reference for the anon method, our first arg is [1]
+      result := 'The result is ' + IntToStr(args[1].AsOrdinal);
+    end
+    ).When.Bar(200);
 
 
-
-
-  //define that Bar must be called before TestMe and will return 'abc' when passed in 33
-//  mock.Setup.Before('TestMe').WillReturn('abc').When.Bar(33);
-
+  //Not yet implemented - Define our expectations
   //mock.Setup.Expect.AtLeastOnce.&On('testMe');
   //mock.Setup.Expect.Once.When.Bar(99);
+  //mock.Setup.Expect.Exactly(2).OnMethod('Bar');
 
-//  mock.Setup.Expect.Exactly(2).OnMethod('Bar');
-//  mock.Setup.WillReturn('hello').When.MyProp;
+ //Now use our mock object
+
   mock.Instance.MyProp := 'hello';
   mock.Instance.IndexedProp[1] := 'hello';
+
   WriteLn('Calling Bar(1) : ' + mock.Instance.Bar(1));
   WriteLn('Calling Bar(2) : ' + mock.Instance.Bar(2));
   WriteLn('Calling Bar(2,sdfsd) : ' + mock.Instance.Bar(2,'sdfsd'));
+  WriteLn('Calling Bar(200) : ' + mock.Instance.Bar(200));
+
+
+  //Test the implicit operator by calling a method that expects IFoo
   TestImplicit(mock);
   try
+    // test a method that we have setup to throw an exception
     mock.Instance.TestMe;
   except
+    on e : Exception do
+    begin
+      WriteLn('We caught an exception : ' + e.Message);
+    end;
   end;
   mock.Verify('did it work???');
-  //mock.Free;
+  mock.Free;
 end;
 
 end.

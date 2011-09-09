@@ -3,28 +3,27 @@ unit Delphi.Mocks.Interfaces;
 interface
 
 uses
-  Rtti,
   SysUtils,
-  Generics.Collections;
+  Generics.Collections,
+  Delphi.Mocks,
+  //Delphi.Mocks.Types,
+  Rtti;
 
 type
-  {$M+}
   TBehaviorType = (WillReturn,ReturnDefault,WillRaise,WillRaiseAlways,WillExecute,WillExecuteWhen);
 
   IBehavior = interface
-    ['{9F6FE14D-4522-48EE-B564-20E2BECF7992}']
+  ['{9F6FE14D-4522-48EE-B564-20E2BECF7992}']
     function GetBehaviorType : TBehaviorType;
     function Match(const Args: TArray<TValue>) : boolean;
     function Execute(const Args: TArray<TValue>;  const returnType : TRttiType) : TValue;
     property BehaviorType : TBehaviorType read GetBehaviorType;
   end;
 
-  IVerify = interface
-  ['{58C05610-4BDA-451E-9D61-17C6376C3B3F}']
-    procedure Verify(const message : string = '');
-  end;
+  IExpectation = interface
+  ['{960B95B2-581D-4C18-A320-7E19190F29EF}']
 
-  TExecuteFunc = reference to function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue;
+  end;
 
 
   IMethodData = interface
@@ -48,15 +47,10 @@ type
     property DefaultReturnValue : TValue read GetDefaultReturnValue;
   end;
 
-  IExpectation = interface
-    ['{960B95B2-581D-4C18-A320-7E19190F29EF}']
-
+  IVerify = interface
+  ['{58C05610-4BDA-451E-9D61-17C6376C3B3F}']
+    procedure Verify(const message : string = '');
   end;
-
-
-
-
-
 
 implementation
 
