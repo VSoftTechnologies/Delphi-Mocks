@@ -15,7 +15,8 @@ uses
   Delphi.Mocks.MethodData in 'Delphi.Mocks.MethodData.pas',
   Delphi.Mocks.Utils in 'Delphi.Mocks.Utils.pas',
   Delphi.Mocks.VirtualInterface in 'Delphi.Mocks.VirtualInterface.pas',
-  Delphi.Mocks.When in 'Delphi.Mocks.When.pas';
+  Delphi.Mocks.When in 'Delphi.Mocks.When.pas',
+  Delphi.Mocks.Expectation in 'Delphi.Mocks.Expectation.pas';
 
 begin
   try

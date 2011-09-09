@@ -16,7 +16,9 @@ type
     FReturnValue : TValue;
     FArgs : TArray<TValue>;
     FBehaviorType : TBehaviorType;
+    FHitCount : integer;
   protected
+    function GetHitCount : integer;
     function GetBehaviorType: TBehaviorType;
     function Match(const Args: TArray<TValue>): Boolean;
     function Execute(const Args: TArray<TValue>; const returnType: TRttiType): TValue;
@@ -54,6 +56,7 @@ constructor TBehavior.CreateWillExecute(const AAction: TExecuteFunc);
 begin
   FBehaviorType := TBehaviorType.WillExecute;
   FAction := AAction;
+  FHitCount := 0;
 end;
 
 constructor TBehavior.CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc);
@@ -61,12 +64,14 @@ begin
   FBehaviorType := TBehaviorType.WillExecuteWhen;
   CopyArgs(Args);
   FAction := AAction;
+  FHitCount := 0;
 end;
 
 constructor TBehavior.CreateWillRaise(const AExceptClass: ExceptClass);
 begin
   FBehaviorType := TBehaviorType.WillRaiseAlways;
   FExceptClass := AExceptClass;
+  FHitCount := 0;
 end;
 
 constructor TBehavior.CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass: ExceptClass);
@@ -74,7 +79,7 @@ begin
   FBehaviorType := TBehaviorType.WillRaise;
   FExceptClass := AExceptClass;
   CopyArgs(Args);
-
+  FHitCount := 0;
 end;
 
 constructor TBehavior.CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue);
@@ -82,24 +87,30 @@ begin
   FBehaviorType := TBehaviorType.WillReturn;
   CopyArgs(Args);
   FReturnValue := ReturnValue;
+  FHitCount := 0;
 end;
 
 function TBehavior.Execute(const Args: TArray<TValue>; const returnType: TRttiType): TValue;
 begin
   result := TValue.Empty;
-  case FBehaviorType of
-    WillReturn: result := FReturnValue;
-    ReturnDefault: result := FReturnValue;
-    WillRaise,WillRaiseAlways:
-    begin
-       if FExceptClass <> nil then
-        raise FExceptClass.Create('raised by mock');
+  try
+    case FBehaviorType of
+      WillReturn: result := FReturnValue;
+      ReturnDefault: result := FReturnValue;
+      WillRaise,WillRaiseAlways:
+      begin
+         if FExceptClass <> nil then
+          raise FExceptClass.Create('raised by mock');
+      end;
+      WillExecute,WillExecuteWhen:
+      begin
+        if Assigned(FAction) then
+          result := FAction(args,returnType);
+      end;
     end;
-    WillExecute,WillExecuteWhen:
-    begin
-      if Assigned(FAction) then
-        result := FAction(args,returnType);
-    end;
+  finally
+    //needs the finally as we may raise an exception above!
+    Inc(FHitCount);
   end;
 
 end;
@@ -109,7 +120,10 @@ begin
   Result := FBehaviorType;
 end;
 
-
+function TBehavior.GetHitCount: integer;
+begin
+  result := FHitCount;
+end;
 
 function TBehavior.Match(const Args: TArray<TValue>): Boolean;
 

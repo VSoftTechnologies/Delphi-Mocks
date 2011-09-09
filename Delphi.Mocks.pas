@@ -34,20 +34,40 @@ uses
 type
   IWhen<T> = interface;
 
-  //Records the expectations we have when our Mock is used.
+  //Records the expectations we have when our Mock is used. We can then verify
+  //our expectations later.
   IExpect<T> = interface
   ['{8B9919F1-99AB-4526-AD90-4493E9343083}']
-    function Once : IWhen<T>;
-    function Never : IWhen<T>;
-    function AtLeastOnce : IWhen<T>;
-    function AtLeast(const times : Cardinal) : IWhen<T>;
-    function AtMost(const times : Cardinal) : IWhen<T>;
-    function Between(const a,b : Cardinal) : IWhen<T>;
-    function Exactly(const times : Cardinal) : IWhen<T>;
+    function Once : IWhen<T>;overload;
+    procedure Once(const AMethodName : string);overload;
+
+    function Never : IWhen<T>;overload;
+    procedure Never(const AMethodName : string);overload;
+
+    function AtLeastOnce : IWhen<T>;overload;
+    procedure AtLeastOnce(const AMethodName : string);overload;
+
+    function AtLeast(const times : Cardinal) : IWhen<T>;overload;
+    procedure AtLeast(const AMethodName : string);overload;
+
+    function AtMost(const times : Cardinal) : IWhen<T>;overload;
+    procedure AtMost(const AMethodName : string);overload;
+
+    function Between(const a,b : Cardinal) : IWhen<T>;overload;
+    procedure Between(const AMethodName : string);overload;
+
+    function Exactly(const times : Cardinal) : IWhen<T>;overload;
+    procedure Exactly(const AMethodName : string);overload;
+
+    function Before(const AMethodName : string) : IWhen<T>;overload;
+    procedure Before(const AMethodName : string; const ABeforeMethodName : string);overload;
+
+    function After(const AMethodName : string) : IWhen<T>;overload;
+    procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
   end;
 
   IWhen<T> = interface
- // ['{A8C2E07B-A5C1-463D-ACC4-BA2881E8419F}']
+  ['{A8C2E07B-A5C1-463D-ACC4-BA2881E8419F}']
     function When : T;
   end;
 
@@ -100,9 +120,11 @@ type
   end;
 
 
-  //used by the mock - need to find another place to put this.. circular references problem means we need it here
+  //used by the mock - need to find another place to put this.. circular references
+  //problem means we need it here for now.
+
   IProxy<T> = interface
-//  ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
+  ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
     function Setup : ISetup<T>;
     function Proxy : T;
   end;
@@ -125,8 +147,23 @@ type
     procedure Free;
   end;
 
+  //NOT ACTUALLY IMPLEMENTED YET
+  TObjectMock<T : class> = record
+  private
+    FObject : T;
+  public
+    class operator Implicit(const Value: TObjectMock<T>): T;
+    function Setup : ISetup<T>;
+    //Verify that our expectations were met.
+    procedure Verify(const message : string = '');
+    function Instance : T;
+    class function Create: TObjectMock<T>; static;
+    // explicit cleanup.
+    procedure Free;
+  end;
 
-//Exception Types that the mocks will raise.
+
+  //Exception Types that the mocks will raise.
   EMockException = class(Exception);
   EMockSetupException = class(EMockException);
   EMockNoRTTIException = class(EMockException);
@@ -199,6 +236,46 @@ begin
     v.Verify(message)
   else
     raise EMockException.Create('Could not cast Setup to IVerify interface!');
+end;
+
+{ TObjectMock<T> }
+
+class function TObjectMock<T>.Create: TObjectMock<T>;
+var
+  pInfo : PTypeInfo;
+begin
+  pInfo := TypeInfo(T);
+  //Generics cannot have interface constraints so we have to resort to runtime checking.
+  if pInfo.Kind <> tkClass then
+    raise EMockException.Create(string(pInfo.Name) + ' is not an Object. TObjectMock<T> supports objects only');
+
+
+  raise Exception.Create('Not implemented');
+end;
+
+procedure TObjectMock<T>.Free;
+begin
+  raise Exception.Create('Not implemented');
+end;
+
+class operator TObjectMock<T>.Implicit(const Value: TObjectMock<T>): T;
+begin
+  raise Exception.Create('Not implemented');
+end;
+
+function TObjectMock<T>.Instance: T;
+begin
+  raise Exception.Create('Not implemented');
+end;
+
+function TObjectMock<T>.Setup: ISetup<T>;
+begin
+  raise Exception.Create('Not implemented');
+end;
+
+procedure TObjectMock<T>.Verify(const message: string);
+begin
+  raise Exception.Create('Not implemented');
 end;
 
 end.

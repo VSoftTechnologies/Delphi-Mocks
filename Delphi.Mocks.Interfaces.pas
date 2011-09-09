@@ -14,14 +14,38 @@ type
 
   IBehavior = interface
   ['{9F6FE14D-4522-48EE-B564-20E2BECF7992}']
+    function GetHitCount : integer;
     function GetBehaviorType : TBehaviorType;
     function Match(const Args: TArray<TValue>) : boolean;
     function Execute(const Args: TArray<TValue>;  const returnType : TRttiType) : TValue;
     property BehaviorType : TBehaviorType read GetBehaviorType;
+    property HitCount : integer read GetHitCount;
   end;
+
+  TExpectationType = (Once,           //Called once only
+                      OnceWhen,       //Called once only with specified params
+                      Never,          //Never called
+                      NeverWhen,      //Never called with specified params
+                      AtLeastOnce,    //1 or more times
+                      AtLeastOnceWhen,//1 or more times with specified params
+                      AtLeastX,       //x or more times
+                      AtLeastXWhen,   //x or more times with specified params
+                      AtMostOnce,     //0 or 1 times
+                      AtMostOnceWhen, //0 or 1 times with specified params
+                      AtMostX,        //0 to X times
+                      AtMostXWhen,    //0 to X times with specified params
+                      Between,        //Between X & Y Inclusive times
+                      BetweenWhen,    //Between X & Y Inclusive times with specified params
+                      Exactly,        //Exactly X times
+                      ExactlyWhen,    //Exactly X times with specified params
+                      Before,         //Must be called before Method X is called
+                      BeforeWhen,     //Must be called before Method x is called with specified params
+                      After,          //Must be called after Method X is called
+                      AfterWhen);     //Must be called after Method x is called with specified params
 
   IExpectation = interface
   ['{960B95B2-581D-4C18-A320-7E19190F29EF}']
+    function GetExpectationType : TExpectationType;
 
   end;
 
@@ -35,10 +59,8 @@ type
 
     procedure WillReturnDefault(const returnValue : TValue);
     procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue);
-
     procedure WillRaiseAlways(const exceptionClass : ExceptClass);
     procedure WillRaiseWhen(const exceptionClass : ExceptClass;const Args: TArray<TValue>);
-
     procedure WillExecute(const func : TExecuteFunc);
     procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>);
 

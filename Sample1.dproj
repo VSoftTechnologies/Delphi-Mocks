@@ -98,6 +98,7 @@
 			<DCCReference Include="Delphi.Mocks.Utils.pas"/>
 			<DCCReference Include="Delphi.Mocks.VirtualInterface.pas"/>
 			<DCCReference Include="Delphi.Mocks.When.pas"/>
+			<DCCReference Include="Delphi.Mocks.Expectation.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
