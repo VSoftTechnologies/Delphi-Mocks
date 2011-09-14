@@ -24,6 +24,8 @@ type
     function Execute(const Args: TArray<TValue>; const returnType: TRttiType): TValue;
     procedure CopyArgs(const Args: TArray<TValue>);
   public
+    //disable warnings about c++ compatibility, since we don't intend to support it.
+    {$WARN DUPLICATE_CTOR_DTOR OFF}
     constructor CreateWillExecute(const AAction: TExecuteFunc);
     constructor CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc );
     constructor CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue);

@@ -8,6 +8,11 @@ uses
   Delphi.Mocks,
   Delphi.Mocks.Interfaces;
 
+//disable warnings about c++ compatibility, since we don't intend to support it.
+{$WARN DUPLICATE_CTOR_DTOR OFF}
+//for some reason this doesn't work.. this should override the project settings.
+
+
 type
   TExpectation = class(TInterfacedObject,IExpectation)
   private
@@ -25,6 +30,7 @@ type
     function Match(const Args : TArray<TValue>) : boolean;
     procedure RecordHit;
     function Report : string;
+    function ArgsToString : string;
     procedure CopyArgs(const Args: TArray<TValue>);
     constructor Create(const AMethodName : string);
     constructor CreateWhen(const AMethodName : string; const Args: TArray<TValue>);
@@ -63,9 +69,25 @@ type
 implementation
 
 uses
+  SysUtils,
   Delphi.Mocks.Helpers;
 
 { TExpectation }
+
+function TExpectation.ArgsToString: string;
+var
+  arg : TValue;
+  i : integer;
+begin
+  result := '( ';
+  for i := Low(FArgs) to High(FArgs) do
+  begin
+    if i > Low(FArgs) then
+      result := result + ', ';
+    result := result + arg.ToString;
+  end;
+  result := result + ' )';
+end;
 
 procedure TExpectation.CopyArgs(const Args: TArray<TValue>);
 begin
@@ -245,35 +267,59 @@ function TExpectation.Match(const Args: TArray<TValue>): boolean;
     end;
     result := True;
   end;
-
 begin
+  result := False;
+  case FExpectationType of
+    Once,
+    Never,
+    AtLeastOnce,
+    AtLeast,
+    AtMostOnce,
+    AtMost,
+    Between,
+    Exactly,
+    Before,
+    After: result := True ;
 
+    OnceWhen,
+    NeverWhen,
+    AtLeastOnceWhen,
+    AtLeastWhen,
+    AtMostOnceWhen,
+    AtMostWhen,
+    BetweenWhen,
+    ExactlyWhen,
+    BeforeWhen,
+    AfterWhen: result := MatchArgs;
+  end;
 end;
 
 procedure TExpectation.RecordHit;
 begin
   Inc(FHitCount);
   case FExpectationType of
-    Once: FExpectationMet := FHitCount = FTimes;
-    OnceWhen: ;
-    Never: ;
-    NeverWhen: ;
-    AtLeastOnce: ;
-    AtLeastOnceWhen: ;
-    AtLeast: ;
-    AtLeastWhen: ;
-    AtMostOnce: ;
-    AtMostOnceWhen: ;
-    AtMost: ;
-    AtMostWhen: ;
-    Between: ;
-    BetweenWhen: ;
+    Once,
+    OnceWhen: FExpectationMet := FHitCount = 1;
+    Never,
+    NeverWhen: FExpectationMet := False;
+    AtLeastOnce,
+    AtLeastOnceWhen: FExpectationMet := FHitCount >= 1;
+    AtLeast,
+    AtLeastWhen: FExpectationMet := FHitCount >= FTimes;
+    AtMostOnce,
+    AtMostOnceWhen: FExpectationMet := FHitCount <= 1;
+    AtMost,
+    AtMostWhen: FExpectationMet := FHitCount <= FTimes;
+    Between,
+    BetweenWhen: FExpectationMet := (FHitCount >= FBetween[0]) and (FHitCount <= FBetween[1]);
     Exactly: ;
-    ExactlyWhen: ;
-    Before: ;
-    BeforeWhen: ;
-    After: ;
-    AfterWhen: ;
+    ExactlyWhen: FExpectationMet := FHitCount = FTimes;
+
+    //haven't figure out how to handle these yet.. might need to rethink ordered expectations
+    Before,
+    BeforeWhen: FExpectationMet := False;
+    After,
+    AfterWhen: FExpectationMet := False;
   end;
 
 end;
@@ -283,28 +329,32 @@ begin
   result := '';
   if not FExpectationMet then
   begin
+    //YUK - must do better than this!
+    result := 'Expectation [ ';
      case FExpectationType of
-       Once: ;
-       OnceWhen: ;
-       Never: ;
-       NeverWhen: ;
-       AtLeastOnce: ;
-       AtLeastOnceWhen: ;
-       AtLeast: ;
-       AtLeastWhen: ;
-       AtMostOnce: ;
-       AtMostOnceWhen: ;
-       AtMost: ;
-       AtMostWhen: ;
-       Between: ;
-       BetweenWhen: ;
-       Exactly: ;
-       ExactlyWhen: ;
-       Before: ;
-       BeforeWhen: ;
-       After: ;
-       AfterWhen: ;
+       Once: result := 'Once';
+       Never: result := 'Never';
+       AtLeastOnce: result := 'At Least Once';
+       AtLeast: result := 'At Least ' + IntToStr(FTimes) + ' Times';
+       AtMost: result := 'At Most ' + IntToStr(FTimes) + ' Times';
+       AtMostOnce: result := 'At Most Once';
+       Between: result := 'Between ' + IntToStr(FBetween[0]) + ' and ' + IntToStr(FBetween[0]) + ' Times';
+       Exactly: result := 'Exactly ' + IntToStr(FTimes) + ' Times';
+       Before: result := 'Before Method : ' + FBeforeAfterMethodName;
+       After: result := 'After Method : ' + FBeforeAfterMethodName;
+
+       OnceWhen: result := 'Once When' + ArgsToString;
+       NeverWhen:result := 'Never When' + ArgsToString ;
+       AtLeastOnceWhen: result := 'At Least Once When' + ArgsToString;
+       AtLeastWhen: result := 'At Least ' + IntToStr(FTimes) + ' Times When ' + ArgsToString;
+       AtMostOnceWhen: result := 'At Most Once When' + ArgsToString;
+       AtMostWhen: result := 'At Most ' + IntToStr(FTimes) + ' Times When ' + ArgsToString;
+       BetweenWhen: result := 'Between ' + IntToStr(FBetween[0]) + ' and ' + IntToStr(FBetween[0]) + ' Times When' + ArgsToString;
+       ExactlyWhen: result := 'Exactly ' + IntToStr(FTimes) + ' Times When' + ArgsToString;
+       BeforeWhen: result := 'Before Method : ' + FBeforeAfterMethodName + ' When ' + ArgsToString;
+       AfterWhen: result := 'After Method : ' + FBeforeAfterMethodName + ' When ' + ArgsToString;
      end;
+    result := result + '] was not met.';
   end;
 
 end;

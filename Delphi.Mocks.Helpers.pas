@@ -26,7 +26,6 @@ uses
 
 function TValueHelper.Equals(const value : TValue) : boolean;
 begin
-  result := False;
   if Self.IsEmpty and value.IsEmpty then
     exit(true);
 

@@ -199,7 +199,6 @@ begin
   //Create Our proxy object, which will implement our interface T
   proxy := TProxyBase<T>.Create;
 
-
   //Note we don't worry if there being no guid on the interface, we know that our proxy implements T
   //and it will treat an empty GUID as T;
   if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid,result.FProxy) <> 0 then
@@ -249,6 +248,7 @@ begin
   if pInfo.Kind <> tkClass then
     raise EMockException.Create(string(pInfo.Name) + ' is not an Object. TObjectMock<T> supports objects only');
 
+  result.FObject := Default(T);//just to stop the compiler hint for now.
 
   raise Exception.Create('Not implemented');
 end;

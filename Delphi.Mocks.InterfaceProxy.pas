@@ -89,11 +89,9 @@ type
     function WillExecute(const func : TExecuteFunc) : IWhen<T>;overload;
     procedure WillExecute(const AMethodName : string; const func : TExecuteFunc);overload;
 
-    //ISetupControl
     procedure DoInvoke(Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue);
+    //IVerify
     procedure Verify(const message : string = '');
-    function GetSetupMode : boolean;
-    procedure SetSetupMode(const value : boolean);
 
     function GetMethodData(const AMethodName : string) : IMethodData;overload;
 
@@ -253,10 +251,6 @@ begin
 
 end;
 
-function TProxyBase<T>.GetSetupMode: boolean;
-begin
-  result := FSetupMode;
-end;
 
 function TProxyBase<T>.InternalQueryInterface(const IID: TGUID;
   out Obj): HRESULT;
@@ -290,10 +284,6 @@ begin
   FBehaviorMustBeDefined := value;
 end;
 
-procedure TProxyBase<T>.SetSetupMode(const value: boolean);
-begin
-  FSetupMode := value;
-end;
 
 function TProxyBase<T>.Setup: ISetup<T>;
 begin

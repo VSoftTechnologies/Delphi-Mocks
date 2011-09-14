@@ -42,6 +42,7 @@ type
                       BeforeWhen,     //Must be called before Method x is called with specified params
                       After,          //Must be called after Method X is called
                       AfterWhen);     //Must be called after Method x is called with specified params
+  TExpectationTypes = set of TExpectationType;
 
   IExpectation = interface
   ['{960B95B2-581D-4C18-A320-7E19190F29EF}']
@@ -57,11 +58,9 @@ type
 
   IMethodData = interface
   ['{640BFB71-85C2-4ED4-A863-5AF6535BD2E8}']
-    function GetDefaultReturnValue : TValue;
-    function GetBehaviors : TList<IBehavior>;
-    function GetHitCount : integer;
     procedure RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result: TValue);
 
+    //behaviors
     procedure WillReturnDefault(const returnValue : TValue);
     procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue);
     procedure WillRaiseAlways(const exceptionClass : ExceptClass);
@@ -69,9 +68,25 @@ type
     procedure WillExecute(const func : TExecuteFunc);
     procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>);
 
-    property Behaviors : TList<IBehavior> read GetBehaviors;
-    property HitCount : integer read GetHitCount;
-    property DefaultReturnValue : TValue read GetDefaultReturnValue;
+    //expectations
+    procedure OnceWhen(const Args : TArray<TValue>);
+    procedure Once;
+    procedure NeverWhen(const Args : TArray<TValue>);
+    procedure Never;
+    procedure AtLeastOnceWhen(const Args : TArray<TValue>);
+    procedure AtLeastOnce;
+    procedure AtLeastWhen(const times : Cardinal; const Args : TArray<TValue>);
+    procedure AtLeast(const times : Cardinal);
+    procedure AtMostWhen(const times : Cardinal; const Args : TArray<TValue>);
+    procedure AtMost(const times : Cardinal);
+    procedure BetweenWhen(const a,b : Cardinal; const Args : TArray<TValue>);
+    procedure Between(const a,b : Cardinal);
+    procedure ExactlyWhen(const times : Cardinal; const Args : TArray<TValue>);
+    procedure Exactly(const times : Cardinal);
+    procedure BeforeWhen(const ABeforeMethodName : string ; const Args : TArray<TValue>);
+    procedure Before(const ABeforeMethodName : string);
+    procedure AfterWhen(const AAfterMethodName : string;const Args : TArray<TValue>);
+    procedure After(const AAfterMethodName : string);
   end;
 
   IVerify = interface

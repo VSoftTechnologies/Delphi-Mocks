@@ -31,6 +31,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_DUPLICATE_CTOR_DTOR>false</DCC_DUPLICATE_CTOR_DTOR>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.2.3.4;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0</VerInfo_Keys>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>3081</VerInfo_Locale>
@@ -63,19 +64,11 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<VerInfo_Keys>CompanyName=VincentX64;FileDescription=was;FileVersion=12.11.10.9;InternalName=here;LegalCopyright=blah;LegalTrademarks=blah2;OriginalFilename=blah3;ProductName=Sample1 of course;ProductVersion=1.0.0.0</VerInfo_Keys>
-			<Manifest_File>None</Manifest_File>
-			<VerInfo_Locale>3081</VerInfo_Locale>
 			<VerInfo_CodePage>1252</VerInfo_CodePage>
-			<VerInfo_IncludeVerInfo>True</VerInfo_IncludeVerInfo>
-			<VerInfo_PreRelease>False</VerInfo_PreRelease>
-			<VerInfo_DLL>False</VerInfo_DLL>
 			<VerInfo_MinorVer>11</VerInfo_MinorVer>
 			<VerInfo_MajorVer>12</VerInfo_MajorVer>
 			<VerInfo_Release>10</VerInfo_Release>
-			<VerInfo_Special>False</VerInfo_Special>
-			<VerInfo_Private>False</VerInfo_Private>
 			<VerInfo_Build>9</VerInfo_Build>
-			<VerInfo_Debug>False</VerInfo_Debug>
 			<VerInfo_AutoIncBuild>False</VerInfo_AutoIncBuild>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
