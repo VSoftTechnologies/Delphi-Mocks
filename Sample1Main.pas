@@ -72,7 +72,7 @@ begin
   //Not yet implemented - Define our expectations
   //mock.Setup.Expect.AtLeastOnce.&On('testMe');
   //mock.Setup.Expect.Once.When.Bar(99);
-  //mock.Setup.Expect.Exactly(2).OnMethod('Bar');
+  mock.Setup.Expect.Once.When.TestMe;
 
  //Now use our mock object
 

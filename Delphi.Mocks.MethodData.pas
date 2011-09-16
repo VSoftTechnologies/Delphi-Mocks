@@ -57,6 +57,7 @@ type
     procedure AfterWhen(const AAfterMethodName : string;const Args : TArray<TValue>);
     procedure After(const AAfterMethodName : string);
 
+    procedure Verify;
   public
     constructor Create(const AMethodName : string);
     destructor Destroy;override;
@@ -72,68 +73,6 @@ uses
 
 { TMethodData }
 
-procedure TMethodData.After(const AAfterMethodName: string);
-begin
-
-end;
-
-procedure TMethodData.AfterWhen(const AAfterMethodName: string;const Args: TArray<TValue>);
-begin
-
-end;
-
-procedure TMethodData.AtLeast(const times: Cardinal);
-begin
-
-end;
-
-procedure TMethodData.AtLeastOnce;
-begin
-
-end;
-
-procedure TMethodData.AtLeastOnceWhen(const Args: TArray<TValue>);
-begin
-
-end;
-
-procedure TMethodData.AtLeastWhen(const times: Cardinal; const Args: TArray<TValue>);
-begin
-
-end;
-
-procedure TMethodData.AtMost(const times: Cardinal);
-begin
-
-end;
-
-procedure TMethodData.AtMostWhen(const times: Cardinal;
-  const Args: TArray<TValue>);
-begin
-
-end;
-
-procedure TMethodData.Before(const ABeforeMethodName: string);
-begin
-
-end;
-
-procedure TMethodData.BeforeWhen(const ABeforeMethodName: string;
-  const Args: TArray<TValue>);
-begin
-
-end;
-
-procedure TMethodData.Between(const a, b: Cardinal);
-begin
-
-end;
-
-procedure TMethodData.BetweenWhen(const a, b: Cardinal;
-  const Args: TArray<TValue>);
-begin
-
-end;
 
 constructor TMethodData.Create(const AMethodName : string);
 begin
@@ -152,14 +91,26 @@ begin
 end;
 
 procedure TMethodData.Exactly(const times: Cardinal);
+var
+  expectation : IExpectation;
 begin
-
+  expectation := FindExpectation([TExpectationType.Exactly,TExpectationType.ExactlyWhen]);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation Exactly already defined on method : ' + FMethodName);
+  expectation := TExpectation.CreateExactly(FMethodName,times);
+  FExpectations.Add(expectation);
 end;
 
 procedure TMethodData.ExactlyWhen(const times: Cardinal;
   const Args: TArray<TValue>);
+var
+  expectation : IExpectation;
 begin
-
+  expectation := FindExpectation(TExpectationType.ExactlyWhen,Args);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation Exactly already defined for these args on method : ' + FMethodName);
+  expectation := TExpectation.CreateExactlyWhen(FMethodName,times,Args);
+  FExpectations.Add(expectation);
 end;
 
 function TMethodData.FindBehavior(const behaviorType: TBehaviorType; const Args: TArray<TValue>): IBehavior;
@@ -257,6 +208,117 @@ begin
   end;
 end;
 
+procedure TMethodData.After(const AAfterMethodName: string);
+begin
+  raise ENotImplemented.Create('After not implented');
+end;
+
+procedure TMethodData.AfterWhen(const AAfterMethodName: string;const Args: TArray<TValue>);
+begin
+  raise ENotImplemented.Create('AfterWhen not implented');
+end;
+
+procedure TMethodData.AtLeast(const times: Cardinal);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation([TExpectationType.AtLeast,TExpectationType.AtLeastOnce,TExpectationType.AtLeastOnceWhen,TExpectationType.AtLeastWhen]);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation At Least already defined on method : ' + FMethodName);
+  expectation := TExpectation.CreateAtLeast(FMethodName,times);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.AtLeastOnce;
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation([TExpectationType.AtLeast,TExpectationType.AtLeastOnce,TExpectationType.AtLeastOnceWhen,TExpectationType.AtLeastWhen]);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation At Least already defined on method : ' + FMethodName);
+  expectation := TExpectation.CreateAtLeastOnce(FMethodName);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.AtLeastOnceWhen(const Args: TArray<TValue>);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation(TExpectationType.AtLeastOnceWhen,Args);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation At Least Once already defined for these args on method : ' + FMethodName);
+  expectation := TExpectation.CreateAtLeastOnceWhen(FMethodName,Args);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.AtLeastWhen(const times: Cardinal; const Args: TArray<TValue>);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation(TExpectationType.AtLeastWhen,Args);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation At Least already defined for these args on method : ' + FMethodName);
+  expectation := TExpectation.CreateAtLeastWhen(FMethodName,times,Args);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.AtMost(const times: Cardinal);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation([TExpectationType.AtMost,TExpectationType.AtMostWhen]);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation At Most already defined on method : ' + FMethodName);
+  expectation := TExpectation.CreateAtMost(FMethodName,times);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.AtMostWhen(const times: Cardinal;
+  const Args: TArray<TValue>);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation(TExpectationType.AtMostWhen,Args);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation At Most already defined for these args on method : ' + FMethodName);
+  expectation := TExpectation.CreateAtMostWhen(FMethodName,times,Args);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.Before(const ABeforeMethodName: string);
+begin
+  raise ENotImplemented.Create('Before not implented');
+end;
+
+procedure TMethodData.BeforeWhen(const ABeforeMethodName: string; const Args: TArray<TValue>);
+begin
+  raise ENotImplemented.Create('BeforeWhen not implented');
+end;
+
+procedure TMethodData.Between(const a, b: Cardinal);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation([TExpectationType.Between,TExpectationType.BetweenWhen]);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation Between already defined on method : ' + FMethodName);
+  expectation := TExpectation.CreateBetween(FMethodName,a,b);
+  FExpectations.Add(expectation);
+end;
+
+procedure TMethodData.BetweenWhen(const a, b: Cardinal;const Args: TArray<TValue>);
+var
+  expectation : IExpectation;
+begin
+  expectation := FindExpectation(TExpectationType.BetweenWhen,Args);
+  if expectation <> nil then
+    raise EMockException.Create('Expectation Between already defined for these args on method : ' + FMethodName);
+  expectation := TExpectation.CreateBetweenWhen(FMethodName,a,b,Args);
+  FExpectations.Add(expectation);
+end;
+
+
+
 procedure TMethodData.Never;
 var
   expectation : IExpectation;
@@ -302,10 +364,12 @@ begin
   FExpectations.Add(expectation);
 end;
 
+
 procedure TMethodData.RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result: TValue);
 var
   behavior : IBehavior;
   returnVal : TValue;
+  expectation : IExpectation;
 begin
   Inc(FHitCount);
   behavior := FindBestBehavior(Args);
@@ -319,7 +383,29 @@ begin
   end;
   if returnType <> nil then
     Result := returnVal;
+
+  for expectation in FExpectations do
+  begin
+    if expectation.Match(Args) then
+      expectation.RecordHit;
+  end;
 end;
+
+procedure TMethodData.Verify;
+var
+  report : string;
+  expectation : IExpectation;
+begin
+  for expectation in FExpectations do
+  begin
+    if not expectation.ExpectationMet then
+      report := report + expectation.Report;
+  end;
+  if report <> '' then
+    raise EMockVerificationException.Create(report);
+end;
+
+//Behaviors
 
 procedure TMethodData.WillExecute(const func: TExecuteFunc);
 var

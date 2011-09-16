@@ -90,11 +90,11 @@ type
     //Set Expectations for methods
     function Expect : IExpect<T>;
 
-    //set a required order for methods, e.g A must have been called before B
-    function Before(const AMethodName : string) : ISetup<T>;
-
-    //set a required order for methods, e.g A must have been called After B
-    function After(const AMethodName : string) : ISetup<T>;
+//    //set a required order for methods, e.g A must have been called before B
+//    function Before(const AMethodName : string) : ISetup<T>;
+//
+//    //set a required order for methods, e.g A must have been called After B
+//    function After(const AMethodName : string) : ISetup<T>;
 
     //set the return value for a method when called with the parameters specified on the When
     function WillReturn(const value : TValue) : IWhen<T>;
@@ -168,6 +168,7 @@ type
   EMockSetupException = class(EMockException);
   EMockNoRTTIException = class(EMockException);
   EMockNoProxyException = class(EMockException);
+  EMockVerificationException = class(EMockException);
 
 
 implementation

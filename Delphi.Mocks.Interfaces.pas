@@ -87,6 +87,10 @@ type
     procedure Before(const ABeforeMethodName : string);
     procedure AfterWhen(const AAfterMethodName : string;const Args : TArray<TValue>);
     procedure After(const AAfterMethodName : string);
+
+    //Verification
+    procedure Verify;
+
   end;
 
   IVerify = interface

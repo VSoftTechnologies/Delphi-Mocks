@@ -39,7 +39,9 @@ uses
 type
   TProxyBaseInvokeEvent = procedure (Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue) of object;
 
-  TProxyBase<T> = class(TInterfacedObject,IInterface,IProxy<T>,ISetup<T>,IVerify)
+  TSetupMode = (None,Behavior,Expectation);
+
+  TProxyBase<T> = class(TInterfacedObject,IInterface,IProxy<T>,ISetup<T>,IExpect<T>, IVerify)
   private type
    TProxyVirtualInterface = class(TVirtualInterface)
     private
@@ -57,9 +59,10 @@ type
 
     FMethodData : TDictionary<string,IMethodData>;
     //
-    FSetupMode : Boolean;
+    FSetupMode : TSetupMode;
 
     FNextBehavior : TBehaviorType;
+    FNextExpectationType : TExpectationType;
     FReturnValue : TValue;
     FBehaviorMustBeDefined : Boolean;
     FNextFunc : TExecuteFunc;
@@ -79,8 +82,8 @@ type
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
     function Expect : IExpect<T>;
-    function Before(const AMethodName : string) : ISetup<T>;
-    function After(const AMethodName : string) : ISetup<T>;
+//    function Before(const AMethodName : string) : ISetup<T>;
+//    function After(const AMethodName : string) : ISetup<T>;
     function WillReturn(const value : TValue) : IWhen<T>;
     procedure WillReturnDefault(const AMethodName : string; const value : TValue);
     function WillRaise(const exceptionClass : ExceptClass) : IWhen<T>;overload;
@@ -96,6 +99,34 @@ type
     function GetMethodData(const AMethodName : string) : IMethodData;overload;
 
     procedure ClearSetupState;
+
+    //IExpect<T>
+    function Once : IWhen<T>;overload;
+    procedure Once(const AMethodName : string);overload;
+
+    function Never : IWhen<T>;overload;
+    procedure Never(const AMethodName : string);overload;
+
+    function AtLeastOnce : IWhen<T>;overload;
+    procedure AtLeastOnce(const AMethodName : string);overload;
+
+    function AtLeast(const times : Cardinal) : IWhen<T>;overload;
+    procedure AtLeast(const AMethodName : string; const times : Cardinal);overload;
+
+    function AtMost(const times : Cardinal) : IWhen<T>;overload;
+    procedure AtMost(const AMethodName : string; const times : Cardinal);overload;
+
+    function Between(const a,b : Cardinal) : IWhen<T>;overload;
+    procedure Between(const AMethodName : string; const a,b : Cardinal);overload;
+
+    function Exactly(const times : Cardinal) : IWhen<T>;overload;
+    procedure Exactly(const AMethodName : string; const times : Cardinal);overload;
+
+    function Before(const AMethodName : string) : IWhen<T>;overload;
+    procedure Before(const AMethodName : string; const ABeforeMethodName : string);overload;
+
+    function After(const AMethodName : string) : IWhen<T>;overload;
+    procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
   public
     constructor Create;
     destructor Destroy;override;
@@ -145,19 +176,82 @@ uses
 
 { TProxyBase }
 
-function TProxyBase<T>.After(const AMethodName: string): ISetup<T>;
+//function TProxyBase<T>.After(const AMethodName: string): ISetup<T>;
+//begin
+//  result := Self;
+//end;
+
+//function TProxyBase<T>.Before(const AMethodName: string): ISetup<T>;
+//begin
+//  result := Self;
+//end;
+
+procedure TProxyBase<T>.After(const AMethodName, AAfterMethodName: string);
 begin
-  result := Self;
+
 end;
 
-function TProxyBase<T>.Before(const AMethodName: string): ISetup<T>;
+function TProxyBase<T>.After(const AMethodName: string): IWhen<T>;
 begin
-  result := Self;
+
+end;
+
+procedure TProxyBase<T>.AtLeast(const AMethodName: string;
+  const times: Cardinal);
+begin
+
+end;
+
+function TProxyBase<T>.AtLeast(const times: Cardinal): IWhen<T>;
+begin
+
+end;
+
+procedure TProxyBase<T>.AtLeastOnce(const AMethodName: string);
+begin
+
+end;
+
+function TProxyBase<T>.AtLeastOnce: IWhen<T>;
+begin
+
+end;
+
+procedure TProxyBase<T>.AtMost(const AMethodName: string;
+  const times: Cardinal);
+begin
+
+end;
+
+function TProxyBase<T>.AtMost(const times: Cardinal): IWhen<T>;
+begin
+
+end;
+
+procedure TProxyBase<T>.Before(const AMethodName, ABeforeMethodName: string);
+begin
+
+end;
+
+function TProxyBase<T>.Before(const AMethodName: string): IWhen<T>;
+begin
+
+end;
+
+procedure TProxyBase<T>.Between(const AMethodName: string; const a,
+  b: Cardinal);
+begin
+
+end;
+
+function TProxyBase<T>.Between(const a, b: Cardinal): IWhen<T>;
+begin
+
 end;
 
 procedure TProxyBase<T>.ClearSetupState;
 begin
-  FSetupMode := False;
+  FSetupMode := TSetupMode.None;
   FReturnValue := TValue.Empty;
   FExceptClass := nil;
   FNextFunc := nil;
@@ -171,7 +265,7 @@ begin
    end);
    //remove reference created in this constructor, the virtual interface and proxy's lifetime are now the same.
    FVirtualInterface._Release;
-   FSetupMode := False;
+   FSetupMode := TSetupMode.None;
    FBehaviorMustBeDefined := False;
    FMethodData := TDictionary<string,IMethodData>.Create;
 end;
@@ -190,46 +284,75 @@ var
   methodData : IMethodData;
   behavior : IBehavior;
 begin
-  if FSetupMode then
-  begin
-    try
-      //record desired behavior
-      //first see if we know about this method
+  case FSetupMode of
+    TSetupMode.None:
+    begin
+      //record actual behavior
       methodData := GetMethodData(method.Name);
       Assert(methodData <> nil);
-
-      case FNextBehavior of
-        TBehaviorType.WillReturn:
-        begin
-          if (Method.ReturnType = nil) and (not FReturnValue.IsEmpty) then
-            raise EMockSetupException.Create('Setup.WillReturn called on procedure : ' + Method.Name );
-          methodData.WillReturnWhen(Args,FReturnValue);
-        end;
-        TBehaviorType.WillRaise:
-        begin
-          methodData.WillRaiseAlways(FExceptClass);
-        end;
-        TBehaviorType.WillExecuteWhen :
-        begin
-          methodData.WillExecuteWhen(FNextFunc,Args);
-        end;
-      end;
-    finally
-      ClearSetupState;
+      methodData.RecordHit(Args,Method.ReturnType,Result);
     end;
-  end
-  else
-  begin
-    //record actual behavior
-    methodData := GetMethodData(method.Name);
-    Assert(methodData <> nil);
-    methodData.RecordHit(Args,Method.ReturnType,Result);
+    TSetupMode.Behavior:
+    begin
+      try
+        //record desired behavior
+        //first see if we know about this method
+        methodData := GetMethodData(method.Name);
+        Assert(methodData <> nil);
+
+        case FNextBehavior of
+          TBehaviorType.WillReturn:
+          begin
+            if (Method.ReturnType = nil) and (not FReturnValue.IsEmpty) then
+              raise EMockSetupException.Create('Setup.WillReturn called on procedure : ' + Method.Name );
+            methodData.WillReturnWhen(Args,FReturnValue);
+          end;
+          TBehaviorType.WillRaise:
+          begin
+            methodData.WillRaiseAlways(FExceptClass);
+          end;
+          TBehaviorType.WillExecuteWhen :
+          begin
+            methodData.WillExecuteWhen(FNextFunc,Args);
+          end;
+        end;
+      finally
+        ClearSetupState;
+      end;
+    end;
+    TSetupMode.Expectation:
+    begin
+      try
+        //record expectations
+        //first see if we know about this method
+        methodData := GetMethodData(method.Name);
+        Assert(methodData <> nil);
+
+        //
+
+      finally
+        ClearSetupState;
+      end;
+    end;
   end;
+
+end;
+
+procedure TProxyBase<T>.Exactly(const AMethodName: string;
+  const times: Cardinal);
+begin
+
+end;
+
+function TProxyBase<T>.Exactly(const times: Cardinal): IWhen<T>;
+begin
+
 end;
 
 function TProxyBase<T>.Expect: IExpect<T>;
 begin
-  raise Exception.Create('Not implemented yet!');
+  result := Self as IExpect<T> ;
+//  raise Exception.Create('Not implemented yet!');
 end;
 
 function TProxyBase<T>.GetBehaviorMustBeDefined: boolean;
@@ -259,6 +382,26 @@ begin
   if (IsEqualGUID(IID,IInterface)) then
     if GetInterface(IID, Obj) then
       Result := 0;
+end;
+
+procedure TProxyBase<T>.Never(const AMethodName: string);
+begin
+
+end;
+
+function TProxyBase<T>.Never: IWhen<T>;
+begin
+
+end;
+
+function TProxyBase<T>.Once: IWhen<T>;
+begin
+
+end;
+
+procedure TProxyBase<T>.Once(const AMethodName: string);
+begin
+
 end;
 
 function TProxyBase<T>.Proxy: T;
@@ -291,13 +434,19 @@ begin
 end;
 
 procedure TProxyBase<T>.Verify(const message: string);
+var
+  methodData : IMethodData;
 begin
+  for methodData in FMethodData.Values do
+  begin
+    methodData.Verify;
+  end;
   WriteLn('Verifying..' + message);
 end;
 
 function TProxyBase<T>.WillExecute(const func: TExecuteFunc): IWhen<T>;
 begin
-  FSetupMode := True;
+  FSetupMode := TSetupMode.Behavior;
   FNextBehavior := TBehaviorType.WillExecuteWhen;
   FNextFunc := func;
   result := TWhen<T>.Create(Self.Proxy);
@@ -316,7 +465,7 @@ end;
 
 function TProxyBase<T>.WillRaise(const exceptionClass: ExceptClass): IWhen<T>;
 begin
-  FSetupMode := True;
+  FSetupMode := TSetupMode.Behavior;
   FNextBehavior := TBehaviorType.WillRaise;
   FExceptClass := exceptionClass;
   result := TWhen<T>.Create(Self.Proxy);
@@ -335,7 +484,7 @@ end;
 
 function TProxyBase<T>.WillReturn(const value: TValue): IWhen<T>;
 begin
-  FSetupMode := True;
+  FSetupMode := TSetupMode.Behavior;
   FReturnValue := value;
   FNextBehavior := TBehaviorType.WillReturn;
   result := TWhen<T>.Create(Self.Proxy);
