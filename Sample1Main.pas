@@ -78,6 +78,7 @@ begin
   mock.Setup.Expect.AtLeastOnce.When.Bar(1);
 
   mock.Setup.Expect.AtLeastOnce.When.Bar(99);
+  mock.Setup.Expect.Between(2,4).When.Bar(23);
 
  //Now use our mock object
   mock.Instance.MyProp := 'hello';

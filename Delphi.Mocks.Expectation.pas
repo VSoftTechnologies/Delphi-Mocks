@@ -331,7 +331,6 @@ begin
   result := '';
   if not FExpectationMet then
   begin
-    //YUK - must do better than this!
      case FExpectationType of
        Once: result := 'Once';
        Never: result := 'Never';
@@ -339,7 +338,7 @@ begin
        AtLeast: result := 'At Least ' + IntToStr(FTimes) + ' Times';
        AtMost: result := 'At Most ' + IntToStr(FTimes) + ' Times';
        AtMostOnce: result := 'At Most Once';
-       Between: result := 'Between ' + IntToStr(FBetween[0]) + ' and ' + IntToStr(FBetween[0]) + ' Times';
+       Between: result := 'Between ' + IntToStr(FBetween[0]) + ' and ' + IntToStr(FBetween[1]) + ' Times';
        Exactly: result := 'Exactly ' + IntToStr(FTimes) + ' Times';
        Before: result := 'Before Method : ' + FBeforeAfterMethodName;
        After: result := 'After Method : ' + FBeforeAfterMethodName;
@@ -350,7 +349,7 @@ begin
        AtLeastWhen: result := 'At Least ' + IntToStr(FTimes) + ' Times When ' + ArgsToString;
        AtMostOnceWhen: result := 'At Most Once When' + ArgsToString;
        AtMostWhen: result := 'At Most ' + IntToStr(FTimes) + ' Times When ' + ArgsToString;
-       BetweenWhen: result := 'Between ' + IntToStr(FBetween[0]) + ' and ' + IntToStr(FBetween[0]) + ' Times When' + ArgsToString;
+       BetweenWhen: result := 'Between ' + IntToStr(FBetween[0]) + ' and ' + IntToStr(FBetween[1]) + ' Times When' + ArgsToString;
        ExactlyWhen: result := 'Exactly ' + IntToStr(FTimes) + ' Times When' + ArgsToString;
        BeforeWhen: result := 'Before Method : ' + FBeforeAfterMethodName + ' When ' + ArgsToString;
        AfterWhen: result := 'After Method : ' + FBeforeAfterMethodName + ' When ' + ArgsToString;
