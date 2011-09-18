@@ -53,13 +53,12 @@ begin
   mock.Setup.WillReturn('blah blah').When.Bar(1);
   mock.Setup.WillReturn('goodbye world').When.Bar(2,'sdfsd');
   //method TestMe will raise an exception - using one that the debugger won't break on here!
-  mock.Setup.WillRaise(EMockException).When.TestMe;
+  mock.Setup.WillRaise(EMockException,'You called me when I told you not to!').When.TestMe;
 
   //MyProp return value - note it really sets up the return value
   //for the getter method
   mock.Setup.WillReturn('hello').When.MyProp;
 
-  //Why doesn't this compile!
   mock.Setup.WillExecute(
     function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
     begin
@@ -71,8 +70,8 @@ begin
 
   //Define our expectations - mostly about how many times we expect a method to be called.
 
-  //we expect the TestMe method to be called at least once.
-  mock.Setup.Expect.AtLeastOnce('TestMe');
+  //we expect the TestMe method to never be called
+  mock.Setup.Expect.Never.When.TestMe;
 
   //we expecte Bar to be called at lease once with a param value of 1
   mock.Setup.Expect.AtLeastOnce.When.Bar(1);

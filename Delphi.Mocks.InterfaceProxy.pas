@@ -59,16 +59,20 @@ type
 
     FMethodData : TDictionary<string,IMethodData>;
     //
+    FBehaviorMustBeDefined  : Boolean;
+
     FSetupMode : TSetupMode;
 
-    FNextBehavior : TBehaviorType;
-    FReturnValue : TValue;
-    FBehaviorMustBeDefined : Boolean;
-    FNextFunc : TExecuteFunc;
-    FExceptClass : ExceptClass;
-    FNextExpectation : TExpectationType;
-    FTimes  : Cardinal;
-    FBetween : array[0..1] of Cardinal;
+    //behavior setup
+    FNextBehavior           : TBehaviorType;
+    FReturnValue            : TValue;
+    FNextFunc               : TExecuteFunc;
+    FExceptClass            : ExceptClass;
+    FExceptionMessage       : string;
+    //expectation setup
+    FNextExpectation        : TExpectationType;
+    FTimes                  : Cardinal;
+    FBetween                : array[0..1] of Cardinal;
   protected
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
@@ -87,8 +91,8 @@ type
 //    function After(const AMethodName : string) : ISetup<T>;
     function WillReturn(const value : TValue) : IWhen<T>;
     procedure WillReturnDefault(const AMethodName : string; const value : TValue);
-    function WillRaise(const exceptionClass : ExceptClass) : IWhen<T>;overload;
-    procedure WillRaise(const AMethodName : string; const exceptionClass : ExceptClass);overload;
+    function WillRaise(const exceptionClass : ExceptClass; const message : string = '') : IWhen<T>;overload;
+    procedure WillRaise(const AMethodName : string; const exceptionClass : ExceptClass; const message : string = '');overload;
 
     function WillExecute(const func : TExecuteFunc) : IWhen<T>;overload;
     procedure WillExecute(const AMethodName : string; const func : TExecuteFunc);overload;
@@ -298,7 +302,7 @@ begin
           end;
           TBehaviorType.WillRaise:
           begin
-            methodData.WillRaiseAlways(FExceptClass);
+            methodData.WillRaiseAlways(FExceptClass,FExceptionMessage);
           end;
           TBehaviorType.WillExecuteWhen :
           begin
@@ -454,16 +458,26 @@ end;
 procedure TProxyBase<T>.Verify(const message: string);
 var
   methodData : IMethodData;
+  report : string;
+  msg : string;
+  result : boolean;
 begin
-  try
-    for methodData in FMethodData.Values do
+  msg := '';
+  result := true;
+  for methodData in FMethodData.Values do
+  begin
+    report := '';
+    if not methodData.Verify(report) then
     begin
-      methodData.Verify;
+      result := false;
+      if msg <> '' then
+        msg := msg + #13#10;
+      msg := msg + report ;
     end;
-  except
-    on e : EMockVerificationException do
-      raise EMockVerificationException.Create(message + #13#10 + e.Message);
+
   end;
+  if not result then
+    raise EMockVerificationException.Create(message + #13#10 + msg);
 
 end;
 
@@ -486,22 +500,23 @@ begin
   ClearSetupState;
 end;
 
-function TProxyBase<T>.WillRaise(const exceptionClass: ExceptClass): IWhen<T>;
+function TProxyBase<T>.WillRaise(const exceptionClass: ExceptClass;const message : string): IWhen<T>;
 begin
   FSetupMode := TSetupMode.Behavior;
   FNextBehavior := TBehaviorType.WillRaise;
   FExceptClass := exceptionClass;
+  FExceptionMessage := message;
   result := TWhen<T>.Create(Self.Proxy);
 end;
 
-procedure TProxyBase<T>.WillRaise(const AMethodName: string; const exceptionClass: ExceptClass);
+procedure TProxyBase<T>.WillRaise(const AMethodName: string; const exceptionClass: ExceptClass;const message : string);
 var
   methodData : IMethodData;
 begin
   //actually record the behaviour here!
   methodData := GetMethodData(AMethodName);
   Assert(methodData <> nil);
-  methodData.WillRaiseAlways(exceptionClass);
+  methodData.WillRaiseAlways(exceptionClass,message);
   ClearSetupState;
 end;
 

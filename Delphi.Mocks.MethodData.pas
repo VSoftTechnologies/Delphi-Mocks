@@ -21,8 +21,8 @@ type
     //Behaviors
     procedure WillReturnDefault(const returnValue : TValue);
     procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue);
-    procedure WillRaiseAlways(const exceptionClass : ExceptClass);
-    procedure WillRaiseWhen(const exceptionClass : ExceptClass;const Args: TArray<TValue>);
+    procedure WillRaiseAlways(const exceptionClass : ExceptClass; const message : string);
+    procedure WillRaiseWhen(const exceptionClass : ExceptClass; const message : string;const Args: TArray<TValue>);
     procedure WillExecute(const func : TExecuteFunc);
     procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>);
 
@@ -56,7 +56,7 @@ type
     procedure AfterWhen(const AAfterMethodName : string;const Args : TArray<TValue>);
     procedure After(const AAfterMethodName : string);
 
-    procedure Verify;
+    function Verify(var report : string) : boolean;
   public
     constructor Create(const AMethodName : string);
     destructor Destroy;override;
@@ -388,15 +388,17 @@ begin
     Result := returnVal;
 end;
 
-procedure TMethodData.Verify;
+function TMethodData.Verify(var report : string) : boolean;
 var
-  report : string;
   expectation : IExpectation;
 begin
+  result := true;
+  report := '';
   for expectation in FExpectations do
   begin
     if not expectation.ExpectationMet then
     begin
+      result := False;
       if report <> '' then
         report := report + #13#10 + '    '
       else
@@ -404,8 +406,8 @@ begin
       report := report +  expectation.Report;
     end;
   end;
-  if report <> '' then
-    raise EMockVerificationException.Create('Method : ' + FMethodName + #13#10 +  report);
+  if not result then
+    report := '  Method : ' + FMethodName + #13#10 +  report;
 end;
 
 //Behaviors
@@ -432,25 +434,25 @@ begin
   FBehaviors.Add(behavior);
 end;
 
-procedure TMethodData.WillRaiseAlways(const exceptionClass: ExceptClass);
+procedure TMethodData.WillRaiseAlways(const exceptionClass: ExceptClass; const message : string);
 var
   behavior : IBehavior;
 begin
   behavior := FindBehavior(TBehaviorType.WillRaiseAlways);
   if behavior <> nil then
     raise EMockSetupException.Create('WillRaise already defined for method ' + FMethodName );
-  behavior := TBehavior.CreateWillRaise(exceptionClass);
+  behavior := TBehavior.CreateWillRaise(exceptionClass,message);
   FBehaviors.Add(behavior);
 end;
 
-procedure TMethodData.WillRaiseWhen(const exceptionClass: ExceptClass; const Args: TArray<TValue>);
+procedure TMethodData.WillRaiseWhen(const exceptionClass: ExceptClass; const message : string; const Args: TArray<TValue>);
 var
   behavior : IBehavior;
 begin
   behavior := FindBehavior(TBehaviorType.WillRaise,Args);
   if behavior <> nil then
     raise EMockSetupException.Create('WillRaise.When already defined for method ' + FMethodName );
-  behavior := TBehavior.CreateWillRaiseWhen(Args,exceptionClass);
+  behavior := TBehavior.CreateWillRaiseWhen(Args,exceptionClass,message);
   FBehaviors.Add(behavior);
 end;
 

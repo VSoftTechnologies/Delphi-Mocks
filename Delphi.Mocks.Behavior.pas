@@ -13,12 +13,12 @@ type
   private
     FAction : TExecuteFunc;
     FExceptClass : ExceptClass;
+    FExceptionMessage : string;
     FReturnValue : TValue;
     FArgs : TArray<TValue>;
     FBehaviorType : TBehaviorType;
     FHitCount : integer;
   protected
-    function GetHitCount : integer;
     function GetBehaviorType: TBehaviorType;
     function Match(const Args: TArray<TValue>): Boolean;
     function Execute(const Args: TArray<TValue>; const returnType: TRttiType): TValue;
@@ -30,8 +30,8 @@ type
     constructor CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc );
     constructor CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue);
     constructor CreateReturnDefault(const ReturnValue: TValue);
-    constructor CreateWillRaise(const AExceptClass : ExceptClass);
-    constructor CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass : ExceptClass);
+    constructor CreateWillRaise(const AExceptClass : ExceptClass; const message : string);
+    constructor CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass : ExceptClass; const message : string);
   end;
 
 implementation
@@ -69,17 +69,19 @@ begin
   FHitCount := 0;
 end;
 
-constructor TBehavior.CreateWillRaise(const AExceptClass: ExceptClass);
+constructor TBehavior.CreateWillRaise(const AExceptClass: ExceptClass; const message : string);
 begin
   FBehaviorType := TBehaviorType.WillRaiseAlways;
   FExceptClass := AExceptClass;
+  FExceptionMessage := message;
   FHitCount := 0;
 end;
 
-constructor TBehavior.CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass: ExceptClass);
+constructor TBehavior.CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass: ExceptClass; const message : string);
 begin
   FBehaviorType := TBehaviorType.WillRaise;
   FExceptClass := AExceptClass;
+  FExceptionMessage := message;
   CopyArgs(Args);
   FHitCount := 0;
 end;
@@ -93,6 +95,8 @@ begin
 end;
 
 function TBehavior.Execute(const Args: TArray<TValue>; const returnType: TRttiType): TValue;
+var
+  msg : string;
 begin
   result := TValue.Empty;
   try
@@ -102,7 +106,13 @@ begin
       WillRaise,WillRaiseAlways:
       begin
          if FExceptClass <> nil then
-          raise FExceptClass.Create('raised by mock');
+         begin
+           if FExceptionMessage <> '' then
+             msg := FExceptionMessage
+           else
+             msg := 'raised by mock';
+           raise FExceptClass.Create(msg);
+         end;
       end;
       WillExecute,WillExecuteWhen:
       begin
@@ -122,11 +132,6 @@ end;
 function TBehavior.GetBehaviorType: TBehaviorType;
 begin
   Result := FBehaviorType;
-end;
-
-function TBehavior.GetHitCount: integer;
-begin
-  result := FHitCount;
 end;
 
 function TBehavior.Match(const Args: TArray<TValue>): Boolean;

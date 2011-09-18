@@ -14,12 +14,10 @@ type
 
   IBehavior = interface
   ['{9F6FE14D-4522-48EE-B564-20E2BECF7992}']
-    function GetHitCount : integer;
     function GetBehaviorType : TBehaviorType;
     function Match(const Args: TArray<TValue>) : boolean;
     function Execute(const Args: TArray<TValue>;  const returnType : TRttiType) : TValue;
     property BehaviorType : TBehaviorType read GetBehaviorType;
-    property HitCount : integer read GetHitCount;
   end;
 
   TExpectationType = (Once,           //Called once only
@@ -63,8 +61,8 @@ type
     //behaviors
     procedure WillReturnDefault(const returnValue : TValue);
     procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue);
-    procedure WillRaiseAlways(const exceptionClass : ExceptClass);
-    procedure WillRaiseWhen(const exceptionClass : ExceptClass;const Args: TArray<TValue>);
+    procedure WillRaiseAlways(const exceptionClass : ExceptClass; const message : string);
+    procedure WillRaiseWhen(const exceptionClass : ExceptClass; const message : string; const Args: TArray<TValue>);
     procedure WillExecute(const func : TExecuteFunc);
     procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>);
 
@@ -89,7 +87,7 @@ type
     procedure After(const AAfterMethodName : string);
 
     //Verification
-    procedure Verify;
+    function Verify(var report : string) : boolean;
 
   end;
 

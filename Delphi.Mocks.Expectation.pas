@@ -61,9 +61,7 @@ type
 
     constructor CreateAfterWhen(const AMethodName : string; const AAfterMethodName : string;const Args : TArray<TValue>);
     constructor CreateAfter(const AMethodName : string; const AAfterMethodName : string);
-
   end;
-
 
 
 implementation
@@ -255,12 +253,10 @@ function TExpectation.Match(const Args: TArray<TValue>): boolean;
   function MatchArgs : boolean;
   var
     i : integer;
-    count : integer;
   begin
     result := False;
     if Length(Args) <> (Length(FArgs)) then
       exit;
-    count := Length(args) -1;
     //start at 1 as we don't care about matching the first arg (self)
     for i := 1 to Length(args) -1 do
     begin
