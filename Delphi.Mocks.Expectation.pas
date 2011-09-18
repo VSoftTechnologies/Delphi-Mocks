@@ -76,15 +76,14 @@ uses
 
 function TExpectation.ArgsToString: string;
 var
-  arg : TValue;
   i : integer;
 begin
   result := '( ';
-  for i := Low(FArgs) to High(FArgs) do
+  for i := 1 to High(FArgs) do
   begin
-    if i > Low(FArgs) then
+    if i > 1 then
       result := result + ', ';
-    result := result + arg.ToString;
+    result := result + FArgs[i].ToString;
   end;
   result := result + ' )';
 end;
@@ -256,11 +255,14 @@ function TExpectation.Match(const Args: TArray<TValue>): boolean;
   function MatchArgs : boolean;
   var
     i : integer;
+    count : integer;
   begin
     result := False;
-    if Length(Args) <> Length(FArgs) then
+    if Length(Args) <> (Length(FArgs)) then
       exit;
-    for i := 0 to Length(args) -1 do
+    count := Length(args) -1;
+    //start at 1 as we don't care about matching the first arg (self)
+    for i := 1 to Length(args) -1 do
     begin
       if not FArgs[i].Equals(args[i]) then
         exit;
@@ -330,7 +332,6 @@ begin
   if not FExpectationMet then
   begin
     //YUK - must do better than this!
-    result := 'Expectation [ ';
      case FExpectationType of
        Once: result := 'Once';
        Never: result := 'Never';
@@ -354,7 +355,7 @@ begin
        BeforeWhen: result := 'Before Method : ' + FBeforeAfterMethodName + ' When ' + ArgsToString;
        AfterWhen: result := 'After Method : ' + FBeforeAfterMethodName + ' When ' + ArgsToString;
      end;
-    result := result + '] was not met.';
+    result := 'Expectation [ ' + result + ' ] was not met.';
   end;
 
 end;

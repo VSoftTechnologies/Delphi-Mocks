@@ -35,17 +35,17 @@ uses
 
 procedure Test;
 var
-  mock : TInterfaceMock<IFoo>;
+  mock : TInterfaceMock<IFoo>; //our mock object
 
   procedure TestImplicit(value : IFoo);
   begin
     value.Bar(1234567);
   end;
 begin
-  //create our mock
+  //Create our mock
   mock := TInterfaceMock<IFoo>.Create;
 
-  //Setup the behavior of our mock
+  //Setup the behavior of our mock.
 
   //setup a default return value for method Bar
   mock.Setup.WillReturnDefault('Bar','hello world');
@@ -69,13 +69,17 @@ begin
     ).When.Bar(200);
 
 
-  //Not yet implemented - Define our expectations
-  //mock.Setup.Expect.AtLeastOnce.&On('testMe');
-  //mock.Setup.Expect.Once.When.Bar(99);
-  mock.Setup.Expect.Once.When.TestMe;
+  //Define our expectations - mostly about how many times we expect a method to be called.
+
+  //we expect the TestMe method to be called at least once.
+  mock.Setup.Expect.AtLeastOnce('TestMe');
+
+  //we expecte Bar to be called at lease once with a param value of 1
+  mock.Setup.Expect.AtLeastOnce.When.Bar(1);
+
+  mock.Setup.Expect.AtLeastOnce.When.Bar(99);
 
  //Now use our mock object
-
   mock.Instance.MyProp := 'hello';
   mock.Instance.IndexedProp[1] := 'hello';
 

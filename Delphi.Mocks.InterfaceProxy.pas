@@ -62,12 +62,13 @@ type
     FSetupMode : TSetupMode;
 
     FNextBehavior : TBehaviorType;
-    FNextExpectationType : TExpectationType;
     FReturnValue : TValue;
     FBehaviorMustBeDefined : Boolean;
     FNextFunc : TExecuteFunc;
     FExceptClass : ExceptClass;
-
+    FNextExpectation : TExpectationType;
+    FTimes  : Cardinal;
+    FBetween : array[0..1] of Cardinal;
   protected
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
@@ -133,38 +134,6 @@ type
   end;
 
 
-
-{
-  TSetup<T> = class(TInterfacedObject,ISetup<T>,ISetupControl)
-  private
-    FProxy : T;
-    FSetupMode : boolean;
-    FNextBehavior : TBehaviourType;
-    FRetVal : TValue;
-    FBehaviors : TDictionary<string,IBehavior>;
-    FBehaviorMustBeDefined : boolean;
-  protected
-    function GetBehaviorMustBeDefined : boolean;
-    procedure SetBehaviorMustBeDefined(const value : boolean);
-    function Expect : IExpect<T>;
-    function WillReturn(const value : TValue) : IWhen<T>;
-    function WillReturnDefault(const AMethodName : string; const value : TValue) : ISetup<T>;
-    function WillRaise(const exceptionClass : ExceptClass) : IWhen<T>;
-    function Before(const AMethodName : string) : ISetup<T>;
-    function After(const AMethodName : string) : ISetup<T>;
-
-    procedure Verify(const message : string = '');
-    procedure DoInvoke(Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue);
-    function GetSetupMode : boolean;
-    procedure SetSetupMode(const value : boolean);
-
-  public
-    constructor Create(const AProxy : T);
-    destructor Destroy;override;
-  end;
- }
-
-
 implementation
 
 uses
@@ -175,77 +144,97 @@ uses
 
 
 { TProxyBase }
-
-//function TProxyBase<T>.After(const AMethodName: string): ISetup<T>;
-//begin
-//  result := Self;
-//end;
-
-//function TProxyBase<T>.Before(const AMethodName: string): ISetup<T>;
-//begin
-//  result := Self;
-//end;
-
 procedure TProxyBase<T>.After(const AMethodName, AAfterMethodName: string);
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
 function TProxyBase<T>.After(const AMethodName: string): IWhen<T>;
 begin
-
+  raise Exception.Create('Not implemented');
 end;
 
-procedure TProxyBase<T>.AtLeast(const AMethodName: string;
-  const times: Cardinal);
+procedure TProxyBase<T>.AtLeast(const AMethodName: string; const times: Cardinal);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.AtLeast(times);
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.AtLeast(const times: Cardinal): IWhen<T>;
 begin
-
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.AtLeastWhen;
+  FTimes := times;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 procedure TProxyBase<T>.AtLeastOnce(const AMethodName: string);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.AtLeastOnce;
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.AtLeastOnce: IWhen<T>;
 begin
-
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.AtLeastOnceWhen;
+  FTimes := 1;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
-procedure TProxyBase<T>.AtMost(const AMethodName: string;
-  const times: Cardinal);
+procedure TProxyBase<T>.AtMost(const AMethodName: string; const times: Cardinal);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.AtMost(times);
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.AtMost(const times: Cardinal): IWhen<T>;
 begin
-
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.AtMostWhen;
+  FTimes := times;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 procedure TProxyBase<T>.Before(const AMethodName, ABeforeMethodName: string);
 begin
-
+  raise Exception.Create('not implemented');
 end;
 
 function TProxyBase<T>.Before(const AMethodName: string): IWhen<T>;
 begin
-
+  raise Exception.Create('not implemented');
 end;
 
-procedure TProxyBase<T>.Between(const AMethodName: string; const a,
-  b: Cardinal);
+procedure TProxyBase<T>.Between(const AMethodName: string; const a,  b: Cardinal);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.Between(a,b);
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.Between(const a, b: Cardinal): IWhen<T>;
 begin
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.BetweenWhen;
+  FBetween[0] := a;
+  FBetween[1] := b;
+  result := TWhen<T>.Create(Self.Proxy);
 
 end;
 
@@ -327,8 +316,18 @@ begin
         //first see if we know about this method
         methodData := GetMethodData(method.Name);
         Assert(methodData <> nil);
-
-        //
+        case FNextExpectation of
+          OnceWhen        : methodData.OnceWhen(Args);
+          NeverWhen       : methodData.NeverWhen(Args) ;
+          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args);
+          AtLeastWhen     : methodData.AtLeastWhen(FTimes,args);
+          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args);
+          AtMostWhen      : methodData.AtMostWhen(FTimes,args);
+          BetweenWhen     : methodData.BetweenWhen(FBetween[0],FBetween[1],Args) ;
+          ExactlyWhen     : methodData.ExactlyWhen(FTimes,Args);
+          BeforeWhen      : raise exception.Create('not implemented') ;
+          AfterWhen       : raise exception.Create('not implemented');
+        end;
 
       finally
         ClearSetupState;
@@ -338,28 +337,33 @@ begin
 
 end;
 
-procedure TProxyBase<T>.Exactly(const AMethodName: string;
-  const times: Cardinal);
+procedure TProxyBase<T>.Exactly(const AMethodName: string; const times: Cardinal);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.Exactly(times);
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.Exactly(const times: Cardinal): IWhen<T>;
 begin
-
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.ExactlyWhen;
+  FTimes := times;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 function TProxyBase<T>.Expect: IExpect<T>;
 begin
   result := Self as IExpect<T> ;
-//  raise Exception.Create('Not implemented yet!');
 end;
 
 function TProxyBase<T>.GetBehaviorMustBeDefined: boolean;
 begin
   result := FBehaviorMustBeDefined;
 end;
-
 
 function TProxyBase<T>.GetMethodData(const AMethodName: string): IMethodData;
 var
@@ -385,23 +389,37 @@ begin
 end;
 
 procedure TProxyBase<T>.Never(const AMethodName: string);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.Never;
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.Never: IWhen<T>;
 begin
-
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.NeverWhen;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 function TProxyBase<T>.Once: IWhen<T>;
 begin
-
+  FSetupMode := TSetupMode.Expectation;
+  FNextExpectation := TExpectationType.OnceWhen;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 procedure TProxyBase<T>.Once(const AMethodName: string);
+var
+  methodData : IMethodData;
 begin
-
+  methodData := GetMethodData(AMethodName);
+  Assert(methodData <> nil);
+  methodData.Once;
+  ClearSetupState;
 end;
 
 function TProxyBase<T>.Proxy: T;
@@ -437,11 +455,16 @@ procedure TProxyBase<T>.Verify(const message: string);
 var
   methodData : IMethodData;
 begin
-  for methodData in FMethodData.Values do
-  begin
-    methodData.Verify;
+  try
+    for methodData in FMethodData.Values do
+    begin
+      methodData.Verify;
+    end;
+  except
+    on e : EMockVerificationException do
+      raise EMockVerificationException.Create(message + #13#10 + e.Message);
   end;
-  WriteLn('Verifying..' + message);
+
 end;
 
 function TProxyBase<T>.WillExecute(const func: TExecuteFunc): IWhen<T>;

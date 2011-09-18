@@ -15,7 +15,6 @@ type
     FMethodName : string;
     FBehaviors : TList<IBehavior>;
     FReturnDefault : TValue;
-    FHitCount     : integer;
     FExpectations : TList<IExpectation>;
   protected
 
@@ -80,7 +79,6 @@ begin
   FBehaviors := TList<IBehavior>.Create;
   FExpectations := TList<IExpectation>.Create;
   FReturnDefault := TValue.Empty;
-  FHitCount := 0;
 end;
 
 destructor TMethodData.Destroy;
@@ -371,7 +369,12 @@ var
   returnVal : TValue;
   expectation : IExpectation;
 begin
-  Inc(FHitCount);
+  for expectation in FExpectations do
+  begin
+    if expectation.Match(Args) then
+      expectation.RecordHit;
+  end;
+
   behavior := FindBestBehavior(Args);
   if behavior <> nil then
     returnVal := behavior.Execute(Args,returnType)
@@ -383,12 +386,6 @@ begin
   end;
   if returnType <> nil then
     Result := returnVal;
-
-  for expectation in FExpectations do
-  begin
-    if expectation.Match(Args) then
-      expectation.RecordHit;
-  end;
 end;
 
 procedure TMethodData.Verify;
@@ -399,10 +396,16 @@ begin
   for expectation in FExpectations do
   begin
     if not expectation.ExpectationMet then
-      report := report + expectation.Report;
+    begin
+      if report <> '' then
+        report := report + #13#10 + '    '
+      else
+        report :=  '    ';
+      report := report +  expectation.Report;
+    end;
   end;
   if report <> '' then
-    raise EMockVerificationException.Create(report);
+    raise EMockVerificationException.Create('Method : ' + FMethodName + #13#10 +  report);
 end;
 
 //Behaviors
