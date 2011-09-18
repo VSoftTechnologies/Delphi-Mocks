@@ -40,6 +40,7 @@ type
 
   /// This is intended to be a relatively clean room implementation of
   /// TVirtualInterface, so that we can use Delphi.Mocks with D2009+
+  ///  but it's not going to be easy..
     TVirtualInterfaceInvokeEvent = reference to procedure(Method: TRttiMethod;
       const Args: TArray<TValue>; out Result: TValue);
 
