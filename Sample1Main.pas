@@ -20,6 +20,7 @@ type
     function Bar(const param : integer) : string;overload;
     function Bar(const param : integer; const param2 : string) : string;overload;
     procedure TestMe;
+    procedure TestVarParam(var msg : string);
     property MyProp : string read GetProp write SetProp;
     property IndexedProp[index : integer] : string read GetIndexProp write SetIndexedProp;
   end;
@@ -36,11 +37,13 @@ uses
 procedure Test;
 var
   mock : TInterfaceMock<IFoo>; //our mock object
+  msg  : string;
 
   procedure TestImplicit(value : IFoo);
   begin
     WriteLn('Calling Bar(1234567) : ' + value.Bar(1234567));
   end;
+
 begin
   //Create our mock
   mock := TInterfaceMock<IFoo>.Create;
@@ -67,6 +70,13 @@ begin
     end
     ).When.Bar(200);
 
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      args[1] := 'hello Delphi Mocks!';
+    end
+    ).When.TestVarParam(msg);
+
 
   //Define our expectations - mostly about how many times we expect a method to be called.
 
@@ -84,6 +94,10 @@ begin
  //Now use our mock object
   mock.Instance.MyProp := 'hello';
   mock.Instance.IndexedProp[1] := 'hello';
+
+  mock.Instance.TestVarParam(msg);
+  WriteLn('Calling TestVarParam set msg to : ' + msg);
+
 
   WriteLn('Calling Bar(1) : ' + mock.Instance.Bar(1));
   WriteLn('Calling Bar(2) : ' + mock.Instance.Bar(2));

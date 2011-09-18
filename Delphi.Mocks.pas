@@ -133,7 +133,7 @@ type
   //We use a record here to take advantage of operator overloading, the Implicit
   //operator allows us to use the mock as the interface without holding a reference
   //to the mock interface outside of the mock.
-  TInterfaceMock<T> = record
+  TInterfaceMock<T : IInterface> = record
   private
     FProxy : IProxy<T>;
   public
