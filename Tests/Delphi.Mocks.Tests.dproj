@@ -102,6 +102,8 @@
 			<DCCReference Include="Delphi.Mocks.Tests.Behavior.pas"/>
 			<DCCReference Include="..\Delphi.Mocks.Interfaces.pas"/>
 			<DCCReference Include="..\Delphi.Mocks.MethodData.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.Expectations.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Expectation.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

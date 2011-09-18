@@ -77,9 +77,9 @@ var
   i : integer;
 begin
   result := '( ';
-  for i := 1 to High(FArgs) do
+  for i := Low(FArgs) to High(FArgs) do
   begin
-    if i > 1 then
+    if i > 0 then
       result := result + ', ';
     result := result + FArgs[i].ToString;
   end;
@@ -87,10 +87,15 @@ begin
 end;
 
 procedure TExpectation.CopyArgs(const Args: TArray<TValue>);
+var
+  l : integer;
 begin
-  SetLength(FArgs,Length(args));
-  if Length(args) > 0 then
-    CopyArray(@FArgs[0],@args[0],TypeInfo(TValue),Length(args));
+  l := Length(Args) -1;
+  if l > 0  then
+  begin
+    SetLength(FArgs,l);
+    CopyArray(@FArgs[0],@args[1],TypeInfo(TValue),l);
+  end;
 end;
 
 constructor TExpectation.Create(const AMethodName : string);
@@ -255,12 +260,12 @@ function TExpectation.Match(const Args: TArray<TValue>): boolean;
     i : integer;
   begin
     result := False;
-    if Length(Args) <> (Length(FArgs)) then
+    if Length(Args) <> (Length(FArgs) + 1 ) then
       exit;
     //start at 1 as we don't care about matching the first arg (self)
     for i := 1 to Length(args) -1 do
     begin
-      if not FArgs[i].Equals(args[i]) then
+      if not FArgs[i -1].Equals(args[i]) then
         exit;
     end;
     result := True;
@@ -310,7 +315,7 @@ begin
     AtMostWhen: FExpectationMet := FHitCount <= FTimes;
     Between,
     BetweenWhen: FExpectationMet := (FHitCount >= FBetween[0]) and (FHitCount <= FBetween[1]);
-    Exactly: ;
+    Exactly,
     ExactlyWhen: FExpectationMet := FHitCount = FTimes;
 
     //haven't figure out how to handle these yet.. might need to rethink ordered expectations

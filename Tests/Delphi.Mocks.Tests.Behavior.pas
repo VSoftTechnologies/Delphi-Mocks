@@ -48,7 +48,6 @@ var
   args : TArray<TValue>;
   rType : TRttiType;
 begin
-  //testValue := 123;
   SetLength(args,1);
   args[0] := 999;
   rType := FContext.GetType(TypeInfo(string));
@@ -58,11 +57,6 @@ begin
       result := 'hello world';
     end
     );
-
-
-//  args[1] := 2;
-//  args[2] := 3;
-
   returnValue := behavior.Execute(args,rType);
   CheckTrue(SameText(returnValue.AsString,'hello world'));
 

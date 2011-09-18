@@ -42,10 +42,17 @@ uses
 { TBehavior }
 
 procedure TBehavior.CopyArgs(const Args: TArray<TValue>);
+var
+  l : integer;
 begin
-  SetLength(FArgs,Length(args));
-  if Length(args) > 0 then
-    CopyArray(@FArgs[0],@args[0],TypeInfo(TValue),Length(args));
+  //Note : Args[0] is the Self Ptr for the proxy, we do not want to keep
+  //a reference to it so it is ignored here.
+  l := Length(args) -1 ;
+  if l > 0 then
+  begin
+    SetLength(FArgs,l);
+    CopyArray(@FArgs[0],@args[1],TypeInfo(TValue),l);
+  end;
 end;
 
 constructor TBehavior.CreateReturnDefault(const ReturnValue: TValue);
@@ -139,13 +146,15 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
   function MatchArgs : boolean;
   var
     i : integer;
+    l : integer;
   begin
     result := False;
-    if Length(Args) <> Length(FArgs) then
+    if Length(Args) <> (Length(FArgs) + 1) then
       exit;
-    for i := 0 to Length(args) -1 do
+    //start at 1 because we don't care about matching the first arg (self pointer)
+    for i := 1 to Length(args) -1 do
     begin
-      if not FArgs[i].Equals(args[i]) then
+      if not FArgs[i-1].Equals(args[i]) then
         exit;
     end;
     result := True;

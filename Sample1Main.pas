@@ -39,7 +39,7 @@ var
 
   procedure TestImplicit(value : IFoo);
   begin
-    value.Bar(1234567);
+    WriteLn('Calling Bar(1234567) : ' + value.Bar(1234567));
   end;
 begin
   //Create our mock
@@ -79,6 +79,8 @@ begin
   mock.Setup.Expect.AtLeastOnce.When.Bar(99);
   mock.Setup.Expect.Between(2,4).When.Bar(23);
 
+  mock.Setup.Expect.Exactly('Bar',5);
+
  //Now use our mock object
   mock.Instance.MyProp := 'hello';
   mock.Instance.IndexedProp[1] := 'hello';
@@ -101,7 +103,6 @@ begin
     end;
   end;
   mock.Verify('did it work???');
-  mock.Free;
 end;
 
 end.

@@ -31,7 +31,9 @@ uses
   Delphi.Mocks.When in '..\Delphi.Mocks.When.pas',
   Delphi.Mocks.Tests.Behavior in 'Delphi.Mocks.Tests.Behavior.pas',
   Delphi.Mocks.Interfaces in '..\Delphi.Mocks.Interfaces.pas',
-  Delphi.Mocks.MethodData in '..\Delphi.Mocks.MethodData.pas';
+  Delphi.Mocks.MethodData in '..\Delphi.Mocks.MethodData.pas',
+  Delphi.Mocks.Tests.Expectations in 'Delphi.Mocks.Tests.Expectations.pas',
+  Delphi.Mocks.Expectation in '..\Delphi.Mocks.Expectation.pas';
 
 {$R *.RES}
 

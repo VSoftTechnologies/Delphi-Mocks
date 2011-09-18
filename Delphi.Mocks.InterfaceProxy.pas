@@ -265,7 +265,7 @@ end;
 
 destructor TProxyBase<T>.Destroy;
 begin
-  WriteLn('destroy proxy');
+//  WriteLn('destroy proxy');
   FVirtualInterface := nil;
   FMethodData.Free;
   inherited;
