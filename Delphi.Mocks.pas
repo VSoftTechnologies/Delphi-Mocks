@@ -97,7 +97,7 @@ type
 //    function After(const AMethodName : string) : ISetup<T>;
 
     //set the return value for a method when called with the parameters specified on the When
-    function WillReturn(const value : TValue) : IWhen<T>;overload;
+    function WillReturn(const value : TValue) : IWhen<T>;
 
     //Will exedute the func when called with the specified parameters
     function WillExecute(const func : TExecuteFunc) : IWhen<T>;overload;
