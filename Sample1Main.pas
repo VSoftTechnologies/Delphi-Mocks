@@ -136,8 +136,7 @@ begin
   mock := TMock<TFoo>.Create;
   mock.Setup.WillReturn('hello world').When.Bar(99);
   mock.Setup.WillReturn('hello world2').When.Bar(99,'abc');
-
-  WriteLn('Bar(1) returned : ' +  mock.Instance.Bar(99,'abc'));
+  WriteLn('Bar(99,abc) returned : ' +  mock.Instance.Bar(99,'abc'));
   mock.Free;
 end;
 
