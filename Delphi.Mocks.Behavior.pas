@@ -171,7 +171,6 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
   function MatchArgs : boolean;
   var
     i : integer;
-    l : integer;
   begin
     result := False;
     if Length(Args) <> (Length(FArgs) + 1) then

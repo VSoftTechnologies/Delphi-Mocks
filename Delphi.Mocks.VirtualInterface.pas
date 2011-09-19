@@ -112,8 +112,14 @@ implementation
 
 uses
   RTLConsts,
-  SysUtils,
-  PrivateHeap;
+  SysUtils
+  {$IFDEF VER230}
+   ;
+  {$ELSE}
+  ,PrivateHeap;
+  {$ENDIF}
+
+
 
 {$IFNDEF VER230}
 

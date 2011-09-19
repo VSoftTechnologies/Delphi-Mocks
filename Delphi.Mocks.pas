@@ -97,7 +97,7 @@ type
 //    function After(const AMethodName : string) : ISetup<T>;
 
     //set the return value for a method when called with the parameters specified on the When
-    function WillReturn(const value : TValue) : IWhen<T>;
+    function WillReturn(const value : TValue) : IWhen<T>;overload;
 
     //Will exedute the func when called with the specified parameters
     function WillExecute(const func : TExecuteFunc) : IWhen<T>;overload;
@@ -118,7 +118,6 @@ type
     //If true, calls to methods for which we have not defined a behavior will cause verify to fail.
     property BehaviorMustBeDefined : boolean read GetBehaviorMustBeDefined write SetBehaviorMustBeDefined;
   end;
-
 
   //used by the mock - need to find another place to put this.. circular references
   //problem means we need it here for now.
