@@ -8,6 +8,8 @@ uses
 
 procedure Test;
 
+procedure TesTObjectMock;
+
 
 type
   {$M+}
@@ -36,7 +38,7 @@ uses
 
 procedure Test;
 var
-  mock : TInterfaceMock<IFoo>; //our mock object
+  mock : TMock<IFoo>; //our mock object
   msg  : string;
 
   procedure TestImplicit(value : IFoo);
@@ -46,7 +48,7 @@ var
 
 begin
   //Create our mock
-  mock := TInterfaceMock<IFoo>.Create;
+  mock := TMock<IFoo>.Create;
 
   //Setup the behavior of our mock.
 
@@ -117,6 +119,43 @@ begin
     end;
   end;
   mock.Verify('did it work???');
+end;
+
+type
+  TFoo = class
+  public
+    function Bar(const param : integer) : string;overload;virtual;
+    function Bar(const param : integer; const param2 : string) : string;overload;virtual;
+    procedure TestMe;virtual;
+  end;
+
+procedure TesTObjectMock;
+var
+  mock : TMock<TFoo>;
+begin
+  mock := TMock<TFoo>.Create;
+  mock.Setup.WillReturn('hello world').When.Bar(99);
+  mock.Setup.WillReturn('hello world2').When.Bar(99,'abc');
+
+  WriteLn('Bar(1) returned : ' +  mock.Instance.Bar(99,'abc'));
+  mock.Free;
+end;
+
+{ TFoo }
+
+function TFoo.Bar(const param: integer): string;
+begin
+  result := IntToStr(param);
+end;
+
+function TFoo.Bar(const param: integer; const param2: string): string;
+begin
+  result := IntToStr(param) + '-' + param2;
+end;
+
+procedure TFoo.TestMe;
+begin
+  //do nothing
 end;
 
 end.

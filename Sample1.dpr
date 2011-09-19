@@ -16,13 +16,15 @@ uses
   Delphi.Mocks.Utils in 'Delphi.Mocks.Utils.pas',
   Delphi.Mocks.VirtualInterface in 'Delphi.Mocks.VirtualInterface.pas',
   Delphi.Mocks.When in 'Delphi.Mocks.When.pas',
-  Delphi.Mocks.Expectation in 'Delphi.Mocks.Expectation.pas';
+  Delphi.Mocks.Expectation in 'Delphi.Mocks.Expectation.pas',
+  Delphi.Mocks.ObjectProxy in 'Delphi.Mocks.ObjectProxy.pas',
+  Delphi.Mocks.ProxyBase in 'Delphi.Mocks.ProxyBase.pas';
 
 begin
   try
-    { TODO -oUser -cConsole Main : Insert code here }
+    TesTObjectMock;
+    Writeln('--------------');
     Test;
-    Writeln('Done');
     ReadLn;
   except
     on E: Exception do

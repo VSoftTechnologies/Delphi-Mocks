@@ -33,7 +33,9 @@ uses
   Delphi.Mocks.Interfaces in '..\Delphi.Mocks.Interfaces.pas',
   Delphi.Mocks.MethodData in '..\Delphi.Mocks.MethodData.pas',
   Delphi.Mocks.Tests.Expectations in 'Delphi.Mocks.Tests.Expectations.pas',
-  Delphi.Mocks.Expectation in '..\Delphi.Mocks.Expectation.pas';
+  Delphi.Mocks.Expectation in '..\Delphi.Mocks.Expectation.pas',
+  Delphi.Mocks.ObjectProxy in '..\Delphi.Mocks.ObjectProxy.pas',
+  Delphi.Mocks.ProxyBase in '..\Delphi.Mocks.ProxyBase.pas';
 
 {$R *.RES}
 

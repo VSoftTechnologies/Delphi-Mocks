@@ -133,34 +133,21 @@ type
   //We use a record here to take advantage of operator overloading, the Implicit
   //operator allows us to use the mock as the interface without holding a reference
   //to the mock interface outside of the mock.
-  TInterfaceMock<T : IInterface> = record
+  TMock<T> = record
   private
     FProxy : IProxy<T>;
   public
-    class operator Implicit(const Value: TInterfaceMock<T>): T;
+    class operator Implicit(const Value: TMock<T>): T;
     function Setup : ISetup<T>;
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
     function Instance : T;
-    class function Create: TInterfaceMock<T>; static;
+    class function Create: TMock<T>; static;
     // explicit cleanup. Not sure if we really need this.
     procedure Free;
   end;
 
-  //NOT ACTUALLY IMPLEMENTED YET
-  TObjectMock<T : class> = record
-  private
-    FObject : T;
-  public
-    class operator Implicit(const Value: TObjectMock<T>): T;
-    function Setup : ISetup<T>;
-    //Verify that our expectations were met.
-    procedure Verify(const message : string = '');
-    function Instance : T;
-    class function Create: TObjectMock<T>; static;
-    // explicit cleanup.
-    procedure Free;
-  end;
+
 
 
   //Exception Types that the mocks will raise.
@@ -180,54 +167,58 @@ uses
   Generics.Defaults,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.InterfaceProxy;
+  Delphi.Mocks.InterfaceProxy,
+  Delphi.Mocks.ObjectProxy;
 
 
-class function TInterfaceMock<T>.Create: TInterfaceMock<T>;
+class function TMock<T>.Create: TMock<T>;
 var
   proxy : IInterface;
   pInfo : PTypeInfo;
 begin
   pInfo := TypeInfo(T);
-  //Generics cannot have interface constraints so we have to resort to runtime checking.
-  if pInfo.Kind <> tkInterface then
-    raise EMockException.Create(string(pInfo.Name) + ' is not an Interface. TInterfaceMock<T> supports interfaces only');
+  if not (pInfo.Kind in [tkInterface,tkClass]) then
+    raise EMockException.Create(string(pInfo.Name) + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
 
-  //Check to make sure we have
-  if not CheckInterfaceHasRTTI(pInfo) then
-    raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
+  case pInfo.Kind of
+    tkClass : proxy := TObjectProxy<T>.Create;
+    tkInterface :
+    begin
+      //Check to make sure we have
+      if not CheckInterfaceHasRTTI(pInfo) then
+        raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
+      //Create Our proxy object, which will implement our interface T
+      proxy := TInterfaceProxy<T>.Create;
+    end;
+  else
+    raise Exception.Create('Invalid type kind T');
+  end;
 
-  //Create Our proxy object, which will implement our interface T
-  proxy := TProxyBase<T>.Create;
-
-  //Note we don't worry if there being no guid on the interface, we know that our proxy implements T
-  //and it will treat an empty GUID as T;
   if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid,result.FProxy) <> 0 then
-    raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt T');
-
+    raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt IProxy<T>');
 end;
 
-procedure TInterfaceMock<T>.Free;
+procedure TMock<T>.Free;
 begin
   FProxy := nil;
 end;
 
-class operator TInterfaceMock<T>.Implicit(const Value: TInterfaceMock<T>): T;
+class operator TMock<T>.Implicit(const Value: TMock<T>): T;
 begin
   result := Value.FProxy.Proxy;
 end;
 
-function TInterfaceMock<T>.Instance : T;
+function TMock<T>.Instance : T;
 begin
   result := FProxy.Proxy;
 end;
 
-function TInterfaceMock<T>.Setup: ISetup<T>;
+function TMock<T>.Setup: ISetup<T>;
 begin
   result := FProxy.Setup;
 end;
 
-procedure TInterfaceMock<T>.Verify(const message: string);
+procedure TMock<T>.Verify(const message: string);
 var
   su : ISetup<T>;
   v : IVerify;
@@ -236,47 +227,6 @@ begin
     v.Verify(message)
   else
     raise EMockException.Create('Could not cast Setup to IVerify interface!');
-end;
-
-{ TObjectMock<T> }
-
-class function TObjectMock<T>.Create: TObjectMock<T>;
-var
-  pInfo : PTypeInfo;
-begin
-  pInfo := TypeInfo(T);
-  //Generics cannot have interface constraints so we have to resort to runtime checking.
-  if pInfo.Kind <> tkClass then
-    raise EMockException.Create(string(pInfo.Name) + ' is not an Object. TObjectMock<T> supports objects only');
-
-  result.FObject := Default(T);//just to stop the compiler hint for now.
-
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TObjectMock<T>.Free;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-class operator TObjectMock<T>.Implicit(const Value: TObjectMock<T>): T;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-function TObjectMock<T>.Instance: T;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-function TObjectMock<T>.Setup: ISetup<T>;
-begin
-  raise Exception.Create('Not implemented');
-end;
-
-procedure TObjectMock<T>.Verify(const message: string);
-begin
-  raise Exception.Create('Not implemented');
 end;
 
 end.
