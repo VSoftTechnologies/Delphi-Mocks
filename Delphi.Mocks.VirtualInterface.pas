@@ -30,7 +30,6 @@ interface
 uses
   TypInfo,
   Rtti,
-  RIO,
   Generics.Collections;
 
 type
@@ -113,7 +112,8 @@ implementation
 
 uses
   RTLConsts,
-  SysUtils;
+  SysUtils,
+  PrivateHeap;
 
 {$IFNDEF VER230}
 
