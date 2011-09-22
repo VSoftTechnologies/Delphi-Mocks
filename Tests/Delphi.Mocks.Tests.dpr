@@ -35,7 +35,8 @@ uses
   Delphi.Mocks.Tests.Expectations in 'Delphi.Mocks.Tests.Expectations.pas',
   Delphi.Mocks.Expectation in '..\Delphi.Mocks.Expectation.pas',
   Delphi.Mocks.ObjectProxy in '..\Delphi.Mocks.ObjectProxy.pas',
-  Delphi.Mocks.ProxyBase in '..\Delphi.Mocks.ProxyBase.pas';
+  Delphi.Mocks.ProxyBase in '..\Delphi.Mocks.ProxyBase.pas',
+  Delphi.Mocks.Utils.Tests in 'Delphi.Mocks.Utils.Tests.pas';
 
 {$R *.RES}
 

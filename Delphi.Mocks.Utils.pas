@@ -29,7 +29,6 @@ unit Delphi.Mocks.Utils;
 interface
 
 uses
-  Rtti,
   TypInfo;
 
 
@@ -39,20 +38,19 @@ function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 implementation
 
 uses
-    SysUtils;
-
-
+  SysUtils,
+  IntfInfo;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 var
-  rType : TRttiType;
-  ctx : TRttiContext;
-  methods : TArray<TRttiMethod>;
+  IntfMetaData: TIntfMetaData;
 begin
-  ctx := TRttiContext.Create;
-  rType := ctx.GetType(info);
-  methods := rType.GetDeclaredMethods;
-  result := Length(methods) > 0;
+  try
+    GetIntfMetaData(info, IntfMetaData, True);
+  except
+    Exit(False);
+  end;
+  Exit(True);
 end;
 
 
