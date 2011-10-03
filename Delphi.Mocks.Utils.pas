@@ -45,12 +45,18 @@ function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 var
   IntfMetaData: TIntfMetaData;
 begin
-  try
-    GetIntfMetaData(info, IntfMetaData, True);
-  except
-    Exit(False);
+  result := False;
+  case info.Kind of
+    tkInterface :
+    begin
+      try
+        GetIntfMetaData(info, IntfMetaData, True);
+        result := True;
+      except
+      end;
+    end;
   end;
-  Exit(True);
+
 end;
 
 
