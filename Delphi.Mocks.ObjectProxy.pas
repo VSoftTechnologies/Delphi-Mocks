@@ -78,7 +78,7 @@ end;
 
 destructor TObjectProxy<T>.Destroy;
 begin
-  TObject(FInstance).Free;//always destroy the instance before the interceptor.
+  TObject(Pointer(@FInstance)^).Free;//always destroy the instance before the interceptor.
   FVMInterceptor.Free;
   inherited;
 end;
