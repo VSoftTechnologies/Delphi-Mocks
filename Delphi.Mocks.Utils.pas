@@ -35,6 +35,8 @@ uses
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 
+function GetVirtualMethodCount(AClass: TClass): Integer;
+
 implementation
 
 uses
@@ -58,6 +60,15 @@ begin
   end;
 
 end;
+
+//courtesy of Allen Bauer on stackoverflow
+//http://stackoverflow.com/questions/760513/where-can-i-find-information-on-the-structure-of-the-delphi-vmt
+function GetVirtualMethodCount(AClass: TClass): Integer;
+begin
+  Result := (PInteger(Integer(AClass) + vmtClassName)^ -
+    (Integer(AClass) + vmtParent) - SizeOf(Pointer)) div SizeOf(Pointer);
+end;
+
 
 
 

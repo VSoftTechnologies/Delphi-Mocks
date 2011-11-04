@@ -25,6 +25,9 @@
 
 unit Delphi.Mocks.MethodData;
 
+{$I 'Delphi.Mocks.inc'}
+
+
 interface
 
 uses
@@ -86,6 +89,10 @@ type
     constructor Create(const AMethodName : string);
     destructor Destroy;override;
   end;
+
+  {$IFNDEF DELPHI_XE_UP}
+  ENotImplemented = class(Exception);
+  {$ENDIF}
 
 implementation
 

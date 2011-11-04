@@ -44,7 +44,6 @@ procedure TTestBehaviors.Test_WillExecute;
 var
   behavior : IBehavior;
   returnValue : TValue;
-  testValue : TValue;
   args : TArray<TValue>;
   rType : TRttiType;
 begin

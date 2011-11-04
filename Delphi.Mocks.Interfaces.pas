@@ -31,7 +31,6 @@ uses
   SysUtils,
   Generics.Collections,
   Delphi.Mocks,
-  //Delphi.Mocks.Types,
   Rtti;
 
 type
@@ -113,7 +112,6 @@ type
 
     //Verification
     function Verify(var report : string) : boolean;
-
   end;
 
   IVerify = interface

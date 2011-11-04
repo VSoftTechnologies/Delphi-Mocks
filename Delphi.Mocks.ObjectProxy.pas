@@ -33,7 +33,8 @@ uses
   Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.ProxyBase;
+  Delphi.Mocks.ProxyBase,
+  Delphi.Mocks.VirtualMethodInterceptor;
 
 type
   TObjectProxy<T> = class(TBaseProxy<T>)
@@ -71,7 +72,7 @@ begin
 
   FInstance := ctor.Invoke(rType.AsInstance.MetaclassType, []).AsType<T>();
   FVMInterceptor := TVirtualMethodInterceptor.Create(rType.AsInstance.MetaclassType);
-  FVMInterceptor.Proxify(TObject(FInstance));
+  FVMInterceptor.Proxify(Pointer(@FInstance));
   FVMInterceptor.OnBefore := DoBefore;
 end;
 

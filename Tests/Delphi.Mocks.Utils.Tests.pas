@@ -30,6 +30,7 @@ procedure TUtilsTests.CheckInterfaceHasRTTIWithoutRTTI;
 begin
   CheckFalse(CheckInterfaceHasRTTI(TypeInfo(IInterface)));
 end;
+
 initialization
   RegisterTest(TUtilsTests.Suite);
 end.

@@ -23,46 +23,28 @@
 {                                                                           }
 {***************************************************************************}
 
-unit Delphi.Mocks.When;
+{$DEFINE UNSUPPORTED_COMPILER_VERSION}
+{$IFDEF VER210} // RAD Studio 2010
+  {$DEFINE DELPHI_2010}
+  {$DEFINE DELPHI_2010_UP}
+  {$UNDEF UNSUPPORTED_COMPILER_VERSION}
+{$ENDIF VER210}
 
-interface
+{$IFDEF VER220} // RAD Studio XE
+  {$DEFINE DELPHI_2010_UP}
+  {$DEFINE DELPHI_XE}
+  {$DEFINE DELPHI_XE_UP}
+  {$UNDEF UNSUPPORTED_COMPILER_VERSION}
+{$ENDIF VER220}
 
-uses
-  Delphi.Mocks,
-  Delphi.Mocks.InterfaceProxy;
+{$IFDEF VER230} // RAD Studio XE2
+  {$DEFINE DELPHI_2010_UP}
+  {$DEFINE DELPHI_XE_UP}
+  {$DEFINE DELPHI_XE2}
+  {$DEFINE DELPHI_XE2_UP}
+  {$UNDEF UNSUPPORTED_COMPILER_VERSION}
+{$ENDIF VER230}
 
-type
-  TWhen<T> = class(TInterfacedObject,IWhen<T>)
-  private
-   FProxy : T;
-  protected
-   function When : T;
-  public
-    constructor Create(const AProxy : T);
-    destructor Destroy;override;
-  end;
-
-implementation
-
-uses
-  SysUtils;
-
-{ TWhen<T> }
-
-constructor TWhen<T>.Create(const AProxy: T);
-begin
-  FProxy := AProxy;
-end;
-
-destructor TWhen<T>.Destroy;
-begin
-  FProxy := Default(T);
-  inherited;
-end;
-
-function TWhen<T>.When: T;
-begin
-  result := FProxy;
-end;
-
-end.
+{$IFDEF UNSUPPORTED_COMPILER_VERSION}
+  Unsupported Compiler Version (Delphi 2010 or later required!)
+{$ENDIF}

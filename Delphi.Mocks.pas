@@ -27,6 +27,8 @@ unit Delphi.Mocks;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
   Rtti,
   sysutils;
@@ -90,12 +92,6 @@ type
     //Set Expectations for methods
     function Expect : IExpect<T>;
 
-//    //set a required order for methods, e.g A must have been called before B
-//    function Before(const AMethodName : string) : ISetup<T>;
-//
-//    //set a required order for methods, e.g A must have been called After B
-//    function After(const AMethodName : string) : ISetup<T>;
-
     //set the return value for a method when called with the parameters specified on the When
     function WillReturn(const value : TValue) : IWhen<T>;
 
@@ -121,7 +117,6 @@ type
 
   //used by the mock - need to find another place to put this.. circular references
   //problem means we need it here for now.
-
   IProxy<T> = interface
   ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
     function Setup : ISetup<T>;
@@ -146,15 +141,13 @@ type
     procedure Free;
   end;
 
-
-
-
   //Exception Types that the mocks will raise.
   EMockException = class(Exception);
   EMockSetupException = class(EMockException);
   EMockNoRTTIException = class(EMockException);
   EMockNoProxyException = class(EMockException);
   EMockVerificationException = class(EMockException);
+
 
 
 implementation

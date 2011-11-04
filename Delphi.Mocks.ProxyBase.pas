@@ -514,7 +514,5 @@ begin
   result := inherited;
 end;
 
-{ TProxyBase<T>.TProxyVirtualInterface }
-
 
 end.
