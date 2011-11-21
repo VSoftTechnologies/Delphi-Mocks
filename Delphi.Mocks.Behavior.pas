@@ -72,11 +72,11 @@ var
 begin
   //Note : Args[0] is the Self Ptr for the proxy, we do not want to keep
   //a reference to it so it is ignored here.
-  l := Length(args) -1 ;
+  l := Length(args);
   if l > 0 then
   begin
     SetLength(FArgs,l);
-    CopyArray(@FArgs[0],@args[1],TypeInfo(TValue),l);
+    CopyArray(@FArgs[0],@args[0],TypeInfo(TValue),l);
   end;
 end;
 
@@ -173,12 +173,11 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
     i : integer;
   begin
     result := False;
-    if Length(Args) <> (Length(FArgs) + 1) then
+    if Length(Args) <> (Length(FArgs)) then
       exit;
-    //start at 1 because we don't care about matching the first arg (self pointer)
-    for i := 1 to Length(args) -1 do
+    for i := 0 to Length(args) -1 do
     begin
-      if not FArgs[i-1].Equals(args[i]) then
+      if not FArgs[i].Equals(args[i]) then
         exit;
     end;
     result := True;

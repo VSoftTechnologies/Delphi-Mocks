@@ -98,6 +98,7 @@ begin
   mock.Instance.IndexedProp[1] := 'hello';
 
   mock.Instance.TestVarParam(msg);
+
   WriteLn('Calling TestVarParam set msg to : ' + msg);
 
 
@@ -127,6 +128,7 @@ type
     function Bar(const param : integer) : string;overload;virtual;
     function Bar(const param : integer; const param2 : string) : string;overload;virtual;
     procedure TestMe;virtual;
+    function ReadString(const AName: string): string; virtual; abstract;
   end;
 
 procedure TesTObjectMock;
@@ -136,7 +138,12 @@ begin
   mock := TMock<TFoo>.Create;
   mock.Setup.WillReturn('hello world').When.Bar(99);
   mock.Setup.WillReturn('hello world2').When.Bar(99,'abc');
+  mock.Setup.WillReturn('..\datadefinitions\').When.ReadString('DefinitionPath');
+  mock.Setup.WillReturn('test\').When.ReadString('Path');
+  WriteLn('Bar(99) returned : ' +  mock.Instance.Bar(99));
   WriteLn('Bar(99,abc) returned : ' +  mock.Instance.Bar(99,'abc'));
+  Writeln('ReadString(''DefinitionPath'') returned : ' + mock.Instance.ReadString('DefinitionPath'));
+  Writeln('ReadString(''Path'') returned : ' + mock.Instance.ReadString('Path'));
   mock.Free;
 end;
 
@@ -151,6 +158,8 @@ function TFoo.Bar(const param: integer; const param2: string): string;
 begin
   result := IntToStr(param) + '-' + param2;
 end;
+
+
 
 procedure TFoo.TestMe;
 begin

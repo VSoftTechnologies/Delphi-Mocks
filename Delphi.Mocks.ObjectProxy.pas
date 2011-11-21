@@ -59,6 +59,7 @@ var
   ctx   : TRttiContext;
   rType : TRttiType;
   ctor : TRttiMethod;
+  instance : TValue;
 begin
   inherited;
   ctx := TRttiContext.Create;
@@ -69,10 +70,10 @@ begin
   ctor := rType.GetMethod('Create');
   if ctor = nil then
     raise EMockException.Create('Could not find constructor Create on type ' + rType.Name);
-
-  FInstance := ctor.Invoke(rType.AsInstance.MetaclassType, []).AsType<T>();
+  instance := ctor.Invoke(rType.AsInstance.MetaclassType, []);
+  FInstance := instance.AsType<T>();
   FVMInterceptor := TVirtualMethodInterceptor.Create(rType.AsInstance.MetaclassType);
-  FVMInterceptor.Proxify(Pointer(@FInstance));
+  FVMInterceptor.Proxify(instance.AsObject);
   FVMInterceptor.OnBefore := DoBefore;
 end;
 
@@ -99,3 +100,4 @@ begin
 end;
 
 end.
+

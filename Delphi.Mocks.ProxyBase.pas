@@ -269,7 +269,6 @@ begin
         //first see if we know about this method
         methodData := GetMethodData(method.Name);
         Assert(methodData <> nil);
-
         case FNextBehavior of
           TBehaviorType.WillReturn:
           begin
