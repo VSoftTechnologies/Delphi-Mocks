@@ -46,8 +46,6 @@ type
     private
       FProxy : TInterfaceProxy<T>;
     protected
-      function _AddRef: Integer; override; stdcall;
-      function _Release: Integer; override; stdcall;
     public
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
       constructor Create(AProxy : TInterfaceProxy<T>; AInterface: Pointer; InvokeEvent: TVirtualInterfaceInvokeEvent);
@@ -75,8 +73,6 @@ constructor TInterfaceProxy<T>.Create;
 begin
   inherited;
   FVirtualInterface := TProxyVirtualInterface.Create(Self,TypeInfo(T),Self.DoInvoke);
- //remove reference created in this constructor, the virtual interface and proxy's lifetime are now the same.
-  FVirtualInterface._Release;
 end;
 
 destructor TInterfaceProxy<T>.Destroy;
@@ -122,6 +118,7 @@ begin
   inherited Create(Ainterface,InvokeEvent);
 end;
 
+
 function TInterfaceProxy<T>.TProxyVirtualInterface.QueryInterface(const IID: TGUID; out Obj): HRESULT;
 begin
   Result := inherited;
@@ -129,15 +126,6 @@ begin
     Result := FProxy.InternalQueryInterface(IID, Obj);
 end;
 
-function TInterfaceProxy<T>.TProxyVirtualInterface._AddRef: Integer;
-begin
-  result := FProxy._AddRef;
-end;
-
-function TInterfaceProxy<T>.TProxyVirtualInterface._Release: Integer;
-begin
-  result := FProxy._Release;
-end;
 
 end.
 

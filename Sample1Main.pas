@@ -41,6 +41,7 @@ var
   mock : TMock<IFoo>; //our mock object
   msg  : string;
 
+
   procedure TestImplicit(value : IFoo);
   begin
     WriteLn('Calling Bar(1234567) : ' + value.Bar(1234567));
@@ -119,7 +120,11 @@ begin
       WriteLn('We caught an exception : ' + e.Message);
     end;
   end;
-  mock.Verify('did it work???');
+  try
+    mock.Verify('did it work???');
+  finally
+    mock.Free;
+  end;
 end;
 
 type
