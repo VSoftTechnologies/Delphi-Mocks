@@ -1,0 +1,79 @@
+body {  
+	color: #070707; 
+	background-color: #ccc; 
+	margin: 10px; 
+	padding: 0; 
+}
+
+div#header { 
+	display: inline; 
+	width=75%; 
+	background-color=white; 
+}
+
+div#content {
+	margin: 0px; 
+	border-top: 4px solid #666; 
+	border-left: 4px solid #666; 
+	border-right: 2px solid #666; 
+	border-bottom: 2px solid #666; 
+	background: #fffff7; width=75%
+}
+
+div#result {
+	margin: 0px; 
+	border-top: 4px solid #666; 
+	border-left: 4px solid #666; 
+	border-right: 2px solid #666; 
+	border-bottom: 2px solid #666; 
+	background: #9999FF; 
+	width=75%
+}
+
+h1 {
+	display: inline; 
+	background: #666; 
+	margin: 10pt; 
+	padding: 1pt; 
+	color: #ffffff;
+}
+
+.tableheader {
+	font-size: large; 
+	background-color: #9F9F9F;
+}
+
+.testpass {
+	background-color: #00FF00;
+}
+
+.testerror {
+	background-color: #FF0000;
+}
+
+.testfailure {
+	background-color: #FF00FF;
+}
+
+.test {
+	background-color: #EEEEEE;
+}
+
+.testsuite {
+	font-size: large; 
+	background-color: #DDDDDD;
+}
+
+.statname {
+	background-color: #DDDDDD;
+}
+
+.statvalue {
+	background-color: #FFFFFF;
+}
+
+.statistics {
+	font-size: large;
+	background-color: #DDDDDD;
+}
+
