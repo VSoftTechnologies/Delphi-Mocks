@@ -31,8 +31,6 @@ interface
 uses
   TypInfo;
 
-
-
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 
 function GetVirtualMethodCount(AClass: TClass): Integer;
@@ -41,24 +39,18 @@ implementation
 
 uses
   SysUtils,
-  IntfInfo;
+  RTTI;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 var
-  IntfMetaData: TIntfMetaData;
+  rType : TRttiType;
+  ctx : TRttiContext;
+  methods : TArray<TRttiMethod>;
 begin
-  result := False;
-  case info.Kind of
-    tkInterface :
-    begin
-      try
-        GetIntfMetaData(info, IntfMetaData, True);
-        result := True;
-      except
-      end;
-    end;
-  end;
-
+  ctx := TRttiContext.Create;
+  rType := ctx.GetType(info);
+  methods := rType.GetDeclaredMethods;
+  result := Length(methods) > 0;
 end;
 
 //courtesy of Allen Bauer on stackoverflow
