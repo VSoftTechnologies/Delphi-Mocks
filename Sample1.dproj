@@ -137,6 +137,7 @@
 			<DCCReference Include="Delphi.Mocks.ObjectProxy.pas"/>
 			<DCCReference Include="Delphi.Mocks.ProxyBase.pas"/>
 			<DCCReference Include="Delphi.Mocks.VirtualMethodInterceptor.pas"/>
+			<DCCReference Include="Delphi.Mocks.ReturnTypePatch.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

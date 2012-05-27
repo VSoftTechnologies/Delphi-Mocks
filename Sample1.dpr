@@ -19,7 +19,8 @@ uses
   Delphi.Mocks.Expectation in 'Delphi.Mocks.Expectation.pas',
   Delphi.Mocks.ObjectProxy in 'Delphi.Mocks.ObjectProxy.pas',
   Delphi.Mocks.ProxyBase in 'Delphi.Mocks.ProxyBase.pas',
-  Delphi.Mocks.VirtualMethodInterceptor in 'Delphi.Mocks.VirtualMethodInterceptor.pas';
+  Delphi.Mocks.VirtualMethodInterceptor in 'Delphi.Mocks.VirtualMethodInterceptor.pas',
+  Delphi.Mocks.ReturnTypePatch in 'Delphi.Mocks.ReturnTypePatch.pas';
 
 begin
   try
