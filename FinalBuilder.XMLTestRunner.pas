@@ -49,7 +49,7 @@ const
 type
   TXMLTestListener = class(TInterfacedObject, ITestListener, ITestListenerX)
   private
-     FOutputFile : TFileStream;
+     FOutputBuffer : TMemoryStream;
      FFileName : String;
 
   protected
@@ -199,16 +199,14 @@ var
 begin
   str := str + CRLF;
   {$IFDEF UNICODE}
-  if FOutputFile <> nil then
+  if FOutputBuffer <> nil then
   begin
     buffer := TEncoding.UTF8.GetBytes(str);
-    FOutputFile.WriteBuffer(buffer[0],Length(buffer));
-  end
-  else
-    WriteLn(str);
+    FOutputBuffer.WriteBuffer(buffer[0],Length(buffer));
+  end;
   {$ELSE}
-  if FOutputFile <> nil then
-    FOutputFile.Write(PChar(str)^,Length(str))
+  if FOutputBuffer <> nil then
+    FOutputBuffer.Write(PChar(str)^,Length(str))
   else
     Writeln(str);
   {$ENDIF}
@@ -273,38 +271,53 @@ begin
 end;
 
 procedure TXMLTestListener.TestingStarts;
-{$IFDEF UNICODE}
 var
-  Preamble: TBytes;
-{$ENDIF}
+  sFileName : string;
 begin
    startTime := GetTickCount;
    dtStartTime := Now;
-   FOutputFile := TFileStream.Create(FFileName,fmCreate);
-{$IFDEF UNICODE}
-   //write the byte order mark
-   Preamble := TEncoding.UTF8.GetPreamble;
-   if Length(Preamble) > 0 then
-      FOutputFile.WriteBuffer(Preamble[0], Length(Preamble));
-   writeReport('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>');
-{$ELSE}
-   writeReport('<?xml version="1.0" encoding="ISO-8859-1" standalone="yes" ?>');
-{$ENDIF}
-   writeReport(Format('<test-results total="%d" notrun="%d" date="%s" time="%s" >',
-                      [RegisteredTests.CountTestCases,
-                        RegisteredTests.CountTestCases - RegisteredTests.CountEnabledTestCases,
-                          DateToStr(Now),
-                            TimeToStr(Now)]));
-   writeReport(Format('<application name="%s" />',[ExtractFileName(ParamStr(0))]));
+   FOutputBuffer := TMemoryStream.Create;
+   sFileName := ExtractFileName(ParamStr(0));
+   writeReport(Format('<application name="%s" />',[sFileName]));
 end;
 
 procedure TXMLTestListener.TestingEnds(testResult: TTestResult);
 var
+{$IFDEF UNICODE}
+  Preamble: TBytes;
+  Buffer : TBytes;
+{$ENDIF}
   runTime : Double;
   dtRunTime : TDateTime;
   successRate : Integer;
   h, m, s, l :Word;
+  fs : TFileStream;
+  sResult : string;
+  sFileName : string;
+  sNameSpace : string;
+
+  procedure writeHeader(str : String);
+{$IFDEF UNICODE}
+  var
+    Buffer : TBytes;
+{$ENDIF}
+  begin
+    str := str + CRLF;
+    {$IFDEF UNICODE}
+    buffer := TEncoding.UTF8.GetBytes(str);
+    fs.WriteBuffer(buffer[0],Length(buffer));
+    {$ELSE}
+    fs.Write(PChar(str)^,Length(str))
+    {$ENDIF}
+  end;
+
+
 begin
+   writeReport('</results>');
+   writeReport('</test-suite>');
+   writeReport('</results>');
+   writeReport('</test-suite>');
+
    runtime := (GetTickCount - startTime) / 1000;
    if testResult.RunCount > 0 then
      successRate :=  Trunc(
@@ -324,7 +337,39 @@ begin
                   Format('<stat name="runtime" value="%1.3f"/>', [runtime])+CRLF+
                   '</statistics>'+CRLF+
               '</test-results>');
-   FreeAndNil(FOutputFile);
+
+   fs := TFileStream.Create(FFileName,fmCreate);
+   try
+    {$IFDEF UNICODE}
+       //write the byte order mark
+       Preamble := TEncoding.UTF8.GetPreamble;
+       if Length(Preamble) > 0 then
+          fs.WriteBuffer(Preamble[0], Length(Preamble));
+       writeHeader('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>');
+    {$ELSE}
+       writeHeader('<?xml version="1.0" encoding="ISO-8859-1" standalone="yes" ?>');
+    {$ENDIF}
+       writeHeader(Format('<test-results total="%d" not-run="%d" errors="%d" failures="%d" date="%s" time="%s" >',
+                      [RegisteredTests.CountTestCases,
+                        RegisteredTests.CountTestCases - RegisteredTests.CountEnabledTestCases,
+                          testResult.errorCount,testResult.FailureCount,
+                          DateToStr(Now),
+                            TimeToStr(Now)]));
+       sFileName := ExtractFileName(ParamStr(0));
+       sNameSpace := ChangeFileExt(sFileName,'');
+
+       writeHeader(Format('<test-suite name="%s" type="Assembly" time="%1.3f">', [sFileName,runtime]));
+       writeHeader('<results>');
+       writeHeader(Format('<test-suite name="%s" type="Namespace" time="%1.3f">', [sNameSpace,runtime]));
+       writeHeader('<results>');
+
+      //write the memory stream to the file.
+      FOutputBuffer.SaveToStream(fs);
+   finally
+      FreeAndNil(FOutputBuffer);
+      fs.Free;
+   end;
+
 
    if PrintReportToConsole then
    begin
@@ -419,7 +464,7 @@ begin
    if CompareText(suite.Name, ExtractFileName(Application.ExeName)) = 0 then
      Exit;
    s := GetCurrentSuiteName + suite.Name;
-   writeReport(Format('<test-suite name="%s" total="%d" notrun="%d">', [s, suite.CountTestCases, suite.CountTestCases - suite.CountEnabledTestCases]));
+   writeReport(Format('<test-suite name="%s" total="%d" notrun="%d" type="TestFixture">', [s, suite.CountTestCases, suite.CountTestCases - suite.CountEnabledTestCases]));
    FSuiteStack.Insert(0, suite.getName);
    writeReport('<results>');
 end;
@@ -431,13 +476,13 @@ class function TXMLTestListener.StringReplaceAll (text,byt,mot : string ) :strin
 var
    plats : integer;
 begin
-While pos(byt,text) > 0 do
-      begin
-      plats := pos(byt,text);
-      delete (text,plats,length(byt));
-      insert (mot,text,plats);
-      end;
-result := text;
+  While pos(byt,text) > 0 do
+  begin
+    plats := pos(byt,text);
+    delete (text,plats,length(byt));
+    insert (mot,text,plats);
+  end;
+  result := text;
 end;
 
 {:
@@ -452,10 +497,11 @@ end;
 
 destructor TXMLTestListener.Destroy;
 begin
-  FreeAndNil(FSuiteStack);
-  FreeAndNil(FOutputFile);
-  FreeAndNil(FInfoList);
-  FreeAndNil(FWarningList);
+  FSuiteStack.Free;
+  FInfoList.Free;
+  FWarningList.Free;
+  if FOutputBuffer <> nil then
+    FOutputBuffer.Free;
   inherited Destroy;
 end;
 
