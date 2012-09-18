@@ -53,18 +53,16 @@ type
      FFileName : String;
 
   protected
-     startTime : Cardinal;
-     dtStartTime : TDateTime;
-     dtEndTime : TDateTime;
+    FStartTime : Cardinal;
+    FStartDateTime : TDateTime;
+    FEndDateTime : TDateTime;
 
-     testStart : TDateTime;
-     FSuiteStack : TStringList;
-     FInfoList   : TStringList;
-     FWarningList : TStringList;
+    FSuiteStack : TStringList;
+    FInfoList   : TStringList;
+    FWarningList : TStringList;
+    procedure writeReport(str: String);
 
-     procedure writeReport(str: String);
-
-     function GetCurrentSuiteName : string;
+    function GetCurrentSuiteName : string;
     function  PrintErrors(r: TTestResult): string; virtual;
     function  PrintFailures(r: TTestResult): string; virtual;
     function  PrintHeader(r: TTestResult): string; virtual;
@@ -274,8 +272,8 @@ procedure TXMLTestListener.TestingStarts;
 var
   sFileName : string;
 begin
-   startTime := GetTickCount;
-   dtStartTime := Now;
+   FStartTime := GetTickCount;
+   FStartDateTime := Now;
    FOutputBuffer := TMemoryStream.Create;
    sFileName := ExtractFileName(ParamStr(0));
    writeReport(Format('<application name="%s" />',[sFileName]));
@@ -285,14 +283,12 @@ procedure TXMLTestListener.TestingEnds(testResult: TTestResult);
 var
 {$IFDEF UNICODE}
   Preamble: TBytes;
-  Buffer : TBytes;
 {$ENDIF}
   runTime : Double;
   dtRunTime : TDateTime;
   successRate : Integer;
   h, m, s, l :Word;
   fs : TFileStream;
-  sResult : string;
   sFileName : string;
   sNameSpace : string;
 
@@ -318,7 +314,7 @@ begin
    writeReport('</results>');
    writeReport('</test-suite>');
 
-   runtime := (GetTickCount - startTime) / 1000;
+   runtime := (GetTickCount - FStartTime) / 1000;
    if testResult.RunCount > 0 then
      successRate :=  Trunc(
         ((testResult.runCount - testResult.failureCount - testResult.errorCount)
@@ -332,7 +328,7 @@ begin
                   '<stat name="failures" value="'+intToStr(testResult.failureCount)+'" />'+CRLF+
                   '<stat name="errors" value="'+intToStr(testResult.errorCount)+'" />'+CRLF+
                   '<stat name="success-rate" value="'+intToStr(successRate)+'%" />'+CRLF+
-                  '<stat name="started-at" value="'+DateTimeToStr(dtStartTime)+'" />'+CRLF+
+                  '<stat name="started-at" value="'+DateTimeToStr(FStartDateTime)+'" />'+CRLF+
                   '<stat name="finished-at" value="'+DateTimeToStr(now)+'" />'+CRLF+
                   Format('<stat name="runtime" value="%1.3f"/>', [runtime])+CRLF+
                   '</statistics>'+CRLF+
@@ -373,8 +369,8 @@ begin
 
    if PrintReportToConsole then
    begin
-      dtEndTime := now;
-      dtRunTime := Now-dtStartTime;
+      FEndDateTime := now;
+      dtRunTime := Now-FStartDateTime;
       writeln;
       DecodeTime(dtRunTime, h,  m, s, l);
       writeln(Format('Time: %d:%2.2d:%2.2d.%d', [h, m, s, l]));
@@ -452,6 +448,8 @@ procedure TXMLTestListener.EndSuite(suite: ITest);
 begin
      if CompareText(suite.Name, ExtractFileName(Application.ExeName)) = 0 then
        Exit;
+
+
      writeReport('</results>');
      writeReport('</test-suite>');
      FSuiteStack.Delete(0);
