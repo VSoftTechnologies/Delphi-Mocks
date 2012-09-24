@@ -65,6 +65,8 @@ type
     procedure PushSuite(const suiteElement, resultsElement : IXMLDOMElement; const name : string);
     procedure PopSuite(var suiteElement, resultsElement : IXMLDOMElement; var name : string );
     function CurrentSuiteElement : IXMLDOMElement;
+    function CurrentSuiteName : string;
+
     function CurrentResultsElement : IXMLDOMElement;
   protected
 
@@ -222,6 +224,12 @@ function TXMLTestListener.CurrentSuiteElement: IXMLDOMElement;
 begin
   Assert(FSuiteDataStack.Count > 0);
   result := TSuiteData(FSuiteDataStack.Items[0]).SuiteElement;
+end;
+
+function TXMLTestListener.CurrentSuiteName: string;
+begin
+  Assert(FSuiteDataStack.Count > 0);
+  result := TSuiteData(FSuiteDataStack.Items[0]).Name;
 end;
 
 const
@@ -415,11 +423,7 @@ begin
     CurrentSuiteElement.setAttribute('result','Success');
     CurrentSuiteElement.setAttribute('success','True');
   end;
-
   PopSuite(suiteElement,resultsElement,name);
-//  Assert(name = suite.Name);
-
-
 end;
 
 procedure TXMLTestListener.StartSuite(suite: ITest);
@@ -436,6 +440,9 @@ begin
     suiteElement := FXMLDoc.createElement('test-suite');
     suiteElement.setAttribute('type','Assembly');
     suiteElement.setAttribute('name',suite.Name);
+    suiteElement.setAttribute('result','Success');
+    suiteElement.setAttribute('success','True');
+    suiteElement.setAttribute('time','0');
     FTestResultsElement.appendChild(suiteElement);
     resultsElement := FXMLDoc.createElement('results');
     suiteElement.appendChild(resultsElement);
@@ -637,6 +644,7 @@ begin
   data.ResultsElement := resultsElement;
   data.ErrorCount := FErrorCount;
   data.FailureCount := FFailureCount;
+  data.Name := name;
   FSuiteDataStack.Insert(0,data);
   FFailureCount := 0;
   FErrorCount := 0;
