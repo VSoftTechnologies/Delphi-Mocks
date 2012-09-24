@@ -338,32 +338,51 @@ var
   dtRunTime : TDateTime;
   h, m, s, l :Word;
 begin
-   FTestResultsElement.setAttribute('total',IntToStr(RegisteredTests.CountTestCases));
-   FTestResultsElement.setAttribute('not-run',IntToStr(RegisteredTests.CountTestCases - RegisteredTests.CountEnabledTestCases));
-   FTestResultsElement.setAttribute('errors',IntToStr(testResult.errorCount));
-   FTestResultsElement.setAttribute('failures',IntToStr(testResult.FailureCount));
-   FTestResultsElement.setAttribute('date',DateToStr(Now));
+  //when no namespaces are used for registering test suites, it seems startsuite is called for the exe,
+  //but endsuite is not.
+  if FSuiteDataStack.Count > 0 then
+  begin
+    CurrentSuiteElement.setAttribute('time',Format('%1.3f',[testResult.TotalTime / 1000]));
+    if (FErrorCount > 0) or (FFailureCount > 0) then
+    begin
+      CurrentSuiteElement.setAttribute('result','Failure');
+      CurrentSuiteElement.setAttribute('success','False');
+    end
+    else
+    begin
+      CurrentSuiteElement.setAttribute('result','Success');
+      CurrentSuiteElement.setAttribute('success','True');
+    end;
 
-   FTestResultsElement.setAttribute('time',Format('%1.3f',[testResult.TotalTime / 1000]));
 
-   FXMLDoc.save(FFileName);
-   if PrintReportToConsole then
-   begin
-      FEndDateTime := now;
-      dtRunTime := Now-FStartDateTime;
-      writeln;
-      DecodeTime(dtRunTime, h,  m, s, l);
-      writeln(Format('Time: %d:%2.2d:%2.2d.%d', [h, m, s, l]));
-      writeln(Report(testResult));
-      writeln;
-   end;
+  end;
+
+  FTestResultsElement.setAttribute('total',IntToStr(RegisteredTests.CountTestCases));
+  FTestResultsElement.setAttribute('not-run',IntToStr(RegisteredTests.CountTestCases - RegisteredTests.CountEnabledTestCases));
+  FTestResultsElement.setAttribute('errors',IntToStr(testResult.errorCount));
+  FTestResultsElement.setAttribute('failures',IntToStr(testResult.FailureCount));
+  FTestResultsElement.setAttribute('date',DateToStr(Now));
+
+  FTestResultsElement.setAttribute('time',Format('%1.3f',[testResult.TotalTime / 1000]));
+
+  FXMLDoc.save(FFileName);
+  if PrintReportToConsole then
+  begin
+    FEndDateTime := now;
+    dtRunTime := Now-FStartDateTime;
+    writeln;
+    DecodeTime(dtRunTime, h,  m, s, l);
+    writeln(Format('Time: %d:%2.2d:%2.2d.%d', [h, m, s, l]));
+    writeln(Report(testResult));
+    writeln;
+  end;
 
 
 end;
 
 class function TXMLTestListener.RunTest(suite: ITest; outputFile:String): TTestResult;
 begin
-   Result := TestFramework.RunTest(suite, [TXMLTestListener.Create(outputFile)]);
+  Result := TestFramework.RunTest(suite, [TXMLTestListener.Create(outputFile)]);
 end;
 
 
@@ -440,9 +459,9 @@ begin
     suiteElement := FXMLDoc.createElement('test-suite');
     suiteElement.setAttribute('type','Assembly');
     suiteElement.setAttribute('name',suite.Name);
-    suiteElement.setAttribute('result','Success');
+{    suiteElement.setAttribute('result','Success');
     suiteElement.setAttribute('success','True');
-    suiteElement.setAttribute('time','0');
+    suiteElement.setAttribute('time','0');}
     FTestResultsElement.appendChild(suiteElement);
     resultsElement := FXMLDoc.createElement('results');
     suiteElement.appendChild(resultsElement);
