@@ -365,6 +365,7 @@ begin
 
   FTestResultsElement.setAttribute('time',Format('%1.3f',[testResult.TotalTime / 1000]));
 
+  ForceDirectories(ExtractFilePath(FFileName));
   FXMLDoc.save(FFileName);
   if PrintReportToConsole then
   begin
