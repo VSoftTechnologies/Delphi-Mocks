@@ -10,6 +10,14 @@ type
     procedure CheckInterfaceHasRTTIWithNonInterface;
     procedure CheckInterfaceHasRTTIWithInterfaceRTTI;
   end;
+
+  {$M+}
+  ITestable = interface
+    procedure DoSomething;
+  end;
+  {$M-}
+
+
 implementation
 uses
   Delphi.Mocks.Utils;
@@ -18,12 +26,12 @@ uses
 procedure TUtilsTests.CheckInterfaceHasRTTIWithInterfaceRTTI;
 
 begin
-  CheckTrue(CheckInterfaceHasRTTI(TypeInfo(IInvokable)));
+  CheckTrue(CheckInterfaceHasRTTI(TypeInfo(ITestable)));
 end;
 
 procedure TUtilsTests.CheckInterfaceHasRTTIWithNonInterface;
 begin
-  CheckFalse(CheckInterfaceHasRTTI(TypeInfo(TObject)));
+  CheckTrue(CheckInterfaceHasRTTI(TypeInfo(TObject)));
 end;
 
 procedure TUtilsTests.CheckInterfaceHasRTTIWithoutRTTI;

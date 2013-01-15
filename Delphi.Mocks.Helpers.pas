@@ -327,6 +327,9 @@ begin
   Result := TypeInfo = System.TypeInfo(Word);
 end;
 
+
+
+
 { TRttiTypeHelper }
 
 function TRttiTypeHelper.TryGetMethod(const AName: string; out AMethod: TRttiMethod): Boolean;

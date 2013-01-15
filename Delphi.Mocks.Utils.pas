@@ -49,7 +49,7 @@ var
 begin
   ctx := TRttiContext.Create;
   rType := ctx.GetType(info);
-  methods := rType.GetDeclaredMethods;
+  methods := rType.GetMethods;
   result := Length(methods) > 0;
 end;
 

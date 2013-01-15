@@ -10,6 +10,7 @@ uses
   Sample1Main in 'Sample1Main.pas',
   Delphi.Mocks.Behavior in 'Delphi.Mocks.Behavior.pas',
   Delphi.Mocks.Helpers in 'Delphi.Mocks.Helpers.pas',
+
   Delphi.Mocks.InterfaceProxy in 'Delphi.Mocks.InterfaceProxy.pas',
   Delphi.Mocks.Interfaces in 'Delphi.Mocks.Interfaces.pas',
   Delphi.Mocks.MethodData in 'Delphi.Mocks.MethodData.pas',
