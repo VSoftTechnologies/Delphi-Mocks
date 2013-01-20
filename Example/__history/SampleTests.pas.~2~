@@ -1,0 +1,11 @@
+unit SampleTests;
+
+interface
+
+uses
+  TestFramework;
+
+
+implementation
+
+end.
