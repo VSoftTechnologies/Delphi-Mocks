@@ -28,6 +28,36 @@
 //  so that it can be used with FinalBuilder and Continua CI.
 unit VSoft.DUnit.XMLTestRunner;
 
+{$IFDEF VER210} // RAD Studio 2010
+  {$DEFINE DELPHI_2010}
+  {$DEFINE DELPHI_2010_UP}
+{$ENDIF VER210}
+
+{$IFDEF VER220} // RAD Studio XE
+  {$DEFINE DELPHI_2010_UP}
+  {$DEFINE DELPHI_XE}
+  {$DEFINE DELPHI_XE_UP}
+  {$UNDEF UNSUPPORTED_COMPILER_VERSION}
+{$ENDIF VER220}
+
+{$IFDEF VER230} // RAD Studio XE2
+  {$DEFINE DELPHI_2010_UP}
+  {$DEFINE DELPHI_XE_UP}
+  {$DEFINE DELPHI_XE2}
+  {$DEFINE DELPHI_XE2_UP}
+  {$UNDEF UNSUPPORTED_COMPILER_VERSION}
+{$ENDIF VER230}
+
+{$IFDEF VER240} // RAD Studio XE3
+  {$DEFINE DELPHI_2010_UP}
+  {$DEFINE DELPHI_XE_UP}
+  {$DEFINE DELPHI_XE2}
+  {$DEFINE DELPHI_XE2_UP}
+  {$DEFINE DELPHI_XE3}
+  {$DEFINE DELPHI_XE3_UP}
+{$ENDIF VER230}
+
+
 interface
 uses
   SysUtils,
@@ -62,6 +92,11 @@ type
 
     FErrorCount : integer;
     FFailureCount : integer;
+
+    {$IFDEF DELPHI_XE2_UP}
+    FFormatSettings : TFormatSettings;
+    {$ENDIF}
+
     procedure PushSuite(const suiteElement, resultsElement : IXMLDOMElement; const name : string);
     procedure PopSuite(var suiteElement, resultsElement : IXMLDOMElement; var name : string );
     function CurrentSuiteElement : IXMLDOMElement;
@@ -83,6 +118,8 @@ type
     function  Report(r: TTestResult): string;
 
     function IsNamespaceSuite(suite : ITest) : boolean;
+
+    function FormatNUnitTime(const value : Extended) : string;
 
   public
 
@@ -189,6 +226,7 @@ end;
 constructor TXMLTestListener.Create;
 begin
    Create(DEFAULT_FILENAME);
+
 end;
 
 constructor TXMLTestListener.Create(outputFile : String);
@@ -196,6 +234,10 @@ var
   pi : IXMLDOMProcessingInstruction;
 begin
    inherited Create;
+   {$IFDEF DELPHI_XE2_UP}
+   FFormatSettings := TFormatSettings.Create('en-US');
+   {$ENDIF}
+
    FileName     := outputFile;
    FMessageList    := TStringList.Create;
    CoInitializeEx(nil,COINIT_MULTITHREADED);
@@ -247,7 +289,8 @@ begin
   begin
     FCurrentTestElement.setAttribute('success','True');
     FCurrentTestElement.setAttribute('result','Success  ');
-    FCurrentTestElement.setAttribute('time',Format('%1.3f',[test.ElapsedTestTime / 1000]));
+
+    FCurrentTestElement.setAttribute('time',FormatNUnitTime(test.ElapsedTestTime / 1000));
     if FMessageList.Count > 0 then
     begin
       reasonElement := FXMLDoc.createElement('reason');
@@ -273,7 +316,7 @@ begin
   begin
     FCurrentTestElement.setAttribute('success','False');
     FCurrentTestElement.setAttribute('result','Error');
-    FCurrentTestElement.setAttribute('time',Format('%1.3f',[error.FailedTest.ElapsedTestTime / 1000]));
+    FCurrentTestElement.setAttribute('time',FormatNUnitTime(error.FailedTest.ElapsedTestTime / 1000));
     failureElement := FXMLDoc.createElement('failure');
     FCurrentTestElement.appendChild(failureElement);
     msgElement := FXMLDoc.createElement('message');
@@ -294,7 +337,7 @@ begin
   begin
     FCurrentTestElement.setAttribute('success','False');
     FCurrentTestElement.setAttribute('result','Failure');
-    FCurrentTestElement.setAttribute('time',Format('%1.3f',[failure.FailedTest.ElapsedTestTime / 1000]));
+    FCurrentTestElement.setAttribute('time',FormatNUnitTime(failure.FailedTest.ElapsedTestTime / 1000));
     failureElement := FXMLDoc.createElement('failure');
     FCurrentTestElement.appendChild(failureElement);
     msgElement := FXMLDoc.createElement('message');
@@ -324,6 +367,20 @@ begin
   FCurrentTestElement := nil;
 end;
 
+function TXMLTestListener.FormatNUnitTime(const value: Extended): string;
+var
+  oldDecimalSeparator : Char;
+begin
+{$IFDEF DELPHI_XE2_UP}
+  result := Format('%1.3f',[value],FFormatSettings);
+{$ELSE}
+  oldDecimalSeparator := SysUtils.DecimalSeparator;
+  SysUtils.DecimalSeparator := '.';
+  result := Format('%1.3f',[value]);
+  SysUtils.DecimalSeparator := oldDecimalSeparator;
+{$ENDIF}
+end;
+
 procedure TXMLTestListener.TestingStarts;
 var
   sFileName : string;
@@ -342,7 +399,7 @@ begin
   //but endsuite is not.
   if FSuiteDataStack.Count > 0 then
   begin
-    CurrentSuiteElement.setAttribute('time',Format('%1.3f',[testResult.TotalTime / 1000]));
+    CurrentSuiteElement.setAttribute('time',FormatNUnitTime(testResult.TotalTime / 1000));
     if (FErrorCount > 0) or (FFailureCount > 0) then
     begin
       CurrentSuiteElement.setAttribute('result','Failure');
@@ -363,7 +420,10 @@ begin
   FTestResultsElement.setAttribute('failures',IntToStr(testResult.FailureCount));
   FTestResultsElement.setAttribute('date',DateToStr(Now));
 
-  FTestResultsElement.setAttribute('time',Format('%1.3f',[testResult.TotalTime / 1000]));
+  FTestResultsElement.setAttribute('time',FormatNUnitTime(testResult.TotalTime / 1000));
+
+  if ExtractFilePath(FFileName) = '' then
+    FFileName := ExtractFilePath(ParamStr(0)) + FFileName;
 
   ForceDirectories(ExtractFilePath(FFileName));
   FXMLDoc.save(FFileName);
@@ -432,7 +492,7 @@ var
   name : string;
 begin
   //update the current suite.. then pop.
-  CurrentSuiteElement.setAttribute('time',Format('%1.3f',[suite.ElapsedTestTime / 1000]));
+  CurrentSuiteElement.setAttribute('time',FormatNUnitTime(suite.ElapsedTestTime / 1000));
   if (FErrorCount > 0) or (FFailureCount > 0) then
   begin
     CurrentSuiteElement.setAttribute('result','Failure');
