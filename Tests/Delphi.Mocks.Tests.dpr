@@ -39,7 +39,8 @@ uses
   Delphi.Mocks.Utils.Tests in 'Delphi.Mocks.Utils.Tests.pas',
   Delphi.Mocks.VirtualMethodInterceptor in '..\Delphi.Mocks.VirtualMethodInterceptor.pas',
   Delphi.Mocks.Tests.TValue in 'Delphi.Mocks.Tests.TValue.pas',
-  Delphi.Mocks.Tests.Interfaces in 'Delphi.Mocks.Tests.Interfaces.pas';
+  Delphi.Mocks.Tests.Interfaces in 'Delphi.Mocks.Tests.Interfaces.pas',
+  Delphi.Mocks.Tests.OpenArrayIntf in 'Delphi.Mocks.Tests.OpenArrayIntf.pas';
 
 {$R *.RES}
 
