@@ -32,7 +32,7 @@ uses
   SysUtils,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.VirtualInterface,
+//  Delphi.Mocks.VirtualInterface,
   Delphi.Mocks.ProxyBase;
 
 type

@@ -38,7 +38,8 @@ uses
   Delphi.Mocks.ProxyBase in '..\Delphi.Mocks.ProxyBase.pas',
   Delphi.Mocks.Utils.Tests in 'Delphi.Mocks.Utils.Tests.pas',
   Delphi.Mocks.VirtualMethodInterceptor in '..\Delphi.Mocks.VirtualMethodInterceptor.pas',
-  Delphi.Mocks.Tests.TValue in 'Delphi.Mocks.Tests.TValue.pas';
+  Delphi.Mocks.Tests.TValue in 'Delphi.Mocks.Tests.TValue.pas',
+  Delphi.Mocks.Tests.Interfaces in 'Delphi.Mocks.Tests.Interfaces.pas';
 
 {$R *.RES}
 
