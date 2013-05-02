@@ -3,29 +3,36 @@ unit Delphi.Mocks.Tests.Behavior;
 interface
 
 uses
+  SysUtils,
   TestFramework,
   Rtti,
   Delphi.Mocks,
   Delphi.Mocks.InterfaceProxy;
 
 type
+  ETestBehaviourException = class(Exception);
+
   TTestBehaviors = class(TTestCase)
   private
     FContext : TRttiContext;
   protected
     procedure SetUp; override;
-
   published
     procedure Test_WillReturnBehavior_Match;
     procedure Test_WillReturnBehavior_NoMatch;
     procedure Test_WillReturnBehavior_Default;
     procedure Test_WillExecute;
+
+    // WillRaise-Execute tests
+    procedure CreateWillRaise_Execute__Raises_Exception_Of_Our_Choice;
+    procedure CreateWillRaise_Execute__Raises_Exception_Message_Of_Our_Choice;
+    procedure CreateWillRaise_Execute__Raises_No_Exception_If_Passed_Nil_For_Exception_Class;
+    procedure CreateWillRaise_Execute__Raises_Exception_Of_Our_Choice_With_Default_Message;
   end;
 
 implementation
 
 uses
-  SysUtils,
   Delphi.Mocks.Helpers,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Behavior,
@@ -50,15 +57,17 @@ begin
   SetLength(args,1);
   args[0] := 999;
   rType := FContext.GetType(TypeInfo(string));
+
   behavior := TBehavior.CreateWillExecute(
     function (const args : TArray<TValue>; const returnType : TRttiType) : TValue
     begin
       result := 'hello world';
     end
     );
-  returnValue := behavior.Execute(args,rType);
-  CheckTrue(SameText(returnValue.AsString,'hello world'));
 
+  returnValue := behavior.Execute(args,rType);
+
+  CheckTrue(SameText(returnValue.AsString,'hello world'));
 end;
 
 procedure TTestBehaviors.Test_WillReturnBehavior_Default;
@@ -111,6 +120,65 @@ begin
   args[1] := 2;
   args[2] :=  'hello world';
   CheckFalse(behavior.Match(args));
+end;
+
+procedure TTestBehaviors.CreateWillRaise_Execute__Raises_Exception_Message_Of_Our_Choice;
+var
+  behavior: IBehavior;
+const
+  EXCEPTION_STRING = 'Exception!';
+begin
+  behavior := TBehavior.CreateWillRaise(ETestBehaviourException, EXCEPTION_STRING);
+
+  StartExpectingException(ETestBehaviourException);
+
+  //Passing nils as we don't care about these values for the exception
+  behavior.Execute(nil, nil);
+
+  StopExpectingException('');
+end;
+
+procedure TTestBehaviors.CreateWillRaise_Execute__Raises_Exception_Of_Our_Choice;
+var
+  behavior: IBehavior;
+begin
+  behavior := TBehavior.CreateWillRaise(ETestBehaviourException, '');
+
+  StartExpectingException(ETestBehaviourException);
+
+  behavior.Execute(nil, nil);
+
+  StopExpectingException;
+end;
+
+
+procedure TTestBehaviors.CreateWillRaise_Execute__Raises_Exception_Of_Our_Choice_With_Default_Message;
+var
+  behavior: IBehavior;
+const
+  EXCEPTION_STRING = 'raised by mock';
+begin
+  behavior := TBehavior.CreateWillRaise(ETestBehaviourException, '');
+
+  StartExpectingException(ETestBehaviourException);
+
+  //Passing nils as we don't care about these values for the exception
+  behavior.Execute(nil, nil);
+
+  StopExpectingException(EXCEPTION_STRING);
+end;
+
+procedure TTestBehaviors.CreateWillRaise_Execute__Raises_No_Exception_If_Passed_Nil_For_Exception_Class;
+var
+  behavior: IBehavior;
+begin
+  behavior := TBehavior.CreateWillRaise(nil, '');
+
+  //No exception coverage. Therefore we shouldn't get an exception
+  behavior.Execute(nil, nil);
+
+  //If we have gotten here no exception was recieved.
+  Check(True);
 end;
 
 initialization
