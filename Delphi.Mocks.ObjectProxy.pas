@@ -52,6 +52,9 @@ type
 
 implementation
 
+uses
+  TypInfo;
+
 { TObjectProxy<T> }
 
 constructor TObjectProxy<T>.Create;
@@ -70,9 +73,12 @@ begin
   ctor := rType.GetMethod('Create');
   if ctor = nil then
     raise EMockException.Create('Could not find constructor Create on type ' + rType.Name);
+
   instance := ctor.Invoke(rType.AsInstance.MetaclassType, []);
+
   FInstance := instance.AsType<T>();
   FVMInterceptor := TVirtualMethodInterceptor.Create(rType.AsInstance.MetaclassType);
+
   FVMInterceptor.Proxify(instance.AsObject);
   FVMInterceptor.OnBefore := DoBefore;
 end;
