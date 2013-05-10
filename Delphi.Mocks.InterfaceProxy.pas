@@ -32,7 +32,7 @@ uses
   SysUtils,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
-//  Delphi.Mocks.VirtualInterface,
+  //  Delphi.Mocks.VirtualInterface,
   Delphi.Mocks.ProxyBase;
 
 type
@@ -42,7 +42,7 @@ type
 
   TInterfaceProxy<T> = class(TBaseProxy<T>)
   private type
-   TProxyVirtualInterface = class(TVirtualInterface)
+    TProxyVirtualInterface = class(TVirtualInterface)
     private
       FProxy : TInterfaceProxy<T>;
     protected

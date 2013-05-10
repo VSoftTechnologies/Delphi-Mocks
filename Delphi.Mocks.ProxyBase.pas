@@ -38,16 +38,13 @@ uses
 type
   TProxyBaseInvokeEvent = procedure (Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue) of object;
 
-  TSetupMode = (None,Behavior,Expectation);
+  TSetupMode = (None, Behavior, Expectation);
 
-  TBaseProxy<T> = class(TInterfacedObject,IInterface,IProxy<T>,ISetup<T>,IExpect<T>, IVerify)
+  TBaseProxy<T> = class(TInterfacedObject, IInterface, IProxy<T>, ISetup<T>, IExpect<T>, IVerify)
   private
     FMethodData : TDictionary<string,IMethodData>;
-    //
     FBehaviorMustBeDefined  : Boolean;
-
     FSetupMode : TSetupMode;
-
     //behavior setup
     FNextBehavior           : TBehaviorType;
     FReturnValue            : TValue;
@@ -83,6 +80,7 @@ type
     procedure WillExecute(const AMethodName : string; const func : TExecuteFunc);overload;
 
     procedure DoInvoke(Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue);
+
     //IVerify
     procedure Verify(const message : string = '');
 
