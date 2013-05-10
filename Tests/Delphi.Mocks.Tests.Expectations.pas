@@ -31,6 +31,10 @@ type
     procedure CreateBefore_Expectation_Type_Set_To_Before;
     procedure CreateAfterWhen_Expectation_Type_Set_To_AfterWhen;
     procedure CreateAfter_Expectation_Type_Set_To_After;
+
+    //ExpectationMet after record hit tests
+    procedure ExpectationMet_With_OnceWhen_CalledOnce;
+
   end;
 
 
@@ -212,6 +216,17 @@ begin
   expectation := TExpectation.CreateOnce('');
 
   Check(expectation.ExpectationType = TExpectationType.Once, 'CreateOnce expectation type isn''t set to Once');
+end;
+
+procedure TTestExpectations.ExpectationMet_With_OnceWhen_CalledOnce;
+var
+  expectation : IExpectation;
+begin
+  expectation := TExpectation.CreateOnceWhen('', nil);
+
+  expectation.RecordHit;
+
+  CheckTrue(expectation.ExpectationMet, 'Exception not met for OnceWhen being called once');
 end;
 
 initialization

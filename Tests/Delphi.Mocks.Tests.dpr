@@ -40,7 +40,13 @@ uses
   Delphi.Mocks.VirtualMethodInterceptor in '..\Delphi.Mocks.VirtualMethodInterceptor.pas',
   Delphi.Mocks.Tests.TValue in 'Delphi.Mocks.Tests.TValue.pas',
   Delphi.Mocks.Tests.Interfaces in 'Delphi.Mocks.Tests.Interfaces.pas',
-  Delphi.Mocks.Tests.OpenArrayIntf in 'Delphi.Mocks.Tests.OpenArrayIntf.pas';
+  Delphi.Mocks.Tests.OpenArrayIntf in 'Delphi.Mocks.Tests.OpenArrayIntf.pas',
+  Delphi.Mocks.Tests.MethodData in 'Delphi.Mocks.Tests.MethodData.pas',
+  Delphi.Mocks.Tests.ProxyBase in 'Delphi.Mocks.Tests.ProxyBase.pas',
+  Delphi.Mocks.Tests.Base in 'Delphi.Mocks.Tests.Base.pas',
+  Delphi.Mocks.Tests.ObjectProxy in 'Delphi.Mocks.Tests.ObjectProxy.pas',
+  Delphi.Mocks.Examples.Objects in 'Delphi.Mocks.Examples.Objects.pas',
+  Delphi.Mocks.ReturnTypePatch in '..\Delphi.Mocks.ReturnTypePatch.pas';
 
 {$R *.RES}
 
