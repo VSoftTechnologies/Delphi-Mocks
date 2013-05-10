@@ -134,6 +134,7 @@ type
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
     function Instance : T;
+    function InstanceAsValue : TValue;
     class function Create: TMock<T>; static;
     // explicit cleanup. Not sure if we really need this.
     procedure Free;
@@ -214,6 +215,11 @@ end;
 function TMock<T>.Instance : T;
 begin
   result := FProxy.Proxy;
+end;
+
+function TMock<T>.InstanceAsValue: TValue;
+begin
+  result := TValue.From<T>(Self);
 end;
 
 function TMock<T>.Setup: ISetup<T>;
