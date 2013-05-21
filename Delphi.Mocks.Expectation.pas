@@ -243,7 +243,7 @@ end;
 constructor TExpectation.CreateNever(const AMethodName : string) ;
 begin
   Create(AMethodName);
-  FExpectationType := TExpectationType.NeverWhen;
+  FExpectationType := TExpectationType.Never;
   FExpectationMet := True;
 end;
 

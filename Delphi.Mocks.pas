@@ -81,7 +81,6 @@ type
   TExecuteFunc = reference to function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue;
 
 
-
   //We use the Setup to configure our expected behaviour rules and to verify
   //that those expectations were met.
   ISetup<T> = interface
@@ -123,7 +122,6 @@ type
     function Proxy : T;
   end;
 
-
   //We use a record here to take advantage of operator overloading, the Implicit
   //operator allows us to use the mock as the interface without holding a reference
   //to the mock interface outside of the mock.
@@ -136,6 +134,7 @@ type
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
     function Instance : T;
+    function InstanceAsValue : TValue;
     class function Create: TMock<T>; static;
     // explicit cleanup. Not sure if we really need this.
     procedure Free;
@@ -148,10 +147,7 @@ type
   EMockNoProxyException = class(EMockException);
   EMockVerificationException = class(EMockException);
 
-
-
 implementation
-
 
 uses
   TypInfo,
@@ -162,31 +158,47 @@ uses
   Delphi.Mocks.InterfaceProxy,
   Delphi.Mocks.ObjectProxy;
 
-
 class function TMock<T>.Create: TMock<T>;
 var
   proxy : IInterface;
   pInfo : PTypeInfo;
 begin
+  //Make sure that we start off with a clean mock
+  FillChar(Result, SizeOf(Result), 0);
+
   pInfo := TypeInfo(T);
+
   if not (pInfo.Kind in [tkInterface,tkClass]) then
     raise EMockException.Create(string(pInfo.Name) + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
 
   case pInfo.Kind of
-    tkClass : proxy := TObjectProxy<T>.Create;
+    //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
+    //NOTE: Object proxy doesn't require more than zero methods on the object.
+    tkClass :
+    begin
+      //Check to make sure we have
+      if not CheckClassHasRTTI(pInfo) then
+          raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
+
+      //Create our proxy object, which will implement our object T
+      proxy := TObjectProxy<T>.Create;
+    end;
     tkInterface :
     begin
       //Check to make sure we have
       if not CheckInterfaceHasRTTI(pInfo) then
         raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
-      //Create Our proxy object, which will implement our interface T
+
+      //Create our proxy interface object, which will implement our interface T
       proxy := TInterfaceProxy<T>.Create;
     end;
   else
-    raise Exception.Create('Invalid type kind T');
+    raise EMockException.Create('Invalid type kind T');
   end;
 
-  if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid,result.FProxy) <> 0 then
+  //Push the proxy into the result we are returning.
+  if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid, Result.FProxy) <> 0 then
+    //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
     raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt IProxy<T>');
 end;
 
@@ -203,6 +215,11 @@ end;
 function TMock<T>.Instance : T;
 begin
   result := FProxy.Proxy;
+end;
+
+function TMock<T>.InstanceAsValue: TValue;
+begin
+  result := TValue.From<T>(Self);
 end;
 
 function TMock<T>.Setup: ISetup<T>;

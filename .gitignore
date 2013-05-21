@@ -3,6 +3,8 @@
 *.dcu
 *.obj
 *.exe
+*.mes
+*.res
 
 # Backup files    #
 ###################

@@ -11,7 +11,13 @@ type
   ISafeCallInterface = interface
     ['{50960499-4347-421A-B28B-3C05AE9CB351}']
     function DoSomething(const value : WideString) : integer;safecall;
-    procedure Foo(const value : WideString);safecall;
+    function Foo2(const value : WideString): string; safecall;
+    procedure Foo; safecall;
+  end;
+
+  ISimpleInterface = interface
+    ['{35DA1428-5183-43FE-BEE8-1010C75EF4D6}']
+    procedure SimpleProcedure(const value: widestring);
   end;
   {$M-}
 
@@ -19,8 +25,7 @@ type
   published
     procedure CanMockSafecallFunction;
     procedure CanMockSafecallProc;
-
-
+    procedure CanMockSimpleProcedureCall;
   end;
 
 
@@ -39,10 +44,8 @@ begin
   mock := TMock<ISafeCallInterface>.Create;
   mock.Setup.WillReturn(123).When.DoSomething('hello');
 
-  mock.Instance.DoSomething('hello');
+  CheckEquals(123, mock.Instance.DoSomething('hello'));
 end;
-
-
 
 procedure TSafeCallTest.CanMockSafecallProc;
 var
@@ -50,16 +53,35 @@ var
 begin
   mock := TMock<ISafeCallInterface>.Create;
 
-   { mock.Setup.WillExecute( function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
-                            begin
-                              //Note - args[0] is the Self interface reference for the anon method, our first arg is [1]
-                              result := 'The result is ' + args[1].AsString;
-                            end
-    ).When.Foo('hello'); }
+  //  mock.Setup.WillExecute(
+  //    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+  //    begin
+  //       Result := TValue.Empty;
+  //    end
+  //  ).When.Foo('hello');
 
-    mock.Instance.Foo('hello');
-  mock.Free;
+  // mock.Instance.Foo;
 
+  // mock.Free;
+end;
+
+
+procedure TSafeCallTest.CanMockSimpleProcedureCall;
+var
+  mock : TMock<ISimpleInterface>;
+begin
+  mock := TMock<ISimpleInterface>.Create;
+
+  // mock.Setup.Expect.Exactly(1).When.SimpleProcedure('');
+
+  //  mock.Setup.WillExecute(
+  //    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+  //    begin
+  //      Result := TValue.Empty;
+  //    end
+  //  ).When.SimpleProcedure('hello');
+
+  mock.Instance.SimpleProcedure('hello');
 end;
 
 initialization
