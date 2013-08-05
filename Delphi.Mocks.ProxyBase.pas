@@ -83,6 +83,7 @@ type
 
     //IVerify
     procedure Verify(const message : string = '');
+    function CheckExpectations: string;
 
     function GetMethodData(const AMethodName : string) : IMethodData;overload;
 
@@ -223,6 +224,24 @@ begin
   FBetween[1] := b;
   result := TWhen<T>.Create(Self.Proxy);
 
+end;
+
+function TBaseProxy<T>.CheckExpectations: string;
+var
+  methodData : IMethodData;
+  report : string;
+begin
+  Result := '';
+  for methodData in FMethodData.Values do
+  begin
+    report := '';
+    if not methodData.Verify(report) then
+    begin
+      if Result <> '' then
+        Result := Result + #13#10;
+      Result := Result + report ;
+    end;
+  end;
 end;
 
 procedure TBaseProxy<T>.ClearSetupState;
@@ -419,26 +438,10 @@ end;
 
 procedure TBaseProxy<T>.Verify(const message: string);
 var
-  methodData : IMethodData;
-  report : string;
   msg : string;
-  result : boolean;
 begin
-  msg := '';
-  result := true;
-  for methodData in FMethodData.Values do
-  begin
-    report := '';
-    if not methodData.Verify(report) then
-    begin
-      result := false;
-      if msg <> '' then
-        msg := msg + #13#10;
-      msg := msg + report ;
-    end;
-
-  end;
-  if not result then
+  msg := CheckExpectations;
+  if msg <> '' then
     raise EMockVerificationException.Create(message + #13#10 + msg);
 
 end;
