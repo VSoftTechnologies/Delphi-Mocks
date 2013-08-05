@@ -117,6 +117,7 @@ type
   IVerify = interface
   ['{58C05610-4BDA-451E-9D61-17C6376C3B3F}']
     procedure Verify(const message : string = '');
+    function CheckExpectations: string;
   end;
 
 implementation
