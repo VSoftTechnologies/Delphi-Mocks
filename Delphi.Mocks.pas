@@ -133,6 +133,7 @@ type
     function Setup : ISetup<T>;
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
+    function CheckExpectations: string;
     function Instance : T;
     function InstanceAsValue : TValue;
     class function Create: TMock<T>; static;
@@ -157,6 +158,17 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.InterfaceProxy,
   Delphi.Mocks.ObjectProxy;
+
+function TMock<T>.CheckExpectations: string;
+var
+  su : ISetup<T>;
+  v : IVerify;
+begin
+  if Supports(FProxy.Setup,IVerify,v) then
+    Result := v.CheckExpectations
+  else
+    raise EMockException.Create('Could not cast Setup to IVerify interface!');
+end;
 
 class function TMock<T>.Create: TMock<T>;
 var
