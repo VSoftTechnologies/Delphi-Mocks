@@ -46,7 +46,8 @@ uses
   Delphi.Mocks.Tests.Base in 'Delphi.Mocks.Tests.Base.pas',
   Delphi.Mocks.Tests.ObjectProxy in 'Delphi.Mocks.Tests.ObjectProxy.pas',
   Delphi.Mocks.Examples.Objects in 'Delphi.Mocks.Examples.Objects.pas',
-  Delphi.Mocks.ReturnTypePatch in '..\Delphi.Mocks.ReturnTypePatch.pas';
+  Delphi.Mocks.ReturnTypePatch in '..\Delphi.Mocks.ReturnTypePatch.pas',
+  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas';
 
 {$R *.RES}
 

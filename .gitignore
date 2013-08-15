@@ -23,3 +23,9 @@
 /Win32
 /Win64
 
+Build/TestAndBuild.fb7lck
+*.fbl7
+*.fbpInf
+*.rc
+*.drc
+*.map

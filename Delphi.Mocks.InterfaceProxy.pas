@@ -30,15 +30,15 @@ interface
 uses
   Rtti,
   SysUtils,
+  Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
-  //  Delphi.Mocks.VirtualInterface,
   Delphi.Mocks.ProxyBase;
 
 type
   TProxyBaseInvokeEvent = procedure (Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue) of object;
 
-  TSetupMode = (None,Behavior,Expectation);
+  TSetupMode = (None, Behavior, Expectation);
 
   TInterfaceProxy<T> = class(TBaseProxy<T>)
   private type
@@ -51,11 +51,12 @@ type
       constructor Create(AProxy : TInterfaceProxy<T>; AInterface: Pointer; InvokeEvent: TVirtualInterfaceInvokeEvent);
     end;
   private
-    FVirtualInterface : IInterface;
+    FVirtualInterfaces : TDictionary<TGUID, TProxyVirtualInterface>;
   protected
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; override;
     function Proxy : T;override;
+    function CastAs<I: IInterface> : I;
   public
     constructor Create;override;
     destructor Destroy;override;
@@ -69,22 +70,40 @@ uses
 
 { TInterfaceProxy<T> }
 
+function TInterfaceProxy<T>.CastAs<I>: I;
+var
+  virtualProxy : TProxyVirtualInterface;
+begin
+  virtualProxy := TProxyVirtualInterface.Create(Self, TypeInfo(I), Self.DoInvoke);
+
+  FVirtualInterfaces.Add(GetTypeData(TypeInfo(I)).Guid, virtualProxy);
+end;
+
 constructor TInterfaceProxy<T>.Create;
+var
+  virtualProxy : TProxyVirtualInterface;
 begin
   inherited;
-  FVirtualInterface := TProxyVirtualInterface.Create(Self,TypeInfo(T),Self.DoInvoke);
+
+  FVirtualInterfaces := TDictionary<TGUID, TProxyVirtualInterface>.Create;
+
+  virtualProxy := TProxyVirtualInterface.Create(Self, TypeInfo(T), Self.DoInvoke);
+
+  FVirtualInterfaces.Add(GetTypeData(TypeInfo(T)).Guid, virtualProxy);
 end;
 
 destructor TInterfaceProxy<T>.Destroy;
 begin
-  FVirtualInterface := nil;
+  FVirtualInterfaces.Clear;
+  FreeAndNil(FVirtualInterfaces);
+
   inherited;
 end;
 
 function TInterfaceProxy<T>.InternalQueryInterface(const IID: TGUID; out Obj): HRESULT;
 begin
   Result := E_NOINTERFACE;
-  if (IsEqualGUID(IID,IInterface)) then
+  if (IsEqualGUID(IID, IInterface)) then
     if GetInterface(IID, Obj) then
       Result := 0;
 end;
@@ -92,30 +111,44 @@ end;
 function TInterfaceProxy<T>.Proxy: T;
 var
   pInfo : PTypeInfo;
+  virtualProxy : IInterface;
 begin
   pInfo := TypeInfo(T);
-  if FVirtualInterface.QueryInterface(GetTypeData(pInfo).Guid,result) <> 0 then
+
+  if FVirtualInterfaces.ContainsKey(GetTypeData(pInfo).Guid) then
+    virtualProxy := FVirtualInterfaces.Items[GetTypeData(pInfo).Guid]
+  else
+    raise EMockNoProxyException.Create('Error proxy casting to interface');
+
+  if virtualProxy.QueryInterface(GetTypeData(pInfo).Guid,result) <> 0 then
     raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt T');
 end;
 
 function TInterfaceProxy<T>.QueryInterface(const IID: TGUID; out Obj): HRESULT;
+var
+  virtualProxy : IInterface;
 begin
   Result := E_NOINTERFACE;
-  if (FVirtualInterface <> nil) then
-    Result := FVirtualInterface.QueryInterface(IID, Obj);
+
+  if (FVirtualInterfaces <> nil) then
+    if (FVirtualInterfaces.Count <> 0) then
+      if (FVirtualInterfaces.ContainsKey(IID)) then
+      begin
+        virtualProxy := FVirtualInterfaces.Items[IID];
+        Result := virtualProxy.QueryInterface(IID, Obj);
+      end;
+
   if result <> 0 then
     Result := inherited;
-
 end;
 
 { TInterfaceProxy<T>.TProxyVirtualInterface }
 
-constructor TInterfaceProxy<T>.TProxyVirtualInterface.Create(
-  AProxy: TInterfaceProxy<T>; AInterface: Pointer;
-  InvokeEvent: TVirtualInterfaceInvokeEvent);
+constructor TInterfaceProxy<T>.TProxyVirtualInterface.Create(AProxy: TInterfaceProxy<T>;
+  AInterface: Pointer; InvokeEvent: TVirtualInterfaceInvokeEvent);
 begin
   FProxy := AProxy;
-  inherited Create(Ainterface,InvokeEvent);
+  inherited Create(Ainterface, InvokeEvent);
 end;
 
 

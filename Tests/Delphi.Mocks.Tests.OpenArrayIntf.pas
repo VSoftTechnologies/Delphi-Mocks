@@ -44,7 +44,7 @@ begin
 
   Intf := Mock;
 
-  // privileged instruction :-(
+  //TODO: Fix the privileged instruction. Something to do with TValue not liking Dynamic Arrays
   CheckEquals(3, Intf.MyMethod([Obj], 1));
 end;
 
