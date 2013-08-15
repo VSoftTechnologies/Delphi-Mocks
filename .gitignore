@@ -37,3 +37,4 @@ __history/**
 *.local
 *.identcache
 >>>>>>> b9bfc5a54cd3fc8bd110a82def4f88a44f7a3941
+*.xml
