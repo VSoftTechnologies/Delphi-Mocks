@@ -10,8 +10,8 @@ program Delphi.Mocks.Tests;
 
 }
 
-{$DEFINE XMLOUTPUT}
-{$DEFINE ISCONSOLE}
+{.$DEFINE XMLOUTPUT}
+{.$DEFINE ISCONSOLE}
 
 {$IFDEF ISCONSOLE}
 {$APPTYPE CONSOLE}
@@ -50,7 +50,9 @@ uses
   Delphi.Mocks.Tests.ObjectProxy in 'Delphi.Mocks.Tests.ObjectProxy.pas',
   Delphi.Mocks.Examples.Objects in 'Delphi.Mocks.Examples.Objects.pas',
   Delphi.Mocks.ReturnTypePatch in '..\Delphi.Mocks.ReturnTypePatch.pas',
-  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas';
+  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas' {$R *.RES},
+  VSoft.DUnit.XMLTestRunner in '..\DUnitXML\VSoft.DUnit.XMLTestRunner.pas',
+  VSoft.MSXML6 in '..\DUnitXML\VSoft.MSXML6.pas';
 
 {$R *.RES}
 
