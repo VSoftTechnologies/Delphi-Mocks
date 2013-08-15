@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Compiled source #
 ###################
 *.dcu
@@ -29,3 +30,10 @@ Build/TestAndBuild.fb7lck
 *.rc
 *.drc
 *.map
+=======
+__history/**
+**.exe
+**.dcu
+*.local
+*.identcache
+>>>>>>> b9bfc5a54cd3fc8bd110a82def4f88a44f7a3941

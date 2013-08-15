@@ -10,17 +10,20 @@ program Delphi.Mocks.Tests;
 
 }
 
-{.$DEFINE CONSOLE_TESTRUNNER}
+{$DEFINE XMLOUTPUT}
+{$DEFINE ISCONSOLE}
 
-{$IFDEF CONSOLE_TESTRUNNER}
+{$IFDEF ISCONSOLE}
 {$APPTYPE CONSOLE}
 {$ENDIF}
+
 
 uses
   Forms,
   TestFramework,
   GUITestRunner,
   TextTestRunner,
+  SysUtils,
   Delphi.Mocks.InterfaceProxy in '..\Delphi.Mocks.InterfaceProxy.pas',
   Delphi.Mocks in '..\Delphi.Mocks.pas',
   Delphi.Mocks.Utils in '..\Delphi.Mocks.Utils.pas',
@@ -51,14 +54,50 @@ uses
 
 {$R *.RES}
 
+
+{$IFDEF XMLOUTPUT}
+var
+  OutputFile : string = 'dunit-report.xml';
+
+var
+  ConfigFile : string;
+{$ENDIF}
+
+{$IFDEF ISCONSOLE}
+var
+  ExitBehavior: TRunnerExitBehavior;
+{$EndIf}
+
 begin
+  {$IFDEF ISCONSOLE}
+    {$IFDEF XMLOUTPUT}
+      if ConfigFile <> '' then
+      begin
+        RegisteredTests.LoadConfiguration(ConfigFile, False, True);
+        WriteLn('Loaded config file ' + ConfigFile);
+      end;
+      if ParamCount > 0 then
+        OutputFile := ParamStr(1);
+      WriteLn('Writing output to ' + OutputFile);
+      WriteLn('Running ' + IntToStr(RegisteredTests.CountEnabledTestCases) + ' of ' + IntToStr(RegisteredTests.CountTestCases) + ' test cases');
+      TXMLTestListener.RunRegisteredTests(OutputFile);
+    {$ELSE}
+      WriteLn('To run with rxbPause, use -p switch');
+      WriteLn('To run with rxbHaltOnFailures, use -h switch');
+      WriteLn('No switch runs as rxbContinue');
+
+      if FindCmdLineSwitch('p', ['-', '/'], true) then
+        ExitBehavior := rxbPause
+      else if FindCmdLineSwitch('h', ['-', '/'], true) then
+        ExitBehavior := rxbHaltOnFailures
+      else
+        ExitBehavior := rxbContinue;
+
+      TextTestRunner.RunRegisteredTests(ExitBehavior);
+    {$ENDIF}
+  {$ELSE}
   Application.Initialize;
-  if IsConsole then
-  begin
-    with TextTestRunner.RunRegisteredTests do
-      Free;
-  end
-  else
-    GUITestRunner.RunRegisteredTests;
+  TGUITestRunner.RunRegisteredTests;
+  {$ENDIF}
 end.
 

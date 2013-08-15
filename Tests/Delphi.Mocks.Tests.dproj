@@ -40,6 +40,10 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<Manifest_File>None</Manifest_File>
+			<BRCC_Defines>_ISCONSOLE;_XMLOUTPUT;$(BRCC_Defines)</BRCC_Defines>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Locale>3081</VerInfo_Locale>
 			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>bindcompfmx;dsnap;fmx;rtl;IndySystem;IndyCore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;IndyProtocols;fmxdae;bindengine;soaprtl;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
@@ -118,7 +122,9 @@
 			<DCCReference Include="Delphi.Mocks.Tests.ObjectProxy.pas"/>
 			<DCCReference Include="Delphi.Mocks.Examples.Objects.pas"/>
 			<DCCReference Include="..\Delphi.Mocks.ReturnTypePatch.pas"/>
-			<DCCReference Include="Delphi.Mocks.Tests.InterfaceProxy.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.InterfaceProxy.pas">
+				<Form>$R *.RES</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
