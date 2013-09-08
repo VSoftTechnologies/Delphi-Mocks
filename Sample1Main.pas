@@ -21,8 +21,10 @@ type
     procedure SetIndexedProp(index : integer; const value : string);
     function Bar(const param : integer) : string;overload;
     function Bar(const param : integer; const param2 : string) : string;overload;
+    function ReturnObject : TObject;
     procedure TestMe;
     procedure TestVarParam(var msg : string);
+    procedure TestOutParam(out msg : string);
     property MyProp : string read GetProp write SetProp;
     property IndexedProp[index : integer] : string read GetIndexProp write SetIndexedProp;
   end;
@@ -80,6 +82,24 @@ begin
     end
     ).When.TestVarParam(msg);
 
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      args[1] := 'hello Delphi Mocks! - With out Param';
+    end
+    ).When.TestOutParam(msg);
+
+
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      //Note - args[0] is the Self interface reference for the anon method, our first arg is [1]
+      result := TObject.Create;
+    end
+    ).When.ReturnObject;
+
+
+
 
   //Define our expectations - mostly about how many times we expect a method to be called.
 
@@ -99,14 +119,19 @@ begin
   mock.Instance.IndexedProp[1] := 'hello';
 
   mock.Instance.TestVarParam(msg);
-
   WriteLn('Calling TestVarParam set msg to : ' + msg);
+
+  mock.Instance.TestOutParam(msg);
+  WriteLn('Calling TestOutParam set msg to : ' + msg);
 
 
   WriteLn('Calling Bar(1) : ' + mock.Instance.Bar(1));
   WriteLn('Calling Bar(2) : ' + mock.Instance.Bar(2));
   WriteLn('Calling Bar(2,sdfsd) : ' + mock.Instance.Bar(2,'sdfsd'));
   WriteLn('Calling Bar(200) : ' + mock.Instance.Bar(200));
+
+  WriteLn('Calling1 ReturnObject : ' + mock.Instance.ReturnObject.ClassName);
+
 
 
   //Test the implicit operator by calling a method that expects IFoo
