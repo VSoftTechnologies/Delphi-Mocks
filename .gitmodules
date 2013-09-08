@@ -1,0 +1,3 @@
+[submodule "DUnitXML"]
+	path = DUnitXML
+	url = https://github.com/VSoftTechnologies/DUnit-XML.git

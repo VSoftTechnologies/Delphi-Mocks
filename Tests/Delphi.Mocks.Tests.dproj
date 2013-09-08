@@ -40,6 +40,10 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<Manifest_File>None</Manifest_File>
+			<BRCC_Defines>_ISCONSOLE;_XMLOUTPUT;$(BRCC_Defines)</BRCC_Defines>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Locale>3081</VerInfo_Locale>
 			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>bindcompfmx;dsnap;fmx;rtl;IndySystem;IndyCore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;IndyProtocols;fmxdae;bindengine;soaprtl;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
@@ -112,6 +116,17 @@
 			<DCCReference Include="Delphi.Mocks.Tests.TValue.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.Interfaces.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.OpenArrayIntf.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.MethodData.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.ProxyBase.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.Base.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.ObjectProxy.pas"/>
+			<DCCReference Include="Delphi.Mocks.Examples.Objects.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.ReturnTypePatch.pas"/>
+			<DCCReference Include="Delphi.Mocks.Tests.InterfaceProxy.pas">
+				<Form>$R *.RES</Form>
+			</DCCReference>
+			<DCCReference Include="..\DUnitXML\VSoft.DUnit.XMLTestRunner.pas"/>
+			<DCCReference Include="..\DUnitXML\VSoft.MSXML6.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -178,19 +193,3 @@
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
 		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
 	</Project>
-
-<!-- EurekaLog First Line
-[Exception Log]
-EurekaLog Version=7001
-Activate=0
-atVCL=1
-DeleteMapAfterCompile=0
-dpJCL=1
-Encrypt Password=""
-idEurekaLog=1
-idEurekaLogDetailed=1
-idMSClassic=1
-idStepsToReproduce=1
-ProjectID="{CC1138A4-84AF-46ED-8D02-81B0C9B1C1C5}"
-sndShowFailureMsg=1
-EurekaLog Last Line -->
