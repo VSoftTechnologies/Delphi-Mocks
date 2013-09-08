@@ -40,10 +40,11 @@ uses
 type
   TMethodData = class(TInterfacedObject,IMethodData)
   private
-    FMethodName : string;
-    FBehaviors : TList<IBehavior>;
-    FReturnDefault : TValue;
-    FExpectations : TList<IExpectation>;
+    FMethodName     : string;
+    FBehaviors      : TList<IBehavior>;
+    FReturnDefault  : TValue;
+    FExpectations   : TList<IExpectation>;
+    FIsStub         : boolean;
   protected
 
     //Behaviors
@@ -86,7 +87,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const AMethodName : string);
+    constructor Create(const AMethodName : string; const AIsStub : boolean);
     destructor Destroy;override;
   end;
 
@@ -97,6 +98,7 @@ type
 implementation
 
 uses
+  Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,
   Delphi.Mocks.Expectation;
 
@@ -105,12 +107,13 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const AMethodName : string);
+constructor TMethodData.Create(const AMethodName : string; const AIsStub : boolean);
 begin
   FMethodName := AMethodName;
   FBehaviors := TList<IBehavior>.Create;
   FExpectations := TList<IExpectation>.Create;
   FReturnDefault := TValue.Empty;
+  FIsStub := AIsStub;
 end;
 
 destructor TMethodData.Destroy;
@@ -413,7 +416,10 @@ begin
   else
   begin
     if (returnType <> nil) and (FReturnDefault.IsEmpty) then
-      raise EMockException.Create('No default return value defined for method ' + FMethodName);
+      if FIsStub then
+        result := GetDefaultValue(returnType)
+      else
+        raise EMockException.Create('No default return value defined for method ' + FMethodName);
     returnVal := FReturnDefault;
   end;
   if returnType <> nil then

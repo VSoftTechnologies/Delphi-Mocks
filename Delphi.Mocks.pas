@@ -80,17 +80,10 @@ type
   ///  so that you can ensure tha.
   TExecuteFunc = reference to function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue;
 
-
-  //We use the Setup to configure our expected behaviour rules and to verify
-  //that those expectations were met.
-  ISetup<T> = interface
-  ['{D6B21933-BF51-4937-877E-51B59A3B3268}']
+  IStubSetup<T> = interface
+    ['{3E6AD69A-11EA-47F1-B5C3-63F7B8C265B1}']
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
-
-    //Set Expectations for methods
-    function Expect : IExpect<T>;
-
     //set the return value for a method when called with the parameters specified on the When
     function WillReturn(const value : TValue) : IWhen<T>;
 
@@ -112,15 +105,46 @@ type
 
     //If true, calls to methods for which we have not defined a behavior will cause verify to fail.
     property BehaviorMustBeDefined : boolean read GetBehaviorMustBeDefined write SetBehaviorMustBeDefined;
+
+  end;
+
+  //We use the Setup to configure our expected behaviour rules and to verify
+  //that those expectations were met.
+  IMockSetup<T> = interface(IStubSetup<T>)
+  ['{D6B21933-BF51-4937-877E-51B59A3B3268}']
+    //Set Expectations for methods
+    function Expect : IExpect<T>;
+  end;
+
+  IStubProxy<T> = interface
+    ['{578BAF90-4155-4C0F-AAED-407057C6384F}']
+    function Setup : IStubSetup<T>;
+    function Proxy : T;
   end;
 
   //used by the mock - need to find another place to put this.. circular references
   //problem means we need it here for now.
   IProxy<T> = interface
   ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
-    function Setup : ISetup<T>;
+    function Setup : IMockSetup<T>;
     function Proxy : T;
   end;
+
+
+  TStub<T> = record
+  private
+    FProxy : IStubProxy<T>;
+  public
+    class operator Implicit(const Value: TStub<T>): T;
+    function Setup : IStubSetup<T>;
+    function Instance : T;
+    function InstanceAsValue : TValue;
+    class function Create: TStub<T>; static;
+    // explicit cleanup. Not sure if we really need this.
+    procedure Free;
+  end;
+
+
 
   //We use a record here to take advantage of operator overloading, the Implicit
   //operator allows us to use the mock as the interface without holding a reference
@@ -130,7 +154,7 @@ type
     FProxy : IProxy<T>;
   public
     class operator Implicit(const Value: TMock<T>): T;
-    function Setup : ISetup<T>;
+    function Setup : IMockSetup<T>;
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
     function CheckExpectations: string;
@@ -161,7 +185,7 @@ uses
 
 function TMock<T>.CheckExpectations: string;
 var
-  su : ISetup<T>;
+  su : IMockSetup<T>;
   v : IVerify;
 begin
   if Supports(FProxy.Setup,IVerify,v) then
@@ -193,7 +217,7 @@ begin
           raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
-      proxy := TObjectProxy<T>.Create;
+      proxy := TObjectProxy<T>.Create(false);
     end;
     tkInterface :
     begin
@@ -202,7 +226,7 @@ begin
         raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
 
       //Create our proxy interface object, which will implement our interface T
-      proxy := TInterfaceProxy<T>.Create;
+      proxy := TInterfaceProxy<T>.Create(false);
     end;
   else
     raise EMockException.Create('Invalid type kind T');
@@ -234,20 +258,91 @@ begin
   result := TValue.From<T>(Self);
 end;
 
-function TMock<T>.Setup: ISetup<T>;
+function TMock<T>.Setup: IMockSetup<T>;
 begin
   result := FProxy.Setup;
 end;
 
 procedure TMock<T>.Verify(const message: string);
 var
-  su : ISetup<T>;
+  su : IMockSetup<T>;
   v : IVerify;
 begin
   if Supports(FProxy.Setup,IVerify,v) then
     v.Verify(message)
   else
     raise EMockException.Create('Could not cast Setup to IVerify interface!');
+end;
+
+{ TStub<T> }
+
+class function TStub<T>.Create: TStub<T>;
+var
+  proxy : IInterface;
+  pInfo : PTypeInfo;
+begin
+  //Make sure that we start off with a clean mock
+  FillChar(Result, SizeOf(Result), 0);
+
+  pInfo := TypeInfo(T);
+
+  if not (pInfo.Kind in [tkInterface,tkClass]) then
+    raise EMockException.Create(string(pInfo.Name) + ' is not an Interface or Class. TStub<T> supports interfaces and classes only');
+
+  case pInfo.Kind of
+    //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
+    //NOTE: Object proxy doesn't require more than zero methods on the object.
+    tkClass :
+    begin
+      //Check to make sure we have
+      if not CheckClassHasRTTI(pInfo) then
+          raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
+
+      //Create our proxy object, which will implement our object T
+      proxy := TObjectProxy<T>.Create(true);
+    end;
+    tkInterface :
+    begin
+      //Check to make sure we have
+      if not CheckInterfaceHasRTTI(pInfo) then
+        raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
+
+      //Create our proxy interface object, which will implement our interface T
+      proxy := TInterfaceProxy<T>.Create(true);
+    end;
+  else
+    raise EMockException.Create('Invalid type kind T');
+  end;
+
+  //Push the proxy into the result we are returning.
+  if proxy.QueryInterface(GetTypeData(TypeInfo(IStubProxy<T>)).Guid, Result.FProxy) <> 0 then
+    //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
+    raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt IProxy<T>');
+end;
+
+procedure TStub<T>.Free;
+begin
+  FProxy := nil;
+end;
+
+class operator TStub<T>.Implicit(const Value: TStub<T>): T;
+begin
+  result := Value.FProxy.Proxy;
+end;
+
+function TStub<T>.Instance: T;
+begin
+  result := FProxy.Proxy;
+end;
+
+function TStub<T>.InstanceAsValue: TValue;
+begin
+  result := TValue.From<T>(Self);
+end;
+
+function TStub<T>.Setup: IStubSetup<T>;
+begin
+  result := FProxy.Setup;
 end;
 
 end.

@@ -58,7 +58,7 @@ type
     function Proxy : T;override;
     function CastAs<I: IInterface> : I;
   public
-    constructor Create;override;
+    constructor Create(const AIsStubOnly : boolean);override;
     destructor Destroy;override;
   end;
 
@@ -79,11 +79,11 @@ begin
   FVirtualInterfaces.Add(GetTypeData(TypeInfo(I)).Guid, virtualProxy);
 end;
 
-constructor TInterfaceProxy<T>.Create;
+constructor TInterfaceProxy<T>.Create(const AIsStubOnly : boolean);
 var
   virtualProxy : TProxyVirtualInterface;
 begin
-  inherited;
+  inherited Create(AIsStubOnly);
 
   FVirtualInterfaces := TDictionary<TGUID, TProxyVirtualInterface>.Create;
 

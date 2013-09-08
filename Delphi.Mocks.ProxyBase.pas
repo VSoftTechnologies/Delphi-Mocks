@@ -40,11 +40,11 @@ type
 
   TSetupMode = (None, Behavior, Expectation);
 
-  TBaseProxy<T> = class(TInterfacedObject, IInterface, IProxy<T>, ISetup<T>, IExpect<T>, IVerify)
+  TBaseProxy<T> = class(TInterfacedObject, IInterface, IProxy<T>, IStubProxy<T>, IMockSetup<T>, IStubSetup<T>, IExpect<T>, IVerify)
   private
-    FMethodData : TDictionary<string,IMethodData>;
+    FMethodData             : TDictionary<string,IMethodData>;
     FBehaviorMustBeDefined  : Boolean;
-    FSetupMode : TSetupMode;
+    FSetupMode              : TSetupMode;
     //behavior setup
     FNextBehavior           : TBehaviorType;
     FReturnValue            : TValue;
@@ -55,15 +55,22 @@ type
     FNextExpectation        : TExpectationType;
     FTimes                  : Cardinal;
     FBetween                : array[0..1] of Cardinal;
+    FIsStubOnly             : boolean;
   protected
+
     function QueryInterface(const IID: TGUID; out Obj): HRESULT;virtual; stdcall;
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
 
     //IProxy<T>
-    function Setup : ISetup<T>;
+    function MockSetup : IMockSetup<T>;
+    function StubSetup : IStubSetup<T>;
+    function IProxy<T>.Setup = MockSetup;
+    function IStubProxy<T>.Setup = StubSetup;
     function Proxy : T;virtual;abstract;
+
+
 
     //ISetup<T>
     function GetBehaviorMustBeDefined : boolean;
@@ -117,7 +124,7 @@ type
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
   public
-    constructor Create;virtual;
+    constructor Create(const AIsStubOnly : boolean);virtual;
     destructor Destroy;override;
   end;
 
@@ -252,11 +259,12 @@ begin
   FNextFunc := nil;
 end;
 
-constructor TBaseProxy<T>.Create;
+constructor TBaseProxy<T>.Create(const AIsStubOnly : boolean);
 begin
    FSetupMode := TSetupMode.None;
    FBehaviorMustBeDefined := False;
    FMethodData := TDictionary<string,IMethodData>.Create;
+   FIsStubOnly := AIsStubOnly;
 end;
 
 destructor TBaseProxy<T>.Destroy;
@@ -370,7 +378,7 @@ begin
   if FMethodData.TryGetValue(methodName,Result) then
     exit;
 
-  Result := TMethodData.Create(AMethodName);
+  Result := TMethodData.Create(AMethodName,FIsStubOnly);
   FMethodData.Add(methodName,Result);
 
 end;
@@ -431,7 +439,12 @@ begin
 end;
 
 
-function TBaseProxy<T>.Setup: ISetup<T>;
+function TBaseProxy<T>.StubSetup: IStubSetup<T>;
+begin
+  result := Self;
+end;
+
+function TBaseProxy<T>.MockSetup: IMockSetup<T>;
 begin
   result := Self;
 end;

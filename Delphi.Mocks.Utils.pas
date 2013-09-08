@@ -29,18 +29,21 @@ unit Delphi.Mocks.Utils;
 interface
 
 uses
-  TypInfo;
+  TypInfo,
+  RTTI;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 function CheckClassHasRTTI(const info: PTypeInfo): boolean;
 
 function GetVirtualMethodCount(AClass: TClass): Integer;
 
+function GetDefaultValue(const rttiType : TRttiType) : TValue;
+
 implementation
 
 uses
-  SysUtils,
-  RTTI;
+  Variants,
+  SysUtils;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 var
@@ -81,6 +84,35 @@ begin
     (Integer(AClass) + vmtParent) - SizeOf(Pointer)) div SizeOf(Pointer);
 end;
 
+//TODO : There must be a better way than this. How does Default(X) work? Couldn't find the implementation.
+function GetDefaultValue(const rttiType : TRttiType) : TValue;
+begin
+  result := TValue.Empty;
+  case rttiType.TypeKind of
+    tkUnknown: ;
+    tkInteger:  result := TValue.From<integer>(0);
+    tkChar: result := TValue.From<Char>(#0);
+    tkEnumeration: result := TValue.FromOrdinal(rttiType.Handle,rttiType.AsOrdinal.MinValue);
+    tkFloat: result := TValue.From<Extended>(0);
+    tkString: result := TValue.From<string>('');
+    tkSet: result := TValue.FromOrdinal(rttiType.Handle,rttiType.AsOrdinal.MinValue);
+    tkClass: result := TValue.From<TObject>(nil);
+    tkMethod: result := TValue.From<TObject>(nil);
+    tkWChar: result := TValue.From<WideChar>(#0);
+    tkLString: result := TValue.From<string>('');
+    tkWString: result := TValue.From<string>('');
+    tkVariant: result := TValue.From<Variant>(null);
+    tkArray: ;
+    tkRecord: ;
+    tkInterface: result := TValue.From<IInterface>(nil);
+    tkInt64: result := TValue.FromOrdinal(rttiType.Handle,0);
+    tkDynArray: ;
+    tkUString: result := TValue.From<string>('');
+    tkClassRef: result := TValue.From<TClass>(nil);
+    tkPointer: result := TValue.From<Pointer>(nil);
+    tkProcedure: result := TValue.From<Pointer>(nil);
+  end;
+end;
 
 
 

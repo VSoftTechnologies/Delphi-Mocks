@@ -41,6 +41,7 @@ uses
 procedure Test;
 var
   mock : TMock<IFoo>; //our mock object
+  stub : TStub<IFoo>; //our stub object;
   msg  : string;
 
 
@@ -52,6 +53,7 @@ var
 begin
   //Create our mock
   mock := TMock<IFoo>.Create;
+  stub := TStub<IFoo>.Create;
 
   //Setup the behavior of our mock.
 
@@ -100,7 +102,6 @@ begin
 
 
 
-
   //Define our expectations - mostly about how many times we expect a method to be called.
 
   //we expect the TestMe method to never be called
@@ -132,6 +133,8 @@ begin
 
   WriteLn('Calling1 ReturnObject : ' + mock.Instance.ReturnObject.ClassName);
 
+
+  stub.Instance.Bar(1234);
 
 
   //Test the implicit operator by calling a method that expects IFoo
