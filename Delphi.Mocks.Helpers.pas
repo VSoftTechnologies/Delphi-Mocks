@@ -57,6 +57,7 @@ type
     function IsSmallInt: Boolean;
     function IsTime: Boolean;
     function IsUInt64: Boolean;
+    function IsVariant: Boolean;
     function IsWord: Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
@@ -196,6 +197,10 @@ begin
   begin
     Result := Left.AsPointer = Right.AsPointer;
   end else
+  if Left.IsVariant and Right.IsVariant then
+  begin
+    Result := Left.AsVariant = Right.AsVariant;
+  end else
   if Left.TypeInfo = Right.TypeInfo then
   begin
     Result := Left.AsPointer = Right.AsPointer;
@@ -320,6 +325,11 @@ end;
 function TValueHelper.IsUInt64: Boolean;
 begin
   Result := TypeInfo = System.TypeInfo(UInt64);
+end;
+
+function TValueHelper.IsVariant: Boolean;
+begin
+  Result := TypeInfo = System.TypeInfo(Variant);
 end;
 
 function TValueHelper.IsWord: Boolean;

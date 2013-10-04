@@ -19,6 +19,10 @@ type
     ['{35DA1428-5183-43FE-BEE8-1010C75EF4D6}']
     procedure SimpleProcedure(const value: widestring);
   end;
+
+  IVariant = interface
+    procedure VariantParam(Value: Variant);
+  end;
   {$M-}
 
   TSafeCallTest = class(TTestcase)
@@ -26,15 +30,29 @@ type
     procedure CanMockSafecallFunction;
     procedure CanMockSafecallProc;
     procedure CanMockSimpleProcedureCall;
+    procedure CanMockProcedureWithVariantParam;
   end;
 
 
 implementation
 uses
-  Rtti;
+  Rtti,
+  System.Variants;
 
 
 { TValueTests }
+
+procedure TSafeCallTest.CanMockProcedureWithVariantParam;
+var
+  mock : TMock<IVariant>;
+begin
+  mock := TMock<IVariant>.Create;
+
+  mock.Setup.Expect.Once.When.VariantParam(Null);
+
+  mock.Instance.VariantParam(Null);
+  mock.Verify;
+end;
 
 procedure TSafeCallTest.CanMockSafecallFunction;
 var
