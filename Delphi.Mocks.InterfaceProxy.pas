@@ -51,7 +51,7 @@ type
       constructor Create(AProxy : TInterfaceProxy<T>; AInterface: Pointer; InvokeEvent: TVirtualInterfaceInvokeEvent);
     end;
   private
-    FVirtualInterfaces : TDictionary<TGUID, TProxyVirtualInterface>;
+    FVirtualInterfaces : TDictionary<TGUID, IInterface>;
   protected
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; override;
@@ -85,7 +85,7 @@ var
 begin
   inherited Create(AIsStubOnly);
 
-  FVirtualInterfaces := TDictionary<TGUID, TProxyVirtualInterface>.Create;
+  FVirtualInterfaces := TDictionary<TGUID, IInterface>.Create;
 
   virtualProxy := TProxyVirtualInterface.Create(Self, TypeInfo(T), Self.DoInvoke);
 
