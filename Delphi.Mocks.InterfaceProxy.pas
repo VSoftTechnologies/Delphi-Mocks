@@ -58,7 +58,7 @@ type
     function Proxy : T;override;
     function CastAs<I: IInterface> : I;
   public
-    constructor Create(const AIsStubOnly : boolean);override;
+    constructor Create(const AIsStubOnly : boolean = false);override;
     destructor Destroy;override;
   end;
 

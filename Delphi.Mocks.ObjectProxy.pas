@@ -45,7 +45,7 @@ type
      procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
      function Proxy : T;override;
   public
-    constructor Create(const AIsStubOnly : boolean);override;
+    constructor Create(const AIsStubOnly : boolean = false);override;
     destructor Destroy;override;
   end;
 
