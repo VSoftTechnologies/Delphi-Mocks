@@ -63,14 +63,24 @@ var
   rType : TRttiType;
   ctx : TRttiContext;
   rttiMethods : TArray<TRttiMethod>;
+  rttiTObjectMethods : TArray<TRttiMethod>;
   virtualMethods : Integer;
+
+  rTObjectType : TRttiType;
+
 begin
   ctx := TRttiContext.Create;
   rType := ctx.GetType(info);
   rttiMethods := rType.GetMethods;
+
+  rTObjectType := ctx.GetType(TypeInfo(TObject));
+
+  rttiTObjectMethods := rTObjectType.GetMethods;
+
+
   virtualMethods := GetVirtualMethodCount(GetTypeData(info).ClassType);
 
-  result := (virtualMethods > 0) and (Length(rttiMethods) > 0);
+  result := (virtualMethods > 12);// and (Length(rttiMethods) > Length(rttiTObjectMethods));
 end;
 
 

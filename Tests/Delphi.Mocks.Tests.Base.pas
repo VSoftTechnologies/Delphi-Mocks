@@ -37,7 +37,11 @@ type
     ['{10405ECB-0AB1-4DBB-B673-7056683A4284}']
   end;
 
-  TSimpleTestObject_WithoutRTTI = class(TObject);
+ {$M-}
+  TSimpleTestObject_WithoutRTTI = class(TObject)
+  public
+    procedure blah;
+  end;
 
   TSimpleRecord_WithoutRTTI = record
   end;
@@ -75,7 +79,6 @@ var
 begin
   exceptionRaised := False;
   exceptionMsg := '';
-
   try
     mock := TMock<TSimpleTestObject_WithOutRTTI>.Create;
   except
@@ -174,6 +177,13 @@ procedure TSimpleTestObject_WithRTTI.Dud;
 begin
   //Does nothing. Required to test condition of having methods.
   Exit;
+end;
+
+{ TSimpleTestObject_WithoutRTTI }
+
+procedure TSimpleTestObject_WithoutRTTI.blah;
+begin
+
 end;
 
 initialization

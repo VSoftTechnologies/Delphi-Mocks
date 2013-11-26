@@ -64,6 +64,7 @@ var
   secondInterface: ISecondSimpleInterface;
 begin
   simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
+
   secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
 
   CheckNotNull(secondInterface, 'The second interface is not implemented!');
@@ -76,10 +77,7 @@ var
 begin
   simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
   try
-    simpleInterface.CastAs<ISecondSimpleInterface>;
-
-    simpleInterface.QueryInterface(ISecondSimpleInterface, secondInterface);
-
+    secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
     CheckNotNull(secondInterface, 'The second interface is not implemented!');
   finally
     FreeAndNil(simpleInterface);

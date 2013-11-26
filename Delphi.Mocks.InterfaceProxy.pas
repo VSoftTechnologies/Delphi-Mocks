@@ -75,8 +75,8 @@ var
   virtualProxy : TProxyVirtualInterface;
 begin
   virtualProxy := TProxyVirtualInterface.Create(Self, TypeInfo(I), Self.DoInvoke);
-
   FVirtualInterfaces.Add(GetTypeData(TypeInfo(I)).Guid, virtualProxy);
+  virtualProxy.QueryInterface(GetTypeData(TypeInfo(I)).Guid,result);
 end;
 
 constructor TInterfaceProxy<T>.Create(const AIsStubOnly : boolean);

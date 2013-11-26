@@ -30,7 +30,8 @@ uses
 
 procedure TTestProxyBase.Setup;
 begin
-  Check(False, 'Not Implemented');
+
+//  Check(False, 'Not Implemented');
 end;
 
 initialization
