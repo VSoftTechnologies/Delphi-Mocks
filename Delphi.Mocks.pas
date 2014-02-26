@@ -30,6 +30,7 @@ interface
 {$I 'Delphi.Mocks.inc'}
 
 uses
+  TypInfo,
   Rtti,
   sysutils;
 
@@ -172,10 +173,13 @@ type
   EMockNoProxyException = class(EMockException);
   EMockVerificationException = class(EMockException);
 
+  TTypeInfoHelper = record helper for TTypeInfo
+    function NameStr : string; inline;
+  end;
+
 implementation
 
 uses
-  TypInfo,
   Classes,
   Generics.Defaults,
   Delphi.Mocks.Utils,
@@ -205,7 +209,7 @@ begin
   pInfo := TypeInfo(T);
 
   if not (pInfo.Kind in [tkInterface,tkClass]) then
-    raise EMockException.Create(string(pInfo.Name) + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
+    raise EMockException.Create(pInfo.NameStr + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
 
   case pInfo.Kind of
     //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
@@ -214,7 +218,7 @@ begin
     begin
       //Check to make sure we have
       if not CheckClassHasRTTI(pInfo) then
-          raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
+          raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
       proxy := TObjectProxy<T>.Create(false);
@@ -223,7 +227,7 @@ begin
     begin
       //Check to make sure we have
       if not CheckInterfaceHasRTTI(pInfo) then
-        raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
+        raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
 
       //Create our proxy interface object, which will implement our interface T
       proxy := TInterfaceProxy<T>.Create(false);
@@ -235,7 +239,7 @@ begin
   //Push the proxy into the result we are returning.
   if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid, Result.FProxy) <> 0 then
     //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
-    raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt IProxy<T>');
+    raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt IProxy<T>');
 end;
 
 procedure TMock<T>.Free;
@@ -287,7 +291,7 @@ begin
   pInfo := TypeInfo(T);
 
   if not (pInfo.Kind in [tkInterface,tkClass]) then
-    raise EMockException.Create(string(pInfo.Name) + ' is not an Interface or Class. TStub<T> supports interfaces and classes only');
+    raise EMockException.Create(pInfo.NameStr + ' is not an Interface or Class. TStub<T> supports interfaces and classes only');
 
   case pInfo.Kind of
     //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
@@ -296,7 +300,7 @@ begin
     begin
       //Check to make sure we have
       if not CheckClassHasRTTI(pInfo) then
-          raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
+          raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
       proxy := TObjectProxy<T>.Create(true);
@@ -305,7 +309,7 @@ begin
     begin
       //Check to make sure we have
       if not CheckInterfaceHasRTTI(pInfo) then
-        raise EMockNoRTTIException.Create(string(pInfo.Name) + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
+        raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
 
       //Create our proxy interface object, which will implement our interface T
       proxy := TInterfaceProxy<T>.Create(true);
@@ -317,7 +321,7 @@ begin
   //Push the proxy into the result we are returning.
   if proxy.QueryInterface(GetTypeData(TypeInfo(IStubProxy<T>)).Guid, Result.FProxy) <> 0 then
     //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
-    raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt IProxy<T>');
+    raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt IProxy<T>');
 end;
 
 procedure TStub<T>.Free;
@@ -343,6 +347,17 @@ end;
 function TStub<T>.Setup: IStubSetup<T>;
 begin
   result := FProxy.Setup;
+end;
+
+{ TTypeInfoHelper }
+
+function TTypeInfoHelper.NameStr: string;
+begin
+{$IFNDEF NEXTGEN}
+  result := string(Self.Name);
+{$ELSE}
+  result := Self.NameFld.ToString;
+{$ENDIF}
 end;
 
 end.
