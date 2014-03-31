@@ -108,7 +108,7 @@ begin
   Result := nil;
   for candidateCtor in ARttiType.GetMethods('Create') do
   begin
-    if Length(candidateCtor.GetParameters) = 0then
+    if Length(candidateCtor.GetParameters) = 0 then
     begin
       Result := candidateCtor;
       Break;
