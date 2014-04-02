@@ -42,6 +42,8 @@ type
 
   ICommand = interface
     procedure Execute;
+    procedure TestVarParam(var msg : string);
+    procedure TestOutParam(out msg : string);
   end;
   {$M-}
 
@@ -56,6 +58,8 @@ type
     procedure MockNoArgProcedureUsingAtLeastWhen;
     procedure MockNoArgProcedureUsingAtMostBetweenWhen;
     procedure MockNoArgProcedureUsingExactlyWhen;
+    procedure TestOuParam;
+    procedure TestVarParam;
   end;
 
 //TODO: IProxy<T> will not allow a function of CastAs<I> on it, class does however.
@@ -65,7 +69,7 @@ implementation
 uses
   SysUtils,
   Delphi.Mocks,
-  Delphi.Mocks.InterfaceProxy;
+  Delphi.Mocks.InterfaceProxy, System.Rtti;
 
 { TTestInterfaceProxy }
 
@@ -167,6 +171,58 @@ begin
   mock := TMock<ICommand>.Create;
   mock.Setup.Expect.Once.When.Execute;
   mock.Instance.Execute;
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.TestOuParam;
+const
+  RETURN_MSG = 'hello Delphi Mocks! - With out Param';
+var
+  mock : TMock<ICommand>;
+  msg: string;
+begin
+  mock := TMock<ICommand>.Create;
+
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      CheckEquals(2, Length(Args), 'Args Length');
+      //Argument Zero is Self Instance
+      args[1] := RETURN_MSG;
+    end
+    ).When.TestOutParam(msg);
+
+  msg := EmptyStr;
+  mock.Instance.TestOutParam(msg);
+
+  CheckEquals(RETURN_MSG, msg);
+
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.TestVarParam;
+const
+  RETURN_MSG = 'hello Delphi Mocks!';
+var
+  mock : TMock<ICommand>;
+  msg: string;
+begin
+  mock := TMock<ICommand>.Create;
+
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      CheckEquals(2, Length(Args), 'Args Length');
+      //Argument Zero is Self Instance
+      args[1] := RETURN_MSG;
+    end
+    ).When.TestVarParam(msg);
+
+  msg := EmptyStr;
+  mock.Instance.TestVarParam(msg);
+
+  CheckEquals(RETURN_MSG, msg);
+
   mock.Verify;
 end;
 

@@ -28,8 +28,10 @@ type
 
   TCommand = class
   public
-    procedure Execute;virtual;
-    procedure Run(value: Integer);virtual;
+    procedure Execute;virtual;abstract;
+    procedure Run(value: Integer);virtual;abstract;
+    procedure TestVarParam(var msg : string);virtual;abstract;
+    procedure TestOutParam(out msg : string);virtual;abstract;
   end;
 
   TTestObjectProxy = class(TTestCase)
@@ -45,6 +47,8 @@ type
     procedure MockNoArgProcedureUsingAtLeastWhen;
     procedure MockNoArgProcedureUsingAtMostBetweenWhen;
     procedure MockNoArgProcedureUsingExactlyWhen;
+    procedure TestOuParam;
+    procedure TestVarParam;
   end;
 
 implementation
@@ -73,6 +77,58 @@ begin
   objectProxy := TObjectProxy<TMultipleConstructor>.Create;
 
   CheckEquals(objectProxy.Proxy.CreateCalled, G_CREATE_CALLED_UNIQUE_ID);
+end;
+
+procedure TTestObjectProxy.TestOuParam;
+const
+  RETURN_MSG = 'hello Delphi Mocks! - With out Param';
+var
+  mock : TMock<TCommand>;
+  msg: string;
+begin
+  mock := TMock<TCommand>.Create;
+
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      CheckEquals(2, Length(Args), 'Args Length');
+      //Argument Zero is Self Instance
+      args[1] := RETURN_MSG;
+    end
+    ).When.TestOutParam(msg);
+
+  msg := EmptyStr;
+  mock.Instance.TestOutParam(msg);
+
+  CheckEquals(RETURN_MSG, msg);
+
+  mock.Verify;
+end;
+
+procedure TTestObjectProxy.TestVarParam;
+const
+  RETURN_MSG = 'hello Delphi Mocks!';
+var
+  mock : TMock<TCommand>;
+  msg: string;
+begin
+  mock := TMock<TCommand>.Create;
+
+  mock.Setup.WillExecute(
+    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
+    begin
+      CheckEquals(2, Length(Args), 'Args Length');
+      //Argument Zero is Self Instance
+      args[1] := RETURN_MSG;
+    end
+    ).When.TestVarParam(msg);
+
+  msg := EmptyStr;
+  mock.Instance.TestVarParam(msg);
+
+  CheckEquals(RETURN_MSG, msg);
+
+  mock.Verify;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingAtLeastOnceWhen;
@@ -181,18 +237,6 @@ end;
 constructor TMultipleConstructor.Create;
 begin
   FCreateCalled := G_CREATE_CALLED_UNIQUE_ID;
-end;
-
-{ TCommand }
-
-procedure TCommand.Execute;
-begin
-  raise ENotImplemented.Create('TCommand.Execute');
-end;
-
-procedure TCommand.Run(value: Integer);
-begin
-  raise ENotImplemented.Create('TCommand.Run()');
 end;
 
 initialization
