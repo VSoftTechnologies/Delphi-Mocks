@@ -39,12 +39,23 @@ type
   ISecondSimpleInterface = Interface
   ['{C7191239-2E89-4D3A-9D1B-F894BACBBB39}']
   End;
+
+  ICommand = interface
+    procedure Execute;
+  end;
   {$M-}
 
   TTestInterfaceProxy = class(TTestCase)
   published
     procedure Does_A_Proxy_Implement_Two_Interfaces_After_A_Cast;
     procedure After_Destruction_Are_All_The_Interfaces_Cleaned_Up;
+    procedure MockNoArgProcedureUsingOnce;
+    procedure MockNoArgProcedureUsingOnceWhen;
+    procedure MockNoArgProcedureUsingNeverWhen;
+    procedure MockNoArgProcedureUsingAtLeastOnceWhen;
+    procedure MockNoArgProcedureUsingAtLeastWhen;
+    procedure MockNoArgProcedureUsingAtMostBetweenWhen;
+    procedure MockNoArgProcedureUsingExactlyWhen;
   end;
 
 //TODO: IProxy<T> will not allow a function of CastAs<I> on it, class does however.
@@ -82,6 +93,81 @@ begin
   finally
     FreeAndNil(simpleInterface);
   end;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtLeastOnceWhen;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.AtLeastOnce.When.Execute;
+  mock.Instance.Execute;
+  mock.Instance.Execute;
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtLeastWhen;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.AtLeast(3).When.Execute;
+  mock.Instance.Execute;
+  mock.Instance.Execute;
+  mock.Instance.Execute;
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtMostBetweenWhen;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.AtMost(2).When.Execute;
+  mock.Instance.Execute;
+  mock.Instance.Execute;
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingExactlyWhen;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.Exactly(2).When.Execute;
+  mock.Instance.Execute;
+  mock.Instance.Execute;
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingNeverWhen;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.Never.When.Execute;
+
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingOnce;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.Once('Execute');
+  mock.Instance.Execute;
+  mock.Verify;
+end;
+
+procedure TTestInterfaceProxy.MockNoArgProcedureUsingOnceWhen;
+var
+  mock : TMock<ICommand>;
+begin
+  mock := TMock<ICommand>.Create;
+  mock.Setup.Expect.Once.When.Execute;
+  mock.Instance.Execute;
+  mock.Verify;
 end;
 
 initialization
