@@ -94,7 +94,7 @@ end;
 procedure TObjectProxy<T>.DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
 var
   vArgs: TArray<TValue>;
-  i: Integer;
+  i, l: Integer;
 begin
   //don't intercept the TObject methods like BeforeDestruction etc.
   if Method.Parent.AsInstance.MetaclassType <> TObject then
@@ -103,14 +103,21 @@ begin
 
     //Included instance as first argument because TExpectation.Match
     //deduces that the first argument is the object instance.
-    SetLength(vArgs, Length(Args)+1);
+    l := Length(Args);
+    SetLength(vArgs, l+1);
     vArgs[0] := Instance;
-    for i := Low(Args) to High(Args) do
+
+    for i := 1 to l do
     begin
-      vArgs[i+1] := Args[i];
+      vArgs[i] := Args[i-1];
     end;
 
-    Self.DoInvoke(Method,VArgs,Result);
+    Self.DoInvoke(Method,vArgs,Result);
+
+    for i := 1 to l do
+    begin
+      Args[i-1] := vArgs[i];
+    end;
   end;
 end;
 
