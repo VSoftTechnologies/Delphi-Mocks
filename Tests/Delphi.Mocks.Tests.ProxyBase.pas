@@ -15,7 +15,7 @@ type
 
   TTestProxyBase = class(TTestCase)
   published
-    procedure Setup;override;
+    procedure SetUp;override;
   end;
 
 implementation

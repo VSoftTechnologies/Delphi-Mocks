@@ -17,6 +17,7 @@ program Delphi.Mocks.Tests;
 {$APPTYPE CONSOLE}
 {$ENDIF}
 
+{$WARN DUPLICATE_CTOR_DTOR OFF}
 
 uses
   Forms,
