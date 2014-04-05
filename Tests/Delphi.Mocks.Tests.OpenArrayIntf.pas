@@ -12,12 +12,12 @@ type
     procedure TestMyMethodTypedArray;
   end;
 
-  TMyArray = array of TObject;
+  TMyArray = array of Integer;
 
   {$M+}
   IDynamicArray = interface
     // This crashes: One open array + one more parameter. Only the open array works.
-    function MyMethod(MyArray: array of TObject; Number: Integer): Integer;
+    function MyMethod(MyArray: array of Integer; Number: Integer): Integer;
   end;
 
   ITypedArray = interface
@@ -35,17 +35,15 @@ procedure TestIOpenArray.TestMyMethodDynamicArray;
 var
   Mock: TMock<IDynamicArray>;
   Intf: IDynamicArray;
-  Obj: TObject;
 begin
   Mock := TMock<IDynamicArray>.Create;
 
-  Obj := TObject.Create;
-  Mock.Setup.WillReturn(3).When.MyMethod([Obj], 1);
+  Mock.Setup.WillReturn(3).When.MyMethod([123], 1);
 
   Intf := Mock;
 
   //TODO: Fix the privileged instruction. Something to do with TValue not liking Dynamic Arrays
-  CheckEquals(3, Intf.MyMethod([Obj], 1));
+  CheckEquals(3, Intf.MyMethod([123], 1));
 end;
 
 procedure TestIOpenArray.TestMyMethodTypedArray;
@@ -58,7 +56,7 @@ begin
 
   // Setup our typed array
   SetLength(MyArray, 1);
-  MyArray[0] := TObject.Create;
+  MyArray[0] := 123;
 
   Mock.Setup.WillReturn(2).When.MyMethod(MyArray, 1);
 
