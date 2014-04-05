@@ -20,6 +20,7 @@ program Delphi.Mocks.Tests;
 {$WARN DUPLICATE_CTOR_DTOR OFF}
 
 uses
+  FastMM4,
   Forms,
   TestFramework,
   GUITestRunner,
