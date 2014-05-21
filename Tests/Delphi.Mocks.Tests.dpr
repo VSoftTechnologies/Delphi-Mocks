@@ -20,7 +20,6 @@ program Delphi.Mocks.Tests;
 {$WARN DUPLICATE_CTOR_DTOR OFF}
 
 uses
-  FastMM4,
   Forms,
   TestFramework,
   GUITestRunner,
@@ -100,6 +99,7 @@ begin
       TextTestRunner.RunRegisteredTests(ExitBehavior);
     {$ENDIF}
   {$ELSE}
+  ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   TGUITestRunner.RunRegisteredTests;
   {$ENDIF}
