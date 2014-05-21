@@ -79,10 +79,13 @@ var
   secondInterface: ISecondSimpleInterface;
 begin
   simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
+  try
+    secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
 
-  secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
-
-  CheckNotNull(secondInterface, 'The second interface is not implemented!');
+    CheckNotNull(secondInterface, 'The second interface is not implemented!');
+  finally
+    simpleInterface.Free;
+  end;
 end;
 
 procedure TTestInterfaceProxy.Does_A_Proxy_Implement_Two_Interfaces_After_A_Cast;

@@ -43,15 +43,18 @@ var
 begin
   //var mock = new Mock<IFoo>();
   //mock.Setup(foo => foo.DoSomething("ping")).Returns(true);
-   mock := TMock<TSimpleMockedObject>.Create;
+  mock := TMock<TSimpleMockedObject>.Create;
 
-   mock.Setup.WillRaise('SimpleMethod', ESimpleException);
+  mock.Setup.WillRaise('SimpleMethod', ESimpleException);
 
-   systemUnderTest := TSystemUnderTest.Create(mock.Instance);
-
-   StartExpectingException(ESimpleException);
-   systemUnderTest.CallsSimpleMethodOnMock;
-   StopExpectingException;
+  systemUnderTest := TSystemUnderTest.Create(mock.Instance);
+  try
+    StartExpectingException(ESimpleException);
+    systemUnderTest.CallsSimpleMethodOnMock;
+    StopExpectingException;
+  finally
+   systemUnderTest.Free;
+  end;
 end;
 
 { TSimpleObject }

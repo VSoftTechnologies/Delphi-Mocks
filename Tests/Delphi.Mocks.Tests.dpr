@@ -99,6 +99,7 @@ begin
       TextTestRunner.RunRegisteredTests(ExitBehavior);
     {$ENDIF}
   {$ELSE}
+  ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   TGUITestRunner.RunRegisteredTests;
   {$ENDIF}
