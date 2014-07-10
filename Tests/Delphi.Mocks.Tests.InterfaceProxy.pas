@@ -49,8 +49,7 @@ type
 
   TTestInterfaceProxy = class(TTestCase)
   published
-    procedure Does_A_Proxy_Implement_Two_Interfaces_After_A_Cast;
-    procedure After_Destruction_Are_All_The_Interfaces_Cleaned_Up;
+    procedure Does_A_Proxy_Implement_Two_Interfaces_After_An_Implements;
     procedure MockNoArgProcedureUsingOnce;
     procedure MockNoArgProcedureUsingOnceWhen;
     procedure MockNoArgProcedureUsingNeverWhen;
@@ -73,32 +72,20 @@ uses
 
 { TTestInterfaceProxy }
 
-procedure TTestInterfaceProxy.After_Destruction_Are_All_The_Interfaces_Cleaned_Up;
+procedure TTestInterfaceProxy.Does_A_Proxy_Implement_Two_Interfaces_After_An_Implements;
 var
-  simpleInterface: TInterfaceProxy<ISimpleInterface>;
+  simpleInterface: IProxy<ISimpleInterface>;
   secondInterface: ISecondSimpleInterface;
 begin
   simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
   try
-    secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
+    simpleInterface.Implements(TypeInfo(ISecondSimpleInterface));
+
+    simpleInterface.QueryInterface(ISecondSimpleInterface, secondInterface);
 
     CheckNotNull(secondInterface, 'The second interface is not implemented!');
   finally
-    simpleInterface.Free;
-  end;
-end;
-
-procedure TTestInterfaceProxy.Does_A_Proxy_Implement_Two_Interfaces_After_A_Cast;
-var
-  simpleInterface: TInterfaceProxy<ISimpleInterface>;
-  secondInterface : ISecondSimpleInterface;
-begin
-  simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
-  try
-    secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
-    CheckNotNull(secondInterface, 'The second interface is not implemented!');
-  finally
-    FreeAndNil(simpleInterface);
+    simpleInterface := nil;
   end;
 end;
 
