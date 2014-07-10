@@ -129,8 +129,8 @@ type
   ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
     function Setup : IMockSetup<T>;
     function Proxy : T;
+    procedure Implements(const ATypeInfo: PTypeInfo);
   end;
-
 
   TStub<T> = record
   private
@@ -145,20 +145,24 @@ type
     procedure Free;
   end;
 
-
-
   //We use a record here to take advantage of operator overloading, the Implicit
   //operator allows us to use the mock as the interface without holding a reference
   //to the mock interface outside of the mock.
   TMock<T> = record
   private
     FProxy : IProxy<T>;
+
+    class procedure CheckMockType(const ATypeInfo : PTypeInfo); static;
+    class procedure CheckMockInterface(const ATypeInfo : PTypeInfo); static;
+    class procedure CheckMockObject(const ATypeInfo : PTypeInfo); static;
   public
     class operator Implicit(const Value: TMock<T>): T;
     function Setup : IMockSetup<T>;
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
     function CheckExpectations: string;
+    procedure Implements(const ATypeInfo : PTypeInfo); overload;
+    procedure Implements<I : IInterface>; overload;
     function Instance : T;
     function InstanceAsValue : TValue;
     class function Create: TMock<T>; static;
@@ -168,6 +172,7 @@ type
 
   //Exception Types that the mocks will raise.
   EMockException = class(Exception);
+  EMockProxyAlreadyImplemented = class(EMockException);
   EMockSetupException = class(EMockException);
   EMockNoRTTIException = class(EMockException);
   EMockNoProxyException = class(EMockException);
@@ -208,32 +213,14 @@ begin
 
   pInfo := TypeInfo(T);
 
-  if not (pInfo.Kind in [tkInterface,tkClass]) then
-    raise EMockException.Create(pInfo.NameStr + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
+  //Raise exceptions if the mock doesn't meet the requirements.
+  CheckMockType(pInfo);
 
   case pInfo.Kind of
-    //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
-    //NOTE: Object proxy doesn't require more than zero methods on the object.
-    tkClass :
-    begin
-      //Check to make sure we have
-      if not CheckClassHasRTTI(pInfo) then
-          raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
-
-      //Create our proxy object, which will implement our object T
-      proxy := TObjectProxy<T>.Create(false);
-    end;
-    tkInterface :
-    begin
-      //Check to make sure we have
-      if not CheckInterfaceHasRTTI(pInfo) then
-        raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
-
-      //Create our proxy interface object, which will implement our interface T
-      proxy := TInterfaceProxy<T>.Create(false);
-    end;
-  else
-    raise EMockException.Create('Invalid type kind T');
+    //Create our proxy object, which will implement our object T
+    tkClass : proxy := TObjectProxy<T>.Create(false);
+    //Create our proxy interface object, which will implement our interface T
+    tkInterface : proxy := TInterfaceProxy<T>.Create(false);
   end;
 
   //Push the proxy into the result we are returning.
@@ -245,6 +232,25 @@ end;
 procedure TMock<T>.Free;
 begin
   FProxy := nil;
+end;
+
+procedure TMock<T>.Implements(const ATypeInfo : PTypeInfo);
+begin
+  if not (ATypeInfo.Kind in [tkInterface]) then
+    raise EMockException.Create(ATypeInfo.NameStr + ' is not an Interface. TMock<T>.Implements only supports interfaces.');
+
+  CheckMockInterface(ATypeInfo);
+
+  FProxy.Implements(ATypeInfo);
+end;
+
+procedure TMock<T>.Implements<I>;
+var
+  pInfo : PTypeInfo;
+begin
+  pInfo := TypeInfo(I);
+
+  Implements(pInfo);
 end;
 
 class operator TMock<T>.Implicit(const Value: TMock<T>): T;
@@ -265,6 +271,35 @@ end;
 function TMock<T>.Setup: IMockSetup<T>;
 begin
   result := FProxy.Setup;
+end;
+
+class procedure TMock<T>.CheckMockInterface(const ATypeInfo : PTypeInfo);
+begin
+  //Check to make sure we have
+  if not CheckInterfaceHasRTTI(ATypeInfo) then
+    raise EMockNoRTTIException.Create(ATypeInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
+end;
+
+class procedure TMock<T>.CheckMockObject(const ATypeInfo: PTypeInfo);
+begin
+  //Check to make sure we have
+  if not CheckClassHasRTTI(ATypeInfo) then
+    raise EMockNoRTTIException.Create(ATypeInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
+end;
+
+class procedure TMock<T>.CheckMockType(const ATypeInfo: PTypeInfo);
+begin
+  if not (ATypeInfo.Kind in [tkInterface,tkClass]) then
+    raise EMockException.Create(ATypeInfo.NameStr + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
+
+  case ATypeInfo.Kind of
+    //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
+    //NOTE: Object proxy doesn't require more than zero methods on the object.
+    tkClass : CheckMockObject(ATypeInfo);
+    tkInterface : CheckMockInterface(ATypeInfo);
+  else
+    raise EMockException.Create('Invalid type kind T');
+  end;
 end;
 
 procedure TMock<T>.Verify(const message: string);

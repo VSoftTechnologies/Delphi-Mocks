@@ -30,6 +30,7 @@ interface
 uses
   Rtti,
   SysUtils,
+  TypInfo,
   Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
@@ -42,6 +43,20 @@ type
 
   TInterfaceProxy<T> = class(TBaseProxy<T>)
   private type
+
+    //GENERAL INFO:
+    //An interface proxy is the external facing proxy for interfaces. The proxy virtual interfaces are
+    //what implement each of the interfaces implemented by the interface proxy. The first interface implemented
+    //is always the one of which we are at generic for. Subsequent ones can be added through the Implements
+    //method which will add another ProxyVirtualInterface to the list of interfaces held by the external facing
+    //InterfaceProxy.
+
+    //HOW ALL INTERFACES SUPPORT EACH OTHER
+    //When QueryInterface is called on any ProxyVirtualInterface, if they don't support the interface in question
+    //they ask the creating InterfaceProxy if has that interface in its list of interfaces. If it does then the
+    //InterfaceProxy will return the instance of that interface. Therefore ANY interface which is "Implemented"
+    //but the InterfaceProxy is "Supported" by all interfaces "Implemented" and the "T" interface.
+
     TProxyVirtualInterface = class(TVirtualInterface)
     private
       FProxy : TInterfaceProxy<T>;
@@ -56,28 +71,15 @@ type
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; override;
     function Proxy : T;override;
-    function CastAs<I: IInterface> : I;
+    procedure Implements(const ATypeInfo: PTypeInfo); override;
   public
     constructor Create(const AIsStubOnly : boolean = false);override;
     destructor Destroy;override;
   end;
 
-
 implementation
 
-uses
-  TypInfo;
-
 { TInterfaceProxy<T> }
-
-function TInterfaceProxy<T>.CastAs<I>: I;
-var
-  virtualProxy : TProxyVirtualInterface;
-begin
-  virtualProxy := TProxyVirtualInterface.Create(Self, TypeInfo(I), Self.DoInvoke);
-  FVirtualInterfaces.Add(GetTypeData(TypeInfo(I)).Guid, virtualProxy);
-  virtualProxy.QueryInterface(GetTypeData(TypeInfo(I)).Guid,result);
-end;
 
 constructor TInterfaceProxy<T>.Create(const AIsStubOnly : boolean);
 var
@@ -88,7 +90,6 @@ begin
   FVirtualInterfaces := TDictionary<TGUID, IInterface>.Create;
 
   virtualProxy := TProxyVirtualInterface.Create(Self, TypeInfo(T), Self.DoInvoke);
-
   FVirtualInterfaces.Add(GetTypeData(TypeInfo(T)).Guid, virtualProxy);
 end;
 
@@ -100,12 +101,30 @@ begin
   inherited;
 end;
 
+procedure TInterfaceProxy<T>.Implements(const ATypeInfo: PTypeInfo);
+var
+  virtualProxy : TProxyVirtualInterface;
+begin
+  inherited;
+
+  if FVirtualInterfaces.ContainsKey(GetTypeData(ATypeInfo).Guid) then
+    raise EMockProxyAlreadyImplemented.Create('The mock already implements ' + ATypeInfo.NameStr);
+
+  virtualProxy := TProxyVirtualInterface.Create(Self, ATypeInfo, Self.DoInvoke);
+  FVirtualInterfaces.Add(GetTypeData(ATypeInfo).Guid, virtualProxy);
+end;
+
 function TInterfaceProxy<T>.InternalQueryInterface(const IID: TGUID; out Obj): HRESULT;
+var
+  virtualProxy : IInterface;
 begin
   Result := E_NOINTERFACE;
-  if (IsEqualGUID(IID, IInterface)) then
-    if GetInterface(IID, Obj) then
-      Result := 0;
+
+  if not FVirtualInterfaces.ContainsKey(IID) then
+    Exit;
+
+  virtualProxy := FVirtualInterfaces.Items[IID];
+  result := virtualProxy.QueryInterface(IID, Obj);
 end;
 
 function TInterfaceProxy<T>.Proxy: T;
@@ -120,8 +139,8 @@ begin
   else
     raise EMockNoProxyException.Create('Error proxy casting to interface');
 
-  if virtualProxy.QueryInterface(GetTypeData(pInfo).Guid,result) <> 0 then
-	raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt T');
+  if virtualProxy.QueryInterface(GetTypeData(pInfo).Guid, result) <> 0 then
+	  raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt T');
 end;
 
 function TInterfaceProxy<T>.QueryInterface(const IID: TGUID; out Obj): HRESULT;
@@ -130,15 +149,13 @@ var
 begin
   Result := E_NOINTERFACE;
 
-  if (FVirtualInterfaces <> nil) then
-    if (FVirtualInterfaces.Count <> 0) then
-      if (FVirtualInterfaces.ContainsKey(IID)) then
-      begin
-        virtualProxy := FVirtualInterfaces.Items[IID];
-        Result := virtualProxy.QueryInterface(IID, Obj);
-      end;
+  if (FVirtualInterfaces.ContainsKey(IID)) then
+  begin
+    virtualProxy := FVirtualInterfaces.Items[IID];
+    Result := virtualProxy.QueryInterface(IID, Obj);
+  end;
 
-  if result <> 0 then
+  if result <> S_OK then
     Result := inherited;
 end;
 
