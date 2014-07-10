@@ -30,6 +30,7 @@ interface
 uses
   Rtti,
   SysUtils,
+  TypInfo,
   Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
@@ -44,7 +45,8 @@ type
     function FindConstructor(ARttiType: TRttiType): TRttiMethod;
   protected
      procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
-     function Proxy : T;override;
+     function Proxy : T; override;
+     procedure Implements(const ATypeInfo: PTypeInfo); override;
   public
     constructor Create(const AIsStubOnly : boolean = false);override;
     destructor Destroy;override;
@@ -52,9 +54,6 @@ type
 
 
 implementation
-
-uses
-  TypInfo;
 
 { TObjectProxy<T> }
 
@@ -134,6 +133,13 @@ begin
       Break;
     end;
   end;
+end;
+
+procedure TObjectProxy<T>.Implements(const ATypeInfo: PTypeInfo);
+begin
+  inherited;
+  {$Message 'TODO: Need to implement mock objects also implementing interfaces'}
+  raise ENotImplemented.Create('Mock Objects Implementing Interfaces has not been implemented.');
 end;
 
 function TObjectProxy<T>.Proxy: T;

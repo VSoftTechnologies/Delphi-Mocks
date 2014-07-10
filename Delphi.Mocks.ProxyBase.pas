@@ -30,6 +30,7 @@ interface
 uses
   Rtti,
   SysUtils,
+  TypInfo,
   Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
@@ -57,7 +58,6 @@ type
     FBetween                : array[0..1] of Cardinal;
     FIsStubOnly             : boolean;
   protected
-
     function QueryInterface(const IID: TGUID; out Obj): HRESULT;virtual; stdcall;
     function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function _AddRef: Integer; stdcall;
@@ -68,16 +68,15 @@ type
     function StubSetup : IStubSetup<T>;
     function IProxy<T>.Setup = MockSetup;
     function IStubProxy<T>.Setup = StubSetup;
-    function Proxy : T;virtual;abstract;
-
-
+    function Proxy : T; virtual; abstract;
+    procedure Implements(const ATypeInfo: PTypeInfo); virtual; abstract;
 
     //ISetup<T>
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
     function Expect : IExpect<T>;
-//    function Before(const AMethodName : string) : ISetup<T>;
-//    function After(const AMethodName : string) : ISetup<T>;
+    //    function Before(const AMethodName : string) : ISetup<T>;
+    //    function After(const AMethodName : string) : ISetup<T>;
     function WillReturn(const value : TValue) : IWhen<T>;
     procedure WillReturnDefault(const AMethodName : string; const value : TValue);
     function WillRaise(const exceptionClass : ExceptClass; const message : string = '') : IWhen<T>;overload;
@@ -134,8 +133,7 @@ implementation
 uses
   Delphi.Mocks.Utils,
   Delphi.Mocks.When,
-  Delphi.Mocks.MethodData,
-  TypInfo;
+  Delphi.Mocks.MethodData;
 
 
 { TProxyBase }
@@ -380,12 +378,9 @@ begin
 
   Result := TMethodData.Create(AMethodName,FIsStubOnly);
   FMethodData.Add(methodName,Result);
-
 end;
 
-
-function TBaseProxy<T>.InternalQueryInterface(const IID: TGUID;
-  out Obj): HRESULT;
+function TBaseProxy<T>.InternalQueryInterface(const IID: TGUID; out Obj): HRESULT;
 begin
   Result := E_NOINTERFACE;
   if (IsEqualGUID(IID,IInterface)) then
