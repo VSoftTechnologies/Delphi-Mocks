@@ -33,13 +33,23 @@ uses
 type
   {$M+}
   ISimpleInterface = Interface
-  ['{F1731F12-2453-4818-A785-997AF7A3D51F}']
+    ['{F1731F12-2453-4818-A785-997AF7A3D51F}']
+    procedure Execute1;
   End;
 
+  {$M+}
   ISecondSimpleInterface = Interface
-  ['{C7191239-2E89-4D3A-9D1B-F894BACBBB39}']
+    ['{C7191239-2E89-4D3A-9D1B-F894BACBBB39}']
+    procedure Execute2;
   End;
 
+  {$M+}
+  IOneMethodInterface = interface
+    ['{E3BE68FA-E318-49CA-B93F-DAB02C07B3A3}']
+    procedure Execute3;
+  end;
+
+  {$M+}
   ICommand = interface
     procedure Execute;
     procedure TestVarParam(var msg : string);
@@ -50,6 +60,7 @@ type
   TTestInterfaceProxy = class(TTestCase)
   published
     procedure Does_A_Proxy_Implement_Two_Interfaces_After_An_Implements;
+    procedure Does_Implement_Then_Setup_Of_Interface_Return_Setup_Of_Interface;
     procedure MockNoArgProcedureUsingOnce;
     procedure MockNoArgProcedureUsingOnceWhen;
     procedure MockNoArgProcedureUsingNeverWhen;
@@ -61,14 +72,13 @@ type
     procedure TestVarParam;
   end;
 
-//TODO: IProxy<T> will not allow a function of CastAs<I> on it, class does however.
-
 implementation
 
 uses
   SysUtils,
   Delphi.Mocks,
-  Delphi.Mocks.InterfaceProxy, System.Rtti;
+  Delphi.Mocks.Proxy,
+  System.Rtti;
 
 { TTestInterfaceProxy }
 
@@ -77,9 +87,9 @@ var
   simpleInterface: IProxy<ISimpleInterface>;
   secondInterface: ISecondSimpleInterface;
 begin
-  simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
+  simpleInterface := TProxy<ISimpleInterface>.Create;
   try
-    simpleInterface.Implements(TypeInfo(ISecondSimpleInterface));
+    simpleInterface.AddImplements(TProxy<ISecondSimpleInterface>.Create, TypeInfo(ISecondSimpleInterface));
 
     simpleInterface.QueryInterface(ISecondSimpleInterface, secondInterface);
 
@@ -87,6 +97,26 @@ begin
   finally
     simpleInterface := nil;
   end;
+end;
+
+procedure TTestInterfaceProxy.Does_Implement_Then_Setup_Of_Interface_Return_Setup_Of_Interface;
+var
+  command : IOneMethodInterface;
+  proxy : IProxy<ISimpleInterface>;
+
+  bSupports : boolean;
+  something : IInterface;
+begin
+  proxy := TProxy<ISimpleInterface>.Create;
+
+  proxy.AddImplements(TProxy<IOneMethodInterface>.Create, TypeInfo(IOneMethodInterface));
+
+  something := proxy.SetupFromTypeInfo(TypeInfo(IOneMethodInterface));
+
+  bSupports := Supports(something, IOneMethodInterface, command);
+
+  Check(bSupports);
+  Check(command <> nil);
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtLeastOnceWhen;

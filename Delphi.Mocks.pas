@@ -32,7 +32,8 @@ interface
 uses
   TypInfo,
   Rtti,
-  sysutils;
+  sysutils,
+  Delphi.Mocks.WeakReference;
 
 type
   IWhen<T> = interface;
@@ -123,13 +124,19 @@ type
     function Proxy : T;
   end;
 
+  IProxy = interface(IWeakReferenceableObject)
+    ['{C97DC7E8-BE99-46FE-8488-4B356DD4AE29}']
+    function SetupFromTypeInfo(const ATypeInfo : PTypeInfo) : IInterface;
+    procedure AddImplements(const AProxy : IProxy; const ATypeInfo : PTypeInfo);
+    procedure SetParentProxy(const AProxy : IProxy);
+  end;
+
   //used by the mock - need to find another place to put this.. circular references
   //problem means we need it here for now.
-  IProxy<T> = interface
+  IProxy<T> = interface(IProxy)
   ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
     function Setup : IMockSetup<T>;
     function Proxy : T;
-    procedure Implements(const ATypeInfo: PTypeInfo);
   end;
 
   TStub<T> = record
@@ -157,11 +164,13 @@ type
     class procedure CheckMockObject(const ATypeInfo : PTypeInfo); static;
   public
     class operator Implicit(const Value: TMock<T>): T;
-    function Setup : IMockSetup<T>;
+
+    function Setup : IMockSetup<T>; overload;
+    function Setup<I> : IMockSetup<I>; overload;
+
     //Verify that our expectations were met.
     procedure Verify(const message : string = '');
     function CheckExpectations: string;
-    procedure Implements(const ATypeInfo : PTypeInfo); overload;
     procedure Implements<I : IInterface>; overload;
     function Instance : T;
     function InstanceAsValue : TValue;
@@ -189,7 +198,7 @@ uses
   Generics.Defaults,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.InterfaceProxy,
+  Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy;
 
 function TMock<T>.CheckExpectations: string;
@@ -220,7 +229,7 @@ begin
     //Create our proxy object, which will implement our object T
     tkClass : proxy := TObjectProxy<T>.Create(false);
     //Create our proxy interface object, which will implement our interface T
-    tkInterface : proxy := TInterfaceProxy<T>.Create(false);
+    tkInterface : proxy := TProxy<T>.Create(false);
   end;
 
   //Push the proxy into the result we are returning.
@@ -234,23 +243,18 @@ begin
   FProxy := nil;
 end;
 
-procedure TMock<T>.Implements(const ATypeInfo : PTypeInfo);
-begin
-  if not (ATypeInfo.Kind in [tkInterface]) then
-    raise EMockException.Create(ATypeInfo.NameStr + ' is not an Interface. TMock<T>.Implements only supports interfaces.');
-
-  CheckMockInterface(ATypeInfo);
-
-  FProxy.Implements(ATypeInfo);
-end;
-
 procedure TMock<T>.Implements<I>;
 var
+  proxy : TProxy<I>;
   pInfo : PTypeInfo;
 begin
   pInfo := TypeInfo(I);
 
-  Implements(pInfo);
+  proxy := TProxy<I>.Create;
+
+  CheckMockInterface(pInfo);
+
+  FProxy.AddImplements(proxy, pInfo);
 end;
 
 class operator TMock<T>.Implicit(const Value: TMock<T>): T;
@@ -271,6 +275,19 @@ end;
 function TMock<T>.Setup: IMockSetup<T>;
 begin
   result := FProxy.Setup;
+end;
+
+function TMock<T>.Setup<I>: IMockSetup<I>;
+var
+  setup : IInterface;
+  pInfo : PTypeInfo;
+begin
+  pInfo := TypeInfo(I);
+
+  setup := FProxy.SetupFromTypeInfo(pInfo);
+
+  if not Supports(setup, IMockSetup<I>, result) then
+    raise EMockNoProxyException.Create(pInfo.NameStr + ' is not implemented by the Mock.');
 end;
 
 class procedure TMock<T>.CheckMockInterface(const ATypeInfo : PTypeInfo);
@@ -347,7 +364,7 @@ begin
         raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
 
       //Create our proxy interface object, which will implement our interface T
-      proxy := TInterfaceProxy<T>.Create(true);
+      proxy := TProxy<T>.Create(true);
     end;
   else
     raise EMockException.Create('Invalid type kind T');
