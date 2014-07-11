@@ -49,7 +49,7 @@ type
     FParentProxy            : IWeakReference<IProxy>;
     FInterfaceProxies       : TDictionary<TGUID, IProxy>;
 
-    FVirtualInterface       : TVirtualInterface;
+    FVirtualInterface       : IInterface;
     FName : string;
 
     FMethodData             : TDictionary<string, IMethodData>;
@@ -67,36 +67,20 @@ type
     FBetween                : array[0..1] of Cardinal;
     FIsStubOnly             : boolean;
 
-  // protected type
-
-    //GENERAL INFO:
-    //An interface proxy is the external facing proxy for interfaces. The proxy virtual interfaces are
-    //what implement each of the interfaces implemented by the interface proxy. The first interface implemented
-    //is always the one of which we are at generic for. Subsequent ones can be added through the Implements
-    //method which will add another ProxyVirtualInterface to the list of interfaces held by the external facing
-    //InterfaceProxy.
-
-    //HOW ALL INTERFACES SUPPORT EACH OTHER
-    //When QueryInterface is called on any ProxyVirtualInterface, if they don't support the interface in question
-    //they ask the creating InterfaceProxy if has that interface in its list of interfaces. If it does then the
-    //InterfaceProxy will return the instance of that interface. Therefore ANY interface which is "Implemented"
-    //but the InterfaceProxy is "Supported" by all interfaces "Implemented" and the "T" interface.
-
-    //        TProxyVirtualInterface = class(TVirtualInterface)
-    //        private
-    //          FProxy : TInterfacedObject;
-    //          FRootProxy : TProxy<T>;
-    //        protected
-    //        public
-    //          function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
-    //          constructor Create(const AInterfaceProxy : TInterfacedObject; const ARootProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
-    //        end;
+  protected type
+    TProxyVirtualInterface = class(TVirtualInterface)
+    private
+      FProxy : TProxy<T>;
+    public
+      function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
+      constructor Create(const AProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+    end;
 
   protected
     procedure SetParentProxy(const AProxy : IProxy);
 
+    function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT;virtual; stdcall;
-    // function InternalQueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
 
@@ -332,7 +316,7 @@ begin
 
   case pInfo.Kind of
     //Create our proxy interface object, which will implement our interface T
-    tkInterface : FVirtualInterface := TVirtualInterface.Create(TypeInfo(T), Self.DoInvoke);
+    tkInterface : FVirtualInterface := TProxyVirtualInterface.Create(Self, TypeInfo(T), Self.DoInvoke);
   end;
 
   FName := pInfo.Name;
@@ -340,8 +324,7 @@ end;
 
 destructor TProxy<T>.Destroy;
 begin
-  if FVirtualInterface <> nil then
-    FVirtualInterface.Free;
+  FVirtualInterface := nil;
 
   FMethodData.Clear;
   FMethodData.Free;
@@ -481,25 +464,28 @@ end;
 //  //  FVirtualInterfaces.Add(GetTypeData(ATypeInfo).Guid, virtualProxy);
 //end;
 
-//function TProxy<T>.InternalQueryInterface(const IID: TGUID; out Obj): HRESULT;
-//var
-//  virtualProxy : IInterface;
-//begin
-//  Result := E_NOINTERFACE;
-//
-//  if (IsEqualGUID(IID,IInterface)) then
-//    if GetInterface(IID, Obj) then
-//      Result := 0;
-//
-//  if result = S_OK then
-//    Exit;
-//
-//  if not FVirtualInterfaces.ContainsKey(IID) then
-//    Exit;
-//
-//  virtualProxy := FVirtualInterfaces.Items[IID];
-//  result := virtualProxy.QueryInterface(IID, Obj);
-//end;
+function TProxy<T>.InternalQueryInterface(const IID: TGUID; out Obj): HRESULT;
+var
+  virtualProxy : IInterface;
+begin
+  Result := E_NOINTERFACE;
+
+  //Otherwise look in the list of interface proxies that might have been implemented
+  if (FInterfaceProxies.ContainsKey(IID)) then
+  begin
+    virtualProxy := FInterfaceProxies.Items[IID];
+    Result := virtualProxy.QueryInterface(IID, Obj);
+
+    if result = S_OK then
+      Exit;
+  end;
+
+  {$Message 'TODO: Need to query the parent, but exclude outselves and any other children which have already been called.'}
+
+  //Remove ourselves from the parents list.
+  //Call the parent.
+  //Add ourselves back to the parents list.
+end;
 
 procedure TProxy<T>.Never(const AMethodName: string);
 var
@@ -580,15 +566,7 @@ begin
       Exit;
   end;
 
-  //Otherwise look in the list of interface proxies that might have been implemented
-  if (FInterfaceProxies.ContainsKey(IID)) then
-  begin
-    virtualProxy := FInterfaceProxies.Items[IID];
-    Result := virtualProxy.QueryInterface(IID, Obj);
-
-    if result = S_OK then
-      Exit;
-  end;
+  result := InternalQueryInterface(IID, Obj);
 end;
 
 procedure TProxy<T>.SetBehaviorMustBeDefined(const value: boolean);
@@ -694,22 +672,21 @@ begin
   result := inherited;
 end;
 
-//{ TProxy<T>.TProxyVirtualInterface }
-//
-//constructor TProxy<T>.TProxyVirtualInterface.Create(const AInterfaceProxy : TProxy<I>;
-//  const ARootProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
-//begin
-//  FProxy := AInterfaceProxy;
-//  FRootProxy := ARootProxy;
-//
-//  inherited Create(Ainterface, InvokeEvent);
-//end;
-//
-//function TProxy<T>.TProxyVirtualInterface.QueryInterface(const IID: TGUID; out Obj): HRESULT;
-//begin
-//  Result := inherited;
-//  if Result <> 0 then
-//    Result := FProxy.InternalQueryInterface(IID, Obj);
-//end;
+{ TProxy<T>.TProxyVirtualInterface }
+
+constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : TProxy<T>;
+  const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+begin
+  FProxy := AProxy;
+
+  inherited Create(Ainterface, InvokeEvent);
+end;
+
+function TProxy<T>.TProxyVirtualInterface.QueryInterface(const IID: TGUID; out Obj): HRESULT;
+begin
+  Result := inherited;
+  if (Result <> 0) then
+    Result := FProxy.InternalQueryInterface(IID, Obj);
+end;
 
 end.

@@ -245,7 +245,7 @@ end;
 
 procedure TMock<T>.Implements<I>;
 var
-  proxy : TProxy<I>;
+  proxy : IProxy<I>;
   pInfo : PTypeInfo;
 begin
   pInfo := TypeInfo(I);
@@ -282,7 +282,7 @@ var
   setup : IInterface;
   pInfo : PTypeInfo;
 begin
-  pInfo := TypeInfo(I);
+  pInfo := TypeInfo(IMockSetup<I>);
 
   setup := FProxy.SetupFromTypeInfo(pInfo);
 
