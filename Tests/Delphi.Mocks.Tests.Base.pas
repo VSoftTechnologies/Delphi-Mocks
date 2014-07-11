@@ -195,6 +195,8 @@ begin
     otherMock.One;
 
   mock.Verify;
+  {$Message 'TODO: Need to add a verify all. The verify will be on the T type, where verify<T> will be implemented T and VerifyAll will do the lot.'}
+
 end;
 
 { TSimpleTestObject_WithRTTI }
