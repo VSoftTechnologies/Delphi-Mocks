@@ -17,6 +17,7 @@ program Delphi.Mocks.Tests;
 {$APPTYPE CONSOLE}
 {$ENDIF}
 
+{$WARN DUPLICATE_CTOR_DTOR OFF}
 
 uses
   Forms,
@@ -98,6 +99,7 @@ begin
       TextTestRunner.RunRegisteredTests(ExitBehavior);
     {$ENDIF}
   {$ELSE}
+  ReportMemoryLeaksOnShutdown := True;
   Application.Initialize;
   TGUITestRunner.RunRegisteredTests;
   {$ENDIF}

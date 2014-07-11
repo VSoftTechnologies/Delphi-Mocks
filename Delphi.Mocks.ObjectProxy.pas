@@ -41,6 +41,7 @@ type
   private
     FInstance : T;
     FVMInterceptor : TVirtualMethodInterceptor;
+    function FindConstructor(ARttiType: TRttiType): TRttiMethod;
   protected
      procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
      function Proxy : T;override;
@@ -70,7 +71,7 @@ begin
   if rType = nil then
     raise EMockNoRTTIException.Create('No TypeInfo found for T');
 
-  ctor := rType.GetMethod('Create');
+  ctor := FindConstructor(rType);
   if ctor = nil then
     raise EMockException.Create('Could not find constructor Create on type ' + rType.Name);
 
@@ -91,12 +92,47 @@ begin
 end;
 
 procedure TObjectProxy<T>.DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
+var
+  vArgs: TArray<TValue>;
+  i, l: Integer;
 begin
   //don't intercept the TObject methods like BeforeDestruction etc.
   if Method.Parent.AsInstance.MetaclassType <> TObject then
   begin
     DoInvoke := False; //don't call the actual method.
-    Self.DoInvoke(Method,Args,Result);
+
+    //Included instance as first argument because TExpectation.Match
+    //deduces that the first argument is the object instance.
+    l := Length(Args);
+    SetLength(vArgs, l+1);
+    vArgs[0] := Instance;
+
+    for i := 1 to l do
+    begin
+      vArgs[i] := Args[i-1];
+    end;
+
+    Self.DoInvoke(Method,vArgs,Result);
+
+    for i := 1 to l do
+    begin
+      Args[i-1] := vArgs[i];
+    end;
+  end;
+end;
+
+function TObjectProxy<T>.FindConstructor(ARttiType: TRttiType): TRttiMethod;
+var
+  candidateCtor: TRttiMethod;
+begin
+  Result := nil;
+  for candidateCtor in ARttiType.GetMethods('Create') do
+  begin
+    if Length(candidateCtor.GetParameters) = 0 then
+    begin
+      Result := candidateCtor;
+      Break;
+    end;
   end;
 end;
 

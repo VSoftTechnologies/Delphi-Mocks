@@ -121,7 +121,7 @@ begin
     raise EMockNoProxyException.Create('Error proxy casting to interface');
 
   if virtualProxy.QueryInterface(GetTypeData(pInfo).Guid,result) <> 0 then
-    raise EMockNoProxyException.Create('Error casting to interface ' + string(pInfo.Name) + ' , proxy does not appear to implememnt T');
+	raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt T');
 end;
 
 function TInterfaceProxy<T>.QueryInterface(const IID: TGUID; out Obj): HRESULT;
