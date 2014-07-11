@@ -23,7 +23,6 @@ implementation
 uses
   Delphi.Mocks.Helpers,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.InterfaceProxy,
   classes;
 
 { TTestProxyBase }

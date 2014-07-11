@@ -6,8 +6,7 @@ uses
   SysUtils,
   TestFramework,
   Rtti,
-  Delphi.Mocks,
-  Delphi.Mocks.InterfaceProxy;
+  Delphi.Mocks;
 
 type
   ETestBehaviourException = class(Exception);

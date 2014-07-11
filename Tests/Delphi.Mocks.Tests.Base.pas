@@ -16,6 +16,12 @@ type
     procedure Dud;
   end;
 
+  ISecondTestInterface = interface
+    ['{2C2D10F4-0FE3-4B48-9834-276C654DF161}']
+    procedure One;
+    procedure Two;
+  end;
+
   IBlankTestInterface_WithRTTI = interface
     ['{C8726C8B-D695-4F19-823C-CE1FFBE59BED}']
   end;
@@ -59,6 +65,8 @@ type
     procedure CreateMock_With_Interface_We_Get_Valid_Proxy;
 
     procedure CreateMock_With_Record_Structure_Raises_Exception;
+
+    procedure Does_Implement_Then_Setup_Of_Interface_Return_Setup_Of_Interface;
   end;
 
 implementation
@@ -66,7 +74,6 @@ implementation
 uses
   Delphi.Mocks.Helpers,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.InterfaceProxy,
   classes;
 
 { TTestMock }
@@ -169,6 +176,25 @@ begin
 
   //Would also like to test the exception string.
   StopExpectingException;
+end;
+
+procedure TTestMock.Does_Implement_Then_Setup_Of_Interface_Return_Setup_Of_Interface;
+var
+  mock : TMock<ISimpleTestInterface_WithRTTI>;
+  otherMock : ISecondTestInterface;
+
+  bSupports : boolean;
+begin
+  mock := TMock<ISimpleTestInterface_WithRTTI>.Create;
+
+  mock.Implements<ISecondTestInterface>;
+
+  mock.Setup<ISecondTestInterface>.Expect.Once.When.One;
+
+  if mock.Instance.QueryInterface(ISecondTestInterface, otherMock) = 0 then
+    otherMock.One;
+
+  mock.Verify;
 end;
 
 { TSimpleTestObject_WithRTTI }

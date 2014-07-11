@@ -34,26 +34,26 @@ uses
   Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.ProxyBase,
+  Delphi.Mocks.Proxy,
   Delphi.Mocks.VirtualMethodInterceptor;
 
 type
-  TObjectProxy<T> = class(TBaseProxy<T>)
+  TObjectProxy<T> = class(TProxy<T>)
   private
     FInstance : T;
     FVMInterceptor : TVirtualMethodInterceptor;
-    function FindConstructor(ARttiType: TRttiType): TRttiMethod;
   protected
-     procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
-     function Proxy : T; override;
-     procedure Implements(const ATypeInfo: PTypeInfo); override;
+    procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
+    function Proxy : T; override;
   public
-    constructor Create(const AIsStubOnly : boolean = false);override;
-    destructor Destroy;override;
+    constructor Create(const AIsStubOnly : boolean = false); override;
+    destructor Destroy; override;
   end;
 
-
 implementation
+
+uses
+  Delphi.Mocks.Helpers;
 
 { TObjectProxy<T> }
 
@@ -70,7 +70,7 @@ begin
   if rType = nil then
     raise EMockNoRTTIException.Create('No TypeInfo found for T');
 
-  ctor := FindConstructor(rType);
+  ctor := rType.FindConstructor;
   if ctor = nil then
     raise EMockException.Create('Could not find constructor Create on type ' + rType.Name);
 
@@ -118,28 +118,6 @@ begin
       Args[i-1] := vArgs[i];
     end;
   end;
-end;
-
-function TObjectProxy<T>.FindConstructor(ARttiType: TRttiType): TRttiMethod;
-var
-  candidateCtor: TRttiMethod;
-begin
-  Result := nil;
-  for candidateCtor in ARttiType.GetMethods('Create') do
-  begin
-    if Length(candidateCtor.GetParameters) = 0 then
-    begin
-      Result := candidateCtor;
-      Break;
-    end;
-  end;
-end;
-
-procedure TObjectProxy<T>.Implements(const ATypeInfo: PTypeInfo);
-begin
-  inherited;
-  {$Message 'TODO: Need to implement mock objects also implementing interfaces'}
-  raise ENotImplemented.Create('Mock Objects Implementing Interfaces has not been implemented.');
 end;
 
 function TObjectProxy<T>.Proxy: T;
