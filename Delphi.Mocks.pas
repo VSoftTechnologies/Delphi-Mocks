@@ -126,8 +126,7 @@ type
 
   IProxy = interface(IWeakReferenceableObject)
     ['{C97DC7E8-BE99-46FE-8488-4B356DD4AE29}']
-    {$Message 'TODO Think of a better name for this later'}
-    function Value : IInterface;
+    function ProxyInterface : IInterface;
     function ProxyFromType(const ATypeInfo : PTypeInfo) : IProxy;
     procedure AddImplement(const AProxy : IProxy; const ATypeInfo : PTypeInfo);
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
@@ -288,10 +287,10 @@ begin
   prox := FProxy.ProxyFromType(pInfo);
 
   if prox = nil then
-    raise EMockException.CreateFmt('Mock does not implement [%s]', [pInfo.name]);
+    raise EMockException.CreateFmt('Mock does not implement [%s]', [pInfo.NameStr]);
 
   if (prox = nil) or (not Supports(prox, IProxy<I>, proxyI)) then
-    raise EMockException.CreateFmt('Proxy for [%s] does not support [IProxy<T>].', [pInfo.name]);
+    raise EMockException.CreateFmt('Proxy for [%s] does not support [IProxy<T>].', [pInfo.NameStr]);
 
   //Return the interface for the requested implementation.
   result := proxyI.Proxy;
@@ -326,7 +325,7 @@ begin
 
   //If nill is returned then we don't implement the defined type.
   if setup = nil then
-    raise EMockNoProxyException.CreateFmt('[%s] is not implement.', [pInfo.Name]);
+    raise EMockNoProxyException.CreateFmt('[%s] is not implement.', [pInfo.NameStr]);
 
   //Now get it as the mocksetup that we requrie. Note that this doesn't ensure
   //that I is actually implemented as all proxies implment IMockSetup<I>. This
@@ -334,7 +333,7 @@ begin
   if not Supports(setup, IMockSetup<I>, result) then
   begin
     pMockSetupInfo := TypeInfo(IMockSetup<I>);
-    raise EMockNoProxyException.CreateFmt('[%s] Proxy does not implement [%s]', [pInfo.Name, pMockSetupInfo.Name]);
+    raise EMockNoProxyException.CreateFmt('[%s] Proxy does not implement [%s]', [pInfo.NameStr, pMockSetupInfo.NameStr]);
   end;
 end;
 {$O+}

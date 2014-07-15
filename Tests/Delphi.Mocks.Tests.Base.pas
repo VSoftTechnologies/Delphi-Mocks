@@ -241,7 +241,6 @@ var
   simpleProxy : IProxy<IInterfaceOne>;
   prox : IProxy;
   secondProxy : IProxy<IInterfaceTwo>;
-  interfaceV : IVerify;
   pInfo : PTypeInfo;
 begin
   simpleProxy := TProxy<IInterfaceOne>.Create;
@@ -256,16 +255,12 @@ begin
   //The proxy should implement all the interfaces its defined with. Can't test
   //for IProxy<IInterfaceTwo> as this has the same GUID as IProxy<IInterfaceOne>
   //Therefore test that the instance of the proxy implements IInterfaceTwo.
-  CheckTrue(Supports(prox.Value, IInterfaceTwo));
+  CheckTrue(Supports(prox.ProxyInterface, IInterfaceTwo));
 end;
 
 procedure TTestMock.After_Implement_MockSetupT_Returns_ISetup_Of_The_Implemented_Type;
 var
   mock : TMock<ISimpleTestInterface_WithRTTI>;
-  otherMock : ISecondTestInterface;
-
-  bSupports : boolean;
-
   mockSetup : IMockSetup<ISecondTestInterface>;
   proxy : IProxy<ISecondTestInterface>;
 begin

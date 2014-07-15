@@ -45,8 +45,8 @@ type
   IProxyVirtualInterface = interface
     ['{A0394EB0-245E-4AE6-AD71-3BC9815CD173}']
     function QueryProxy(const IID: TGUID; out Obj : IProxy) : HRESULT;
-    function QueryInterface(const IID: TGUID; out Obj; const ACheckOwner : Boolean): HRESULT; overload; stdcall;
-    function QueryInterface(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload; stdcall;
+    function QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner : Boolean): HRESULT; overload;
+    function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
   end;
 
   TProxy<T> = class(TWeakReferencedObject, IWeakReferenceableObject, IInterface, IProxy, IProxy<T>, IStubProxy<T>, IMockSetup<T>, IStubSetup<T>, IExpect<T>, IVerify)
@@ -78,24 +78,22 @@ type
     FQueryingInternalInterface : boolean;
 
   protected type
-    TProxyVirtualInterface = class(TVirtualInterface, IProxyVirtualInterface)
+    TProxyVirtualInterface = class(TVirtualInterface, IInterface, IProxyVirtualInterface)
     private
       FProxy : IWeakReference<IProxy<T>>;
-    public
+    protected
       //IProxyVirtualInterface
       function QueryProxy(const IID: TGUID; out Obj : IProxy) : HRESULT;
-      function QueryInterface(const IID: TGUID; out Obj; const ACheckOwner : Boolean): HRESULT; overload; stdcall;
-      function QueryInterface(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload; stdcall;
-
+      function QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner : Boolean): HRESULT; overload;
+      function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
+    public
       //TVirtualInterface overrides
-      function QueryInterface(const IID: TGUID; out Obj): HRESULT; overload; override; stdcall;
       constructor Create(const AProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+      function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
     end;
 
   protected
     procedure SetParentProxy(const AProxy : IProxy);
-
-    function QueryProxy(const ATypeInfo : PTypeInfo; out AProxy : IProxy) : HRESULT;
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
@@ -103,7 +101,7 @@ type
     function _Release: Integer; stdcall;
 
     //IProxy
-    function Value : IInterface;
+    function ProxyInterface : IInterface;
 
     function ProxySupports(const Instance: IInterface; const IID: TGUID) : boolean; virtual;
     function ProxyFromType(const ATypeInfo : PTypeInfo) : IProxy; virtual;
@@ -191,14 +189,14 @@ function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; out 
 begin
   //See if we support the passed in interface. Passed on whether we need to check
   //the owner for the implementation as well.
-  Result := (Instance <> nil) and (Instance.QueryInterface(IID, Intf, ACheckOwner) = 0);
+  Result := (Instance <> nil) and (Instance.QueryInterfaceWithOwner(IID, Intf, ACheckOwner) = 0);
 end;
 
 function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; const ACheckOwner: Boolean): Boolean; overload;
 begin
   //See if we support the passed in interface. Passed on whether we need to check
   //the owner for the implementation as well.
-  Result := (Instance <> nil) and (Instance.QueryInterface(IID, ACheckOwner) = 0);
+  Result := (Instance <> nil) and (Instance.QueryInterfaceWithOwner(IID, ACheckOwner) = 0);
 end;
 
 { TProxyBase }
@@ -360,7 +358,7 @@ begin
     end;
   end;
 
-  FName := pInfo.Name;
+  FName := pInfo.NameStr;
 end;
 
 destructor TProxy<T>.Destroy;
@@ -486,46 +484,6 @@ begin
   FMethodData.Add(methodName,Result);
 end;
 
-function TProxy<T>.QueryProxy(const ATypeInfo : PTypeInfo; out AProxy : IProxy) : HRESULT;
-var
-  virtualProxy : IInterface;
-  interfaceID : TGUID;
-begin
-  //We haven't found the proxy unless otherwise proven.
-  Result := E_NOINTERFACE;
-
-  interfaceID := GetTypeData(ATypeInfo).Guid;
-
-  if FVirtualInterface <> nil then
-  begin
-    //Are we the proxy which implementes the passed in type.
-    if Supports(FVirtualInterface, interfaceID) then
-    begin
-      // AProxy := FVirtualInterface;
-      {$Message 'TODO Figure out how to return IProxy<I>'}
-      AProxy := nil;
-      Result := S_OK;
-      //If so then we can leave.
-      Exit;
-    end;
-  end;
-
-  //Next check our children interface implementations
-  if (FInterfaceProxies.ContainsKey(interfaceID)) then
-  begin
-    virtualProxy := FInterfaceProxies.Items[interfaceID];
-    if Supports(virtualProxy, interfaceID) then
-    begin
-      // AProxy := FVirtualInterface;
-      AProxy := nil;
-      {$Message 'TODO Figure out how to return IProxy<I>'}
-      Result := S_OK;
-      //If so then we can leave.
-      Exit;
-    end;
-  end;
-end;
-
 function TProxy<T>.QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT;
 var
   virtualProxy : IProxy;
@@ -541,7 +499,7 @@ begin
     if (FInterfaceProxies.ContainsKey(IID)) then
     begin
       virtualProxy := FInterfaceProxies.Items[IID];
-      Result := virtualProxy.Value.QueryInterface(IID, Obj);
+      Result := virtualProxy.ProxyInterface.QueryInterface(IID, Obj);
 
       if result = S_OK then
         Exit;
@@ -665,7 +623,7 @@ begin
     Exit;
   end;
 
-  raise EMockNoProxyException.Create('Error - No Proxy of type [' + ATypeInfo.Name + '] was found');
+  raise EMockNoProxyException.Create('Error - No Proxy of type [' + ATypeInfo.NameStr + '] was found');
 end;
 
 function TProxy<T>.ProxySupports(const Instance: IInterface; const IID: TGUID): boolean;
@@ -686,7 +644,7 @@ begin
   result := Self;
 end;
 
-function TProxy<T>.Value: IInterface;
+function TProxy<T>.ProxyInterface: IInterface;
 var
   pInfo : PTypeInfo;
   virtualProxy : IInterface;
@@ -797,10 +755,10 @@ begin
   //IInterfaceOne to support IInterfaceTwo when asked. Use this when looking for
   //the implementing virtual interface, use QueryProxy when looking for the
   //owning proxy of the implemented type.
-  Result := QueryInterface(IID, Obj, True);
+  Result := QueryInterfaceWithOwner(IID, Obj, True);
 end;
 
-function TProxy<T>.TProxyVirtualInterface.QueryInterface(const IID: TGUID; out Obj; const ACheckOwner: Boolean): HRESULT;
+function TProxy<T>.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner: Boolean): HRESULT;
 begin
   //See if we support the passed in interface.
   Result := inherited QueryInterface(IID, Obj);
@@ -812,18 +770,18 @@ begin
     Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
 end;
 
-function TProxy<T>.TProxyVirtualInterface.QueryInterface(const IID: TGUID; const ACheckOwner: Boolean): HRESULT;
+function TProxy<T>.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner: Boolean): HRESULT;
 var
   dud : IInterface;
 begin
-  Result := QueryInterface(IID, dud, ACheckOwner);
+  Result := QueryInterfaceWithOwner(IID, dud, ACheckOwner);
 end;
 
 function TProxy<T>.TProxyVirtualInterface.QueryProxy(const IID: TGUID; out Obj : IProxy): HRESULT;
 begin
   //If this virtual proxy (and only this virtual proxy) supports the passed in
   //interface, return the proxy who owns us.
-  if QueryInterface(IID, Obj, False) <> 0 then
+  if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
     FProxy.QueryInterface(IProxy, Obj);
 end;
 
