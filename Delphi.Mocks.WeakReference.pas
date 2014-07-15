@@ -43,8 +43,6 @@ Delphi 2010 and has so far proven to be very reliable.
 
 *)
 
-{$I DUnitX.inc}
-
 interface
 
 type
