@@ -57,12 +57,14 @@ end;
 procedure TSafeCallTest.CanMockSafecallFunction;
 var
   mock : TMock<ISafeCallInterface>;
-
+  value: Integer;
 begin
   mock := TMock<ISafeCallInterface>.Create;
   mock.Setup.WillReturn(123).When.DoSomething('hello');
 
-  CheckEquals(123, mock.Instance.DoSomething('hello'));
+  value := mock.Instance.DoSomething('hello');
+
+  CheckEquals(123, value);
 end;
 
 procedure TSafeCallTest.CanMockSafecallProc;

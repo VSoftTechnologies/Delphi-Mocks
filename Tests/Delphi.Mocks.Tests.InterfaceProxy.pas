@@ -32,15 +32,26 @@ uses
 
 type
   {$M+}
-  ISimpleInterface = Interface
-  ['{F1731F12-2453-4818-A785-997AF7A3D51F}']
+  IInterfaceOne = Interface
+    ['{F1731F12-2453-4818-A785-997AF7A3D51F}']
+    procedure Execute1;
   End;
 
-  ISecondSimpleInterface = Interface
-  ['{C7191239-2E89-4D3A-9D1B-F894BACBBB39}']
+  {$M+}
+  IInterfaceTwo = Interface
+    ['{C7191239-2E89-4D3A-9D1B-F894BACBBB39}']
+    procedure Execute2;
   End;
 
+  {$M+}
+  IInterfaceThree = interface
+    ['{E3BE68FA-E318-49CA-B93F-DAB02C07B3A3}']
+    procedure Execute3;
+  end;
+
+  {$M+}
   ICommand = interface
+    ['{9742A11D-69A4-422E-A2F3-CCEC4934DFC0}']
     procedure Execute;
     procedure TestVarParam(var msg : string);
     procedure TestOutParam(out msg : string);
@@ -49,8 +60,9 @@ type
 
   TTestInterfaceProxy = class(TTestCase)
   published
-    procedure Does_A_Proxy_Implement_Two_Interfaces_After_A_Cast;
-    procedure After_Destruction_Are_All_The_Interfaces_Cleaned_Up;
+    procedure After_Proxy_AddImplement_ProxyProxy_Implements_Original_Interface;
+    procedure After_Proxy_AddImplement_ProxyProxy_Implements_New_Interface;
+    procedure After_Proxy_AddImplement_ProxyFromType_Returns_Proxy_For_Implemented_Interface;
     procedure MockNoArgProcedureUsingOnce;
     procedure MockNoArgProcedureUsingOnceWhen;
     procedure MockNoArgProcedureUsingNeverWhen;
@@ -62,44 +74,64 @@ type
     procedure TestVarParam;
   end;
 
-//TODO: IProxy<T> will not allow a function of CastAs<I> on it, class does however.
-
 implementation
 
 uses
   SysUtils,
   Delphi.Mocks,
-  Delphi.Mocks.InterfaceProxy, System.Rtti;
+  Delphi.Mocks.Proxy,
+  System.Rtti;
 
 { TTestInterfaceProxy }
 
-procedure TTestInterfaceProxy.After_Destruction_Are_All_The_Interfaces_Cleaned_Up;
+procedure TTestInterfaceProxy.After_Proxy_AddImplement_ProxyFromType_Returns_Proxy_For_Implemented_Interface;
 var
-  simpleInterface: TInterfaceProxy<ISimpleInterface>;
-  secondInterface: ISecondSimpleInterface;
+  proxySUT : IProxy<IInterfaceOne>;
+  newInterface : IInterfaceTwo;
+  newProxy : IProxy;
 begin
-  simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
-  try
-    secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
+  //SETUP
+  proxySUT := TProxy<IInterfaceOne>.Create;
 
-    CheckNotNull(secondInterface, 'The second interface is not implemented!');
-  finally
-    simpleInterface.Free;
-  end;
+  //SETUP - Added the implementation of Interface
+  proxySUT.AddImplement(TProxy<IInterfaceTwo>.Create, TypeInfo(IInterfaceTwo));
+
+  newProxy := proxySUT.ProxyFromType(TypeInfo(IInterfaceTwo));
+
+  //TEST - Make sure proxy value implements IInterfaceTwo
+  CheckTrue(Supports(newProxy.ProxyInterface, IInterfaceTwo, newInterface));
 end;
 
-procedure TTestInterfaceProxy.Does_A_Proxy_Implement_Two_Interfaces_After_A_Cast;
+procedure TTestInterfaceProxy.After_Proxy_AddImplement_ProxyProxy_Implements_New_Interface;
 var
-  simpleInterface: TInterfaceProxy<ISimpleInterface>;
-  secondInterface : ISecondSimpleInterface;
+  proxySUT : IProxy<IInterfaceOne>;
+  newInterface : IInterfaceTwo;
 begin
-  simpleInterface := TInterfaceProxy<ISimpleInterface>.Create;
-  try
-    secondInterface := simpleInterface.CastAs<ISecondSimpleInterface>;
-    CheckNotNull(secondInterface, 'The second interface is not implemented!');
-  finally
-    FreeAndNil(simpleInterface);
-  end;
+  //SETUP
+  proxySUT := TProxy<IInterfaceOne>.Create;
+
+  //SETUP - Added the implementation of Interface
+  proxySUT.AddImplement(TProxy<IInterfaceTwo>.Create, TypeInfo(IInterfaceTwo));
+
+  //TEST - Make sure proxy value implements IInterfaceTwo
+  CheckTrue(Supports(proxySUT.Proxy, IInterfaceTwo, newInterface));
+end;
+
+procedure TTestInterfaceProxy.After_Proxy_AddImplement_ProxyProxy_Implements_Original_Interface;
+var
+  proxySUT : IProxy<IInterfaceOne>;
+  originalInterface : IInterfaceOne;
+begin
+  //SETUP
+  proxySUT := TProxy<IInterfaceOne>.Create;
+
+  //SETUP - Added the implementation of Interface
+  proxySUT.AddImplement(TProxy<IInterfaceTwo>.Create, TypeInfo(IInterfaceTwo));
+
+  //TEST - Make sure proxy value implements IInterfaceOne
+  CheckTrue(Supports(proxySUT.Proxy, IInterfaceOne, originalInterface));
+  CheckNotNull(originalInterface);
+  CheckTrue(originalInterface = proxySUT.Proxy);
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtLeastOnceWhen;

@@ -28,8 +28,7 @@ unit Delphi.Mocks.When;
 interface
 
 uses
-  Delphi.Mocks,
-  Delphi.Mocks.InterfaceProxy;
+  Delphi.Mocks;
 
 type
   TWhen<T> = class(TInterfacedObject,IWhen<T>)

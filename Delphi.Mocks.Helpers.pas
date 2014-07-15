@@ -68,6 +68,7 @@ type
 
   TRttiTypeHelper = class helper for TRttiType
     function TryGetMethod(const AName: string; out AMethod: TRttiMethod): Boolean;
+    function FindConstructor : TRttiMethod;
   end;
 
 function CompareValue(const Left, Right: TValue): Integer;
@@ -341,6 +342,21 @@ end;
 
 
 { TRttiTypeHelper }
+
+function TRttiTypeHelper.FindConstructor: TRttiMethod;
+var
+  candidateCtor: TRttiMethod;
+begin
+  Result := nil;
+  for candidateCtor in GetMethods('Create') do
+  begin
+    if Length(candidateCtor.GetParameters) = 0 then
+    begin
+      Result := candidateCtor;
+      Break;
+    end;
+  end;
+end;
 
 function TRttiTypeHelper.TryGetMethod(const AName: string; out AMethod: TRttiMethod): Boolean;
 begin
