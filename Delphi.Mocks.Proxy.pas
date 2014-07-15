@@ -571,8 +571,6 @@ var
 begin
   Result := E_NOINTERFACE;
 
-  OutputDebugString(PWideChar('TProxy<T>.QueryInterface : ' + GuidToString(IID)));
-
   //If we are already querying this interface, leave.
   if FQueryingInterface then
     Exit;
