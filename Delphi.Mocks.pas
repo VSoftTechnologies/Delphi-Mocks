@@ -41,7 +41,7 @@ type
   //Records the expectations we have when our Mock is used. We can then verify
   //our expectations later.
   IExpect<T> = interface
-  ['{8B9919F1-99AB-4526-AD90-4493E9343083}']
+    ['{8B9919F1-99AB-4526-AD90-4493E9343083}']
     function Once : IWhen<T>;overload;
     procedure Once(const AMethodName : string);overload;
 
@@ -71,7 +71,7 @@ type
   end;
 
   IWhen<T> = interface
-  ['{A8C2E07B-A5C1-463D-ACC4-BA2881E8419F}']
+    ['{A8C2E07B-A5C1-463D-ACC4-BA2881E8419F}']
     function When : T;
   end;
 
@@ -113,7 +113,7 @@ type
   //We use the Setup to configure our expected behaviour rules and to verify
   //that those expectations were met.
   IMockSetup<T> = interface(IStubSetup<T>)
-  ['{D6B21933-BF51-4937-877E-51B59A3B3268}']
+    ['{D6B21933-BF51-4937-877E-51B59A3B3268}']
     //Set Expectations for methods
     function Expect : IExpect<T>;
   end;
@@ -126,15 +126,18 @@ type
 
   IProxy = interface(IWeakReferenceableObject)
     ['{C97DC7E8-BE99-46FE-8488-4B356DD4AE29}']
-    function SetupFromTypeInfo(const ATypeInfo : PTypeInfo) : IInterface;
-    procedure AddImplements(const AProxy : IProxy; const ATypeInfo : PTypeInfo);
+    {$Message 'TODO Think of a better name for this later'}
+    function Value : IInterface;
+    function ProxyFromType(const ATypeInfo : PTypeInfo) : IProxy;
+    procedure AddImplement(const AProxy : IProxy; const ATypeInfo : PTypeInfo);
+    function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     procedure SetParentProxy(const AProxy : IProxy);
   end;
 
   //used by the mock - need to find another place to put this.. circular references
   //problem means we need it here for now.
   IProxy<T> = interface(IProxy)
-  ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
+    ['{1E3A98C5-78BA-4D65-A4BA-B6992B8B4783}']
     function Setup : IMockSetup<T>;
     function Proxy : T;
   end;
@@ -166,13 +169,17 @@ type
     class operator Implicit(const Value: TMock<T>): T;
 
     function Setup : IMockSetup<T>; overload;
-    function Setup<I> : IMockSetup<I>; overload;
+    function Setup<I : IInterface> : IMockSetup<I>; overload;
 
     //Verify that our expectations were met.
-    procedure Verify(const message : string = '');
+    procedure Verify(const message : string = ''); overload;
+    procedure Verify<I : IInterface>(const message : string = ''); overload;
+    procedure VerifyAll(const message : string = '');
+
     function CheckExpectations: string;
-    procedure Implements<I : IInterface>; overload;
-    function Instance : T;
+    procedure Implement<I : IInterface>; overload;
+    function Instance : T; overload;
+    function Instance<I : IInterface> : I; overload;
     function InstanceAsValue : TValue;
     class function Create: TMock<T>; static;
     // explicit cleanup. Not sure if we really need this.
@@ -243,18 +250,18 @@ begin
   FProxy := nil;
 end;
 
-procedure TMock<T>.Implements<I>;
+procedure TMock<T>.Implement<I>;
 var
   proxy : IProxy<I>;
   pInfo : PTypeInfo;
 begin
   pInfo := TypeInfo(I);
 
-  proxy := TProxy<I>.Create;
-
   CheckMockInterface(pInfo);
 
-  FProxy.AddImplements(proxy, pInfo);
+  proxy := TProxy<I>.Create;
+
+  FProxy.AddImplement(proxy, pInfo);
 end;
 
 class operator TMock<T>.Implicit(const Value: TMock<T>): T;
@@ -267,6 +274,29 @@ begin
   result := FProxy.Proxy;
 end;
 
+function TMock<T>.Instance<I>: I;
+var
+  prox : IInterface;
+  proxyI : IProxy<I>;
+  pInfo : PTypeInfo;
+begin
+  result := nil;
+
+  //Does the proxy we have, or any of its children support a proxy for the passed
+  //in interface type?
+  pInfo := TypeInfo(I);
+  prox := FProxy.ProxyFromType(pInfo);
+
+  if prox = nil then
+    raise EMockException.CreateFmt('Mock does not implement [%s]', [pInfo.name]);
+
+  if (prox = nil) or (not Supports(prox, IProxy<I>, proxyI)) then
+    raise EMockException.CreateFmt('Proxy for [%s] does not support [IProxy<T>].', [pInfo.name]);
+
+  //Return the interface for the requested implementation.
+  result := proxyI.Proxy;
+end;
+
 function TMock<T>.InstanceAsValue: TValue;
 begin
   result := TValue.From<T>(Self);
@@ -277,18 +307,37 @@ begin
   result := FProxy.Setup;
 end;
 
+{$O-}
 function TMock<T>.Setup<I>: IMockSetup<I>;
 var
-  setup : IInterface;
+  setup : IProxy;
   pInfo : PTypeInfo;
+  pMockSetupInfo : PTypeInfo;
 begin
-  pInfo := TypeInfo(IMockSetup<I>);
+  //We have to ask for the proxy who owns the implementation of the interface/object
+  //in question. The reason for this it that all proxies implement IProxy<T> and
+  //therefore we will just get the first proxy always.
+  //E.g. IProxy<IInterfaceOne> and IProxy<IInterfaceTwo> have the same GUID. Makes
+  //generic interfaces hard to use.
+  pInfo := TypeInfo(I);
 
-  setup := FProxy.SetupFromTypeInfo(pInfo);
+  //Get the proxy which implements
+  setup := FProxy.ProxyFromType(pInfo);
 
+  //If nill is returned then we don't implement the defined type.
+  if setup = nil then
+    raise EMockNoProxyException.CreateFmt('[%s] is not implement.', [pInfo.Name]);
+
+  //Now get it as the mocksetup that we requrie. Note that this doesn't ensure
+  //that I is actually implemented as all proxies implment IMockSetup<I>. This
+  //is what we only return the error that IMockSetup isn't implemented.
   if not Supports(setup, IMockSetup<I>, result) then
-    raise EMockNoProxyException.Create(pInfo.NameStr + ' is not implemented by the Mock.');
+  begin
+    pMockSetupInfo := TypeInfo(IMockSetup<I>);
+    raise EMockNoProxyException.CreateFmt('[%s] Proxy does not implement [%s]', [pInfo.Name, pMockSetupInfo.Name]);
+  end;
 end;
+{$O+}
 
 class procedure TMock<T>.CheckMockInterface(const ATypeInfo : PTypeInfo);
 begin
@@ -321,11 +370,41 @@ end;
 
 procedure TMock<T>.Verify(const message: string);
 var
-  su : IMockSetup<T>;
   v : IVerify;
 begin
-  if Supports(FProxy.Setup,IVerify,v) then
+  if Supports(FProxy.Setup, IVerify, v) then
     v.Verify(message)
+  else
+    raise EMockException.Create('Could not cast Setup to IVerify interface!');
+end;
+
+{$O-}
+procedure TMock<T>.Verify<I>(const message: string);
+var
+  prox : IInterface;
+  interfaceV : IVerify;
+  pInfo : PTypeInfo;
+begin
+  //Does the proxy we have, or any of its children support a proxy for the passed
+  //in interface type?
+
+  pInfo := TypeInfo(I);
+
+  prox := FProxy.ProxyFromType(pInfo);
+
+  if (prox = nil) or (not Supports(prox, IVerify, interfaceV)) then
+    raise EMockException.Create('Could not cast Setup to IVerify interface!');
+
+  interfaceV.Verify(message);
+end;
+{$O+}
+
+procedure TMock<T>.VerifyAll(const message: string);
+var
+  interfaceV : IVerify;
+begin
+  if Supports(FProxy.Setup, IVerify, interfaceV) then
+    interfaceV.VerifyAll(message)
   else
     raise EMockException.Create('Could not cast Setup to IVerify interface!');
 end;
@@ -413,3 +492,4 @@ begin
 end;
 
 end.
+
