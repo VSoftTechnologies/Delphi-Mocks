@@ -99,7 +99,7 @@ begin
   newProxy := proxySUT.ProxyFromType(TypeInfo(IInterfaceTwo));
 
   //TEST - Make sure proxy value implements IInterfaceTwo
-  CheckTrue(Supports(newProxy.Value, IInterfaceTwo, newInterface));
+  CheckTrue(Supports(newProxy.ProxyInterface, IInterfaceTwo, newInterface));
 end;
 
 procedure TTestInterfaceProxy.After_Proxy_AddImplement_ProxyProxy_Implements_New_Interface;
