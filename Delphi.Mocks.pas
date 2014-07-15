@@ -254,6 +254,9 @@ var
   proxy : IProxy<I>;
   pInfo : PTypeInfo;
 begin
+  if FProxy is TObjectProxy<T> then
+    raise ENotSupportedException.Create('Adding interface implementation to non interfaced objects not supported at this time');
+
   pInfo := TypeInfo(I);
 
   CheckMockInterface(pInfo);
