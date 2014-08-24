@@ -480,7 +480,7 @@ begin
   if FMethodData.TryGetValue(methodName,Result) then
     exit;
 
-  Result := TMethodData.Create(AMethodName,FIsStubOnly);
+  Result := TMethodData.Create(AMethodName,FIsStubOnly, FBehaviorMustBeDefined);
   FMethodData.Add(methodName,Result);
 end;
 
