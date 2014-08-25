@@ -107,7 +107,6 @@ type
 
     //If true, calls to methods for which we have not defined a behavior will cause verify to fail.
     property BehaviorMustBeDefined : boolean read GetBehaviorMustBeDefined write SetBehaviorMustBeDefined;
-
   end;
 
   //We use the Setup to configure our expected behaviour rules and to verify
@@ -272,7 +271,15 @@ begin
 end;
 
 function TMock<T>.Instance : T;
+var
+  pInfo : PTypeInfo;
 begin
+  if FProxy = nil then
+  begin
+    pInfo := TypeInfo(T);
+    raise EMockException.Create(format('Mock [%s] did not have create called before its use.', [pInfo.Name]));
+  end;
+
   result := FProxy.Proxy;
 end;
 
