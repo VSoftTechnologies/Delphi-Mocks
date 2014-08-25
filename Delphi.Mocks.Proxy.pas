@@ -483,7 +483,7 @@ begin
 
   pInfo := TypeInfo(T);
 
-  Result := TMethodData.Create(pInfo.Name, AMethodName, FIsStubOnly);
+  Result := TMethodData.Create(pInfo.Name, AMethodName, FIsStubOnly, FBehaviorMustBeDefined);
   FMethodData.Add(methodName,Result);
 end;
 
