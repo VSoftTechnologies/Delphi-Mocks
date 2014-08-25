@@ -46,6 +46,7 @@ type
     FReturnDefault  : TValue;
     FExpectations   : TList<IExpectation>;
     FIsStub         : boolean;
+    FBehaviorMustBeDefined: boolean;
   protected
 
     //Behaviors
@@ -88,7 +89,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean);
+    constructor Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
     destructor Destroy;override;
   end;
 
@@ -108,13 +109,14 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean);
+constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
 begin
   FTypeName := ATypeName;
   FMethodName := AMethodName;
   FBehaviors := TList<IBehavior>.Create;
   FExpectations := TList<IExpectation>.Create;
   FReturnDefault := TValue.Empty;
+  FBehaviorMustBeDefined := ABehaviorMustBeDefined;
   FIsStub := AIsStub;
 end;
 
@@ -405,11 +407,16 @@ var
   behavior : IBehavior;
   returnVal : TValue;
   expectation : IExpectation;
+  expectationHitCtr: integer;
 begin
+  expectationHitCtr := 0;
   for expectation in FExpectations do
   begin
     if expectation.Match(Args) then
+    begin
       expectation.RecordHit;
+      inc(expectationHitCtr);
+    end;
   end;
 
   behavior := FindBestBehavior(Args);
@@ -420,9 +427,9 @@ begin
     if (returnType <> nil) and (FReturnDefault.IsEmpty) then
       if FIsStub then
         result := GetDefaultValue(returnType)
-      else
-        raise EMockException.Create(Format('[%s] has no default return value defined for method [%s]', [FTypeName, FMethodName]));
-    
+      else if FBehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
+        raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
+
     returnVal := FReturnDefault;
   end;
   if returnType <> nil then
