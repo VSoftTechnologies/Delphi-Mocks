@@ -427,11 +427,9 @@ begin
     if (returnType <> nil) and (FReturnDefault.IsEmpty) then
       if FIsStub then
         result := GetDefaultValue(returnType)
-      else
-        raise EMockException.Create(Format('[%s] has no default return value defined for method [%s]', [FTypeName, FMethodName]));
-    else if FBehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
-      raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
-    
+      else if FBehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
+        raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
+
     returnVal := FReturnDefault;
   end;
   if returnType <> nil then
