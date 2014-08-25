@@ -475,12 +475,15 @@ end;
 function TProxy<T>.GetMethodData(const AMethodName: string): IMethodData;
 var
   methodName : string;
+  pInfo : PTypeInfo;
 begin
   methodName := LowerCase(AMethodName);
   if FMethodData.TryGetValue(methodName,Result) then
     exit;
 
-  Result := TMethodData.Create(AMethodName,FIsStubOnly, FBehaviorMustBeDefined);
+  pInfo := TypeInfo(T);
+
+  Result := TMethodData.Create(pInfo.Name, AMethodName, FIsStubOnly, FBehaviorMustBeDefined);
   FMethodData.Add(methodName,Result);
 end;
 

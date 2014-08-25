@@ -40,6 +40,7 @@ uses
 type
   TMethodData = class(TInterfacedObject,IMethodData)
   private
+    FTypeName      : string;
     FMethodName     : string;
     FBehaviors      : TList<IBehavior>;
     FReturnDefault  : TValue;
@@ -88,7 +89,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
+    constructor Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
     destructor Destroy;override;
   end;
 
@@ -108,8 +109,9 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
+constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
 begin
+  FTypeName := ATypeName;
   FMethodName := AMethodName;
   FBehaviors := TList<IBehavior>.Create;
   FExpectations := TList<IExpectation>.Create;
@@ -131,7 +133,7 @@ var
 begin
   expectation := FindExpectation([TExpectationType.Exactly,TExpectationType.ExactlyWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Exactly already defined on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Exactly for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateExactly(FMethodName,times);
   FExpectations.Add(expectation);
 end;
@@ -143,7 +145,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.ExactlyWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Exactly already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Exactly for method [%s] with args.', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateExactlyWhen(FMethodName,times,Args);
   FExpectations.Add(expectation);
 end;
@@ -259,7 +261,7 @@ var
 begin
   expectation := FindExpectation([TExpectationType.AtLeast,TExpectationType.AtLeastOnce,TExpectationType.AtLeastOnceWhen,TExpectationType.AtLeastWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation At Least already defined on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation At Least for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateAtLeast(FMethodName,times);
   FExpectations.Add(expectation);
 end;
@@ -270,7 +272,7 @@ var
 begin
   expectation := FindExpectation([TExpectationType.AtLeast,TExpectationType.AtLeastOnce,TExpectationType.AtLeastOnceWhen,TExpectationType.AtLeastWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation At Least already defined on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation At Least Once for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateAtLeastOnce(FMethodName);
   FExpectations.Add(expectation);
 end;
@@ -281,7 +283,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.AtLeastOnceWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation At Least Once already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation At Least Once When for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateAtLeastOnceWhen(FMethodName,Args);
   FExpectations.Add(expectation);
 end;
@@ -292,7 +294,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.AtLeastWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation At Least already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation At Least When for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateAtLeastWhen(FMethodName,times,Args);
   FExpectations.Add(expectation);
 end;
@@ -303,7 +305,7 @@ var
 begin
   expectation := FindExpectation([TExpectationType.AtMost,TExpectationType.AtMostWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation At Most already defined on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation At Most for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateAtMost(FMethodName,times);
   FExpectations.Add(expectation);
 end;
@@ -315,7 +317,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.AtMostWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation At Most already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation At Most When for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateAtMostWhen(FMethodName,times,Args);
   FExpectations.Add(expectation);
 end;
@@ -336,7 +338,7 @@ var
 begin
   expectation := FindExpectation([TExpectationType.Between,TExpectationType.BetweenWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Between already defined on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Between for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateBetween(FMethodName,a,b);
   FExpectations.Add(expectation);
 end;
@@ -347,7 +349,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.BetweenWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Between already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Between When for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateBetweenWhen(FMethodName,a,b,Args);
   FExpectations.Add(expectation);
 end;
@@ -360,8 +362,8 @@ var
 begin
   expectation := FindExpectation([TExpectationType.Never ,TExpectationType.NeverWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Never already defined on method : ' + FMethodName);
-
+    raise EMockException.Create(Format('[%s] already defines Expectation Never for method [%s]', [FTypeName, FMethodName]));
+  
   expectation := TExpectation.CreateNever(FMethodName);
   FExpectations.Add(expectation);
 end;
@@ -372,7 +374,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.NeverWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Never already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Never When for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateNeverWhen(FMethodName,Args);
   FExpectations.Add(expectation);
 end;
@@ -383,7 +385,7 @@ var
 begin
   expectation := FindExpectation([TExpectationType.Once,TExpectationType.OnceWhen]);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Once already defined on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Once for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateOnce(FMethodName);
   FExpectations.Add(expectation);
 end;
@@ -394,7 +396,7 @@ var
 begin
   expectation := FindExpectation(TExpectationType.OnceWhen,Args);
   if expectation <> nil then
-    raise EMockException.Create('Expectation Once already defined for these args on method : ' + FMethodName);
+    raise EMockException.Create(Format('[%s] already defines Expectation Once When for method [%s]', [FTypeName, FMethodName]));
   expectation := TExpectation.CreateOnceWhen(FMethodName,Args);
   FExpectations.Add(expectation);
 end;
@@ -425,10 +427,8 @@ begin
     if (returnType <> nil) and (FReturnDefault.IsEmpty) then
       if FIsStub then
         result := GetDefaultValue(returnType)
-      else
-        raise EMockException.Create('No default return value defined for method ' + FMethodName)
-    else if FBehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
-      raise EMockException.Create('No behaviour or expectation defined for method ' + FMethodName);
+      else if FBehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
+        raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
 
     returnVal := FReturnDefault;
   end;
@@ -466,7 +466,7 @@ var
 begin
   behavior := FindBehavior(TBehaviorType.WillExecute);
   if behavior <> nil then
-    raise EMockSetupException.Create('WillExecute already defined for ' + FMethodName );
+    raise EMockSetupException.Create(Format('[%s] already defines WillExecute for method [%s]', [FTypeName, FMethodName]));
   behavior := TBehavior.CreateWillExecute(func);
   FBehaviors.Add(behavior);
 end;
@@ -477,7 +477,7 @@ var
 begin
   behavior := FindBehavior(TBehaviorType.WillExecuteWhen,Args);
   if behavior <> nil then
-    raise EMockSetupException.Create('WillExecute.When already defined with these parameters for method ' + FMethodName );
+    raise EMockSetupException.Create(Format('[%s] already defines WillExecute When for method [%s]', [FTypeName, FMethodName]));
   behavior := TBehavior.CreateWillExecuteWhen(Args, func);
   FBehaviors.Add(behavior);
 end;
@@ -488,7 +488,7 @@ var
 begin
   behavior := FindBehavior(TBehaviorType.WillRaiseAlways);
   if behavior <> nil then
-    raise EMockSetupException.Create('WillRaise already defined for method ' + FMethodName );
+    raise EMockSetupException.Create(Format('[%s] already defines Will Raise Always for method [%s]', [FTypeName, FMethodName]));
   behavior := TBehavior.CreateWillRaise(exceptionClass,message);
   FBehaviors.Add(behavior);
 end;
@@ -499,7 +499,7 @@ var
 begin
   behavior := FindBehavior(TBehaviorType.WillRaise,Args);
   if behavior <> nil then
-    raise EMockSetupException.Create('WillRaise.When already defined for method ' + FMethodName );
+    raise EMockSetupException.Create(Format('[%s] already defines Will Raise When for method [%s]', [FTypeName, FMethodName]));
   behavior := TBehavior.CreateWillRaiseWhen(Args,exceptionClass,message);
   FBehaviors.Add(behavior);
 end;
@@ -507,7 +507,7 @@ end;
 procedure TMethodData.WillReturnDefault(const returnValue: TValue);
 begin
   if not FReturnDefault.IsEmpty then
-    raise EMockSetupException.Create('Default return Value already specified for ' + FMethodName);
+    raise EMockSetupException.Create(Format('[%s] already defines Will Return Default for method [%s]', [FTypeName, FMethodName]));
   FReturnDefault := returnValue;
 end;
 
@@ -517,7 +517,7 @@ var
 begin
   behavior := FindBehavior(TBehaviorType.WillReturn,Args);
   if behavior <> nil then
-    raise EMockSetupException.Create('WillReturn.When already defined with these parameters for method ' + FMethodName );
+    raise EMockSetupException.Create(Format('[%s] already defines Will Return When for method [%s]', [FTypeName, FMethodName]));
   behavior := TBehavior.CreateWillReturnWhen(Args,returnValue);
   FBehaviors.Add(behavior);
 end;
