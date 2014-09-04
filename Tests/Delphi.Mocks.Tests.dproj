@@ -129,6 +129,7 @@
 			<DCCReference Include="..\DUnitXML\VSoft.MSXML6.pas"/>
 			<DCCReference Include="..\Delphi.Mocks.WeakReference.pas"/>
 			<DCCReference Include="Delphi.Mocks.Examples.Implement.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.ParamMatcher.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

@@ -50,11 +50,12 @@ uses
   Delphi.Mocks.Tests.ObjectProxy in 'Delphi.Mocks.Tests.ObjectProxy.pas',
   Delphi.Mocks.Examples.Objects in 'Delphi.Mocks.Examples.Objects.pas',
   Delphi.Mocks.ReturnTypePatch in '..\Delphi.Mocks.ReturnTypePatch.pas',
-  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas' {$R *.RES},
+  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas',
   VSoft.DUnit.XMLTestRunner in '..\DUnitXML\VSoft.DUnit.XMLTestRunner.pas',
   VSoft.MSXML6 in '..\DUnitXML\VSoft.MSXML6.pas',
   Delphi.Mocks.WeakReference in '..\Delphi.Mocks.WeakReference.pas',
-  Delphi.Mocks.Examples.Implement in 'Delphi.Mocks.Examples.Implement.pas';
+  Delphi.Mocks.Examples.Implement in 'Delphi.Mocks.Examples.Implement.pas',
+  Delphi.Mocks.ParamMatcher in '..\Delphi.Mocks.ParamMatcher.pas';
 
 {$R *.RES}
 

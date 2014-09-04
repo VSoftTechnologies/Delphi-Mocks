@@ -32,6 +32,7 @@ uses
   TypInfo,
   Generics.Collections,
   Delphi.Mocks,
+  Delphi.Mocks.ParamMatcher,
   Rtti;
 
 type
@@ -85,11 +86,11 @@ type
 
     //behaviors
     procedure WillReturnDefault(const returnValue : TValue);
-    procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue);
+    procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue; const matchers : TArray<IMatcher>);
     procedure WillRaiseAlways(const exceptionClass : ExceptClass; const message : string);
-    procedure WillRaiseWhen(const exceptionClass : ExceptClass; const message : string; const Args: TArray<TValue>);
+    procedure WillRaiseWhen(const exceptionClass : ExceptClass; const message : string; const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
     procedure WillExecute(const func : TExecuteFunc);
-    procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>);
+    procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
 
     //expectations
     procedure OnceWhen(const Args : TArray<TValue>);

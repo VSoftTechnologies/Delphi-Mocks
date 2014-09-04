@@ -183,6 +183,7 @@ uses
   Delphi.Mocks.Utils,
   Delphi.Mocks.When,
   Delphi.Mocks.MethodData,
+  Delphi.Mocks.ParamMatcher,
   Windows;
 
 function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; out Intf; const ACheckOwner: Boolean): Boolean;
@@ -380,6 +381,7 @@ var
   returnVal : TValue;
   methodData : IMethodData;
   behavior : IBehavior;
+  matchers : TArray<IMatcher>;
 begin
   case FSetupMode of
     TSetupMode.None:
@@ -392,6 +394,7 @@ begin
     TSetupMode.Behavior:
     begin
       try
+        matchers := TMatcherFactory.GetMatchers;
         //record desired behavior
         //first see if we know about this method
         methodData := GetMethodData(method.Name);
@@ -401,7 +404,7 @@ begin
           begin
             if (Method.ReturnType = nil) and (not FReturnValue.IsEmpty) then
               raise EMockSetupException.Create('Setup.WillReturn called on procedure : ' + Method.Name );
-            methodData.WillReturnWhen(Args,FReturnValue);
+            methodData.WillReturnWhen(Args,FReturnValue,matchers);
           end;
           TBehaviorType.WillRaise:
           begin
@@ -409,7 +412,7 @@ begin
           end;
           TBehaviorType.WillExecuteWhen :
           begin
-            methodData.WillExecuteWhen(FNextFunc,Args);
+            methodData.WillExecuteWhen(FNextFunc,Args,matchers);
           end;
         end;
       finally
@@ -483,7 +486,7 @@ begin
 
   pInfo := TypeInfo(T);
 
-  Result := TMethodData.Create(pInfo.Name, AMethodName, FIsStubOnly, FBehaviorMustBeDefined);
+  Result := TMethodData.Create(string(pInfo.Name), AMethodName, FIsStubOnly, FBehaviorMustBeDefined);
   FMethodData.Add(methodName,Result);
 end;
 

@@ -92,6 +92,9 @@ begin
     ).When.TestOutParam(msg);
 
 
+  mock.Setup.WillReturnDefault('ss').
+
+
   mock.Setup.WillExecute(
     function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
     begin
@@ -101,6 +104,7 @@ begin
     ).When.ReturnObject;
 
 
+    mock.Setup.WillRaise
 
   //Define our expectations - mostly about how many times we expect a method to be called.
 

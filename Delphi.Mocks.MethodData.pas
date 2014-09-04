@@ -35,7 +35,8 @@ uses
   SysUtils,
   Generics.Collections,
   Delphi.Mocks,
-  Delphi.Mocks.Interfaces;
+  Delphi.Mocks.Interfaces,
+  Delphi.Mocks.ParamMatcher;
 
 type
   TMethodData = class(TInterfacedObject,IMethodData)
@@ -51,11 +52,11 @@ type
 
     //Behaviors
     procedure WillReturnDefault(const returnValue : TValue);
-    procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue);
+    procedure WillReturnWhen(const Args: TArray<TValue>; const returnValue : TValue; const matchers : TArray<IMatcher>);
     procedure WillRaiseAlways(const exceptionClass : ExceptClass; const message : string);
-    procedure WillRaiseWhen(const exceptionClass : ExceptClass; const message : string;const Args: TArray<TValue>);
+    procedure WillRaiseWhen(const exceptionClass : ExceptClass; const message : string;const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
     procedure WillExecute(const func : TExecuteFunc);
-    procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>);
+    procedure WillExecuteWhen(const func : TExecuteFunc; const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
 
     function FindBehavior(const behaviorType : TBehaviorType; const Args: TArray<TValue>) : IBehavior;overload;
     function FindBehavior(const behaviorType : TBehaviorType) : IBehavior; overload;
@@ -484,14 +485,14 @@ begin
   FBehaviors.Add(behavior);
 end;
 
-procedure TMethodData.WillExecuteWhen(const func: TExecuteFunc;const Args: TArray<TValue>);
+procedure TMethodData.WillExecuteWhen(const func: TExecuteFunc;const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
 var
   behavior : IBehavior;
 begin
   behavior := FindBehavior(TBehaviorType.WillExecuteWhen,Args);
   if behavior <> nil then
     raise EMockSetupException.Create(Format('[%s] already defines WillExecute When for method [%s]', [FTypeName, FMethodName]));
-  behavior := TBehavior.CreateWillExecuteWhen(Args, func);
+  behavior := TBehavior.CreateWillExecuteWhen(Args, func,matchers);
   FBehaviors.Add(behavior);
 end;
 
@@ -506,14 +507,14 @@ begin
   FBehaviors.Add(behavior);
 end;
 
-procedure TMethodData.WillRaiseWhen(const exceptionClass: ExceptClass; const message : string; const Args: TArray<TValue>);
+procedure TMethodData.WillRaiseWhen(const exceptionClass: ExceptClass; const message : string; const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
 var
   behavior : IBehavior;
 begin
   behavior := FindBehavior(TBehaviorType.WillRaise,Args);
   if behavior <> nil then
     raise EMockSetupException.Create(Format('[%s] already defines Will Raise When for method [%s]', [FTypeName, FMethodName]));
-  behavior := TBehavior.CreateWillRaiseWhen(Args,exceptionClass,message);
+  behavior := TBehavior.CreateWillRaiseWhen(Args,exceptionClass,message,matchers);
   FBehaviors.Add(behavior);
 end;
 
@@ -524,14 +525,14 @@ begin
   FReturnDefault := returnValue;
 end;
 
-procedure TMethodData.WillReturnWhen(const Args: TArray<TValue>; const returnValue: TValue);
+procedure TMethodData.WillReturnWhen(const Args: TArray<TValue>; const returnValue: TValue; const matchers : TArray<IMatcher>);
 var
   behavior : IBehavior;
 begin
   behavior := FindBehavior(TBehaviorType.WillReturn,Args);
   if behavior <> nil then
     raise EMockSetupException.Create(Format('[%s] already defines Will Return When for method [%s]', [FTypeName, FMethodName]));
-  behavior := TBehavior.CreateWillReturnWhen(Args,returnValue);
+  behavior := TBehavior.CreateWillReturnWhen(Args,returnValue,matchers);
   FBehaviors.Add(behavior);
 end;
 

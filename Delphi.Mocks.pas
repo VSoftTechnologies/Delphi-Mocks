@@ -33,6 +33,9 @@ uses
   TypInfo,
   Rtti,
   sysutils,
+  {$IFDEF SUPPORTS_REGEX}
+  System.RegularExpressions,
+  {$ENDIF}
   Delphi.Mocks.WeakReference;
 
 type
@@ -184,6 +187,24 @@ type
     procedure Free;
   end;
 
+  ///  Used for defining permissable parameter values during method setup.
+  ///  Inspired by Moq
+  It = record
+    function IsAny<T>() : T;
+    function IsNotNil<T> : T;
+    function IsEqualTo<T>(const value : T) : T;
+    function IsInRange<T>(const fromValue : T; const toValue : T) : T;
+    function IsIn<T>(const values : TArray<T>) : T;overload;
+    function IsIn<T>(const values : IEnumerable<T>) : T;overload;
+    function IsNotIn<T>(const values : TArray<T>) : T;overload;
+    function IsNotIn<T>(const values : IEnumerable<T>) : T;overload;
+    {$IFDEF SUPPORTS_REGEX} //XE2 or later
+    function IsRegex(const regex : string) : string;overload;
+    function IsRegex(const regex : string; const options : TRegExOptions) : string;overload;
+    {$ENDIF}
+
+  end;
+
   //Exception Types that the mocks will raise.
   EMockException = class(Exception);
   EMockProxyAlreadyImplemented = class(EMockException);
@@ -204,7 +225,9 @@ uses
   Delphi.Mocks.Utils,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,
-  Delphi.Mocks.ObjectProxy;
+  Delphi.Mocks.ObjectProxy,
+  Delphi.Mocks.ParamMatcher;
+
 
 function TMock<T>.CheckExpectations: string;
 var
@@ -499,6 +522,79 @@ begin
   result := Self.NameFld.ToString;
 {$ENDIF}
 end;
+
+{ It }
+
+function It.IsAny<T>: T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(
+    function(value : T) : boolean
+    begin
+        result := true;
+    end);
+end;
+
+function It.IsEqualTo<T>(const value : T) : T;
+begin
+  result := Default(T);
+
+  TMatcherFactory.Create<T>(
+    function(param : T) : boolean
+    var
+        comparer : IEqualityComparer<T>;
+    begin
+      comparer := TEqualityComparer<T>.Default;
+      result := comparer.Equals(param,value);
+    end);
+end;
+
+function It.IsIn<T>(const values: TArray<T>): T;
+begin
+  result := Default(T);
+
+end;
+
+function It.IsIn<T>(const values: IEnumerable<T>): T;
+begin
+  result := Default(T);
+end;
+
+function It.IsInRange<T>(const fromValue, toValue: T): T;
+begin
+  result := Default(T);
+end;
+
+function It.IsNotIn<T>(const values: TArray<T>): T;
+begin
+  result := Default(T);
+
+end;
+
+function It.IsNotIn<T>(const values: IEnumerable<T>): T;
+begin
+  result := Default(T);
+end;
+
+function It.IsNotNil<T>: T;
+begin
+  result := Default(T);
+end;
+
+{$IFDEF SUPPORTS_REGEX} //XE2 or later
+function It.IsRegex(const regex : string) : string;
+begin
+
+end;
+
+function It.IsRegex(const regex : string; const options : TRegExOptions) : string;
+begin
+
+end;
+{$ENDIF}
+
+{ TMatcherFactory }
+
 
 end.
 
