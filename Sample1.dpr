@@ -20,7 +20,8 @@ uses
   Delphi.Mocks.Proxy in 'Delphi.Mocks.Proxy.pas',
   Delphi.Mocks.VirtualMethodInterceptor in 'Delphi.Mocks.VirtualMethodInterceptor.pas',
   Delphi.Mocks.ReturnTypePatch in 'Delphi.Mocks.ReturnTypePatch.pas',
-  Delphi.Mocks.Examples.Implement in 'Tests\Delphi.Mocks.Examples.Implement.pas';
+  Delphi.Mocks.Examples.Implement in 'Tests\Delphi.Mocks.Examples.Implement.pas',
+  Delphi.Mocks.ParamMatcher in 'Delphi.Mocks.ParamMatcher.pas';
 
 begin
   try

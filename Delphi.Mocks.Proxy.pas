@@ -395,6 +395,9 @@ begin
     begin
       try
         matchers := TMatcherFactory.GetMatchers;
+        if Length(matchers) > 0 then
+          if Length(matchers) < Length(Args) -1 then
+            raise EMockSetupException.Create('Setup called with Matchers but on on all parameters : ' + Method.Name );
         //record desired behavior
         //first see if we know about this method
         methodData := GetMethodData(method.Name);

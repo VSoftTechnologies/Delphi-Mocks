@@ -188,8 +188,29 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
     result := True;
   end;
 
+  function MatchWithMatchers(const Args: TArray<TValue>): Boolean;
+  var
+    i : integer;
+  begin
+    result := False;
+    for i := 0 to High(FMatchers) do
+    begin
+      if not FMatchers[i].Match(Args[i+1]) then
+        exit;
+    end;
+    result := True;
+  end;
+
 begin
   result := False;
+
+  if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers)  + 1)) then
+  begin
+    result := MatchWithMatchers(Args);
+    exit;
+  end;
+
+
   case FBehaviorType of
     WillReturn      : result := MatchArgs;
     ReturnDefault   : result := True;

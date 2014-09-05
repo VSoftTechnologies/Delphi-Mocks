@@ -190,17 +190,16 @@ type
   ///  Used for defining permissable parameter values during method setup.
   ///  Inspired by Moq
   It = record
-    function IsAny<T>() : T;
-    function IsNotNil<T> : T;
-    function IsEqualTo<T>(const value : T) : T;
-    function IsInRange<T>(const fromValue : T; const toValue : T) : T;
-    function IsIn<T>(const values : TArray<T>) : T;overload;
-    function IsIn<T>(const values : IEnumerable<T>) : T;overload;
-    function IsNotIn<T>(const values : TArray<T>) : T;overload;
-    function IsNotIn<T>(const values : IEnumerable<T>) : T;overload;
+    class function IsAny<T>() : T ;static;
+    class function IsNotNil<T> : T;static;
+    class function IsEqualTo<T>(const value : T) : T;static;
+    class function IsInRange<T>(const fromValue : T; const toValue : T) : T;static;
+    class function IsIn<T>(const values : TArray<T>) : T;overload;static;
+    class function IsIn<T>(const values : IEnumerable<T>) : T;overload;static;
+    class function IsNotIn<T>(const values : TArray<T>) : T;overload;static;
+    class function IsNotIn<T>(const values : IEnumerable<T>) : T;overload;static;
     {$IFDEF SUPPORTS_REGEX} //XE2 or later
-    function IsRegex(const regex : string) : string;overload;
-    function IsRegex(const regex : string; const options : TRegExOptions) : string;overload;
+    class function IsRegex(const regex : string; const options : TRegExOptions = []) : string;static;
     {$ENDIF}
 
   end;
@@ -525,7 +524,7 @@ end;
 
 { It }
 
-function It.IsAny<T>: T;
+class function It.IsAny<T>: T;
 begin
   result := Default(T);
   TMatcherFactory.Create<T>(
@@ -535,61 +534,65 @@ begin
     end);
 end;
 
-function It.IsEqualTo<T>(const value : T) : T;
+class function It.IsEqualTo<T>(const value : T) : T;
 begin
   result := Default(T);
 
   TMatcherFactory.Create<T>(
     function(param : T) : boolean
     var
-        comparer : IEqualityComparer<T>;
+      comparer : IEqualityComparer<T>;
     begin
       comparer := TEqualityComparer<T>.Default;
       result := comparer.Equals(param,value);
     end);
 end;
 
-function It.IsIn<T>(const values: TArray<T>): T;
+class function It.IsIn<T>(const values: TArray<T>): T;
 begin
   result := Default(T);
 
 end;
 
-function It.IsIn<T>(const values: IEnumerable<T>): T;
+class function It.IsIn<T>(const values: IEnumerable<T>): T;
 begin
   result := Default(T);
 end;
 
-function It.IsInRange<T>(const fromValue, toValue: T): T;
+class function It.IsInRange<T>(const fromValue, toValue: T): T;
 begin
   result := Default(T);
 end;
 
-function It.IsNotIn<T>(const values: TArray<T>): T;
+class function It.IsNotIn<T>(const values: TArray<T>): T;
 begin
   result := Default(T);
 
 end;
 
-function It.IsNotIn<T>(const values: IEnumerable<T>): T;
+class function It.IsNotIn<T>(const values: IEnumerable<T>): T;
 begin
   result := Default(T);
 end;
 
-function It.IsNotNil<T>: T;
+class function It.IsNotNil<T>: T;
 begin
   result := Default(T);
+  TMatcherFactory.Create<T>(
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+    begin
+      comparer := TEqualityComparer<T>.Default;
+      result := comparer.Equals(param,Default(T));
+    end);
+
 end;
 
 {$IFDEF SUPPORTS_REGEX} //XE2 or later
-function It.IsRegex(const regex : string) : string;
+class function It.IsRegex(const regex : string; const options : TRegExOptions) : string;
 begin
-
-end;
-
-function It.IsRegex(const regex : string; const options : TRegExOptions) : string;
-begin
-
+  result := '';
 end;
 {$ENDIF}
 
