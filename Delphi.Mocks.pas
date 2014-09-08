@@ -551,12 +551,41 @@ end;
 class function It.IsIn<T>(const values: TArray<T>): T;
 begin
   result := Default(T);
-
+  TMatcherFactory.Create<T>(
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := false;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        result := comparer.Equals(param,value);
+        if result then
+          exit;
+      end;
+    end);
 end;
 
 class function It.IsIn<T>(const values: IEnumerable<T>): T;
 begin
   result := Default(T);
+  TMatcherFactory.Create<T>(
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := false;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        result := comparer.Equals(param,value);
+        if result then
+          exit;
+      end;
+    end);
 end;
 
 class function It.IsInRange<T>(const fromValue, toValue: T): T;
@@ -567,12 +596,40 @@ end;
 class function It.IsNotIn<T>(const values: TArray<T>): T;
 begin
   result := Default(T);
+  TMatcherFactory.Create<T>(
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := true;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        if comparer.Equals(param,value) then
+          exit(false);
+      end;
+    end);
 
 end;
 
 class function It.IsNotIn<T>(const values: IEnumerable<T>): T;
 begin
   result := Default(T);
+  TMatcherFactory.Create<T>(
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := true;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        if comparer.Equals(param,value) then
+          exit(false);
+      end;
+    end);
 end;
 
 class function It.IsNotNil<T>: T;
@@ -593,6 +650,11 @@ end;
 class function It.IsRegex(const regex : string; const options : TRegExOptions) : string;
 begin
   result := '';
+  TMatcherFactory.Create<string>(
+    function(param : string) : boolean
+    begin
+      result := TRegEx.IsMatch(param,regex,options)
+    end);
 end;
 {$ENDIF}
 
