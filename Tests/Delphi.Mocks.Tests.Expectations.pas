@@ -4,14 +4,16 @@ interface
 
 uses
   TestFramework,
+  Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Expectation;
 
 
 type
   TTestExpectations = class(TTestCase)
+  protected
+    FMatchers : TArray<IMatcher>;
   published
-
     //Created with correct exception type set
     procedure CreateOnceWhen_Expectation_Type_Set_To_OnceWhen;
     procedure CreateOnce_Expectation_Type_Set_To_Once;
@@ -49,7 +51,7 @@ procedure TTestExpectations.CreateAfterWhen_Expectation_Type_Set_To_AfterWhen;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateAfterWhen('', '', nil);
+  expectation := TExpectation.CreateAfterWhen('', '', nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.AfterWhen, 'CreateAfterWhen expectation type isn''t set to AfterWhen');
 end;
@@ -68,7 +70,7 @@ procedure TTestExpectations.CreateAtLeastOnceWhen_Expectation_Type_Set_To_AtLeas
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateAtLeastOnceWhen('', nil);
+  expectation := TExpectation.CreateAtLeastOnceWhen('', nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.AtLeastOnceWhen, 'CreateAtLeastOnceWhen expectation type isn''t set to AtLeastOnceWhen');
 
@@ -88,7 +90,7 @@ procedure TTestExpectations.CreateAtLeastWhen_Expectation_Type_Set_To_AtLeastWhe
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateAtLeastWhen('', 0, nil);
+  expectation := TExpectation.CreateAtLeastWhen('', 0, nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.AtLeastWhen, 'CreateAtLeastWhen expectation type isn''t set to AtLeastWhen');
 
@@ -109,7 +111,7 @@ procedure TTestExpectations.CreateAtMostWhen_Expectation_Type_Set_To_AtMostWhen;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateAtMostWhen('', 0, nil);
+  expectation := TExpectation.CreateAtMostWhen('', 0, nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.AtMostWhen, 'CreateAtMostWhen expectation type isn''t set to AtMostWhen');
 
@@ -130,7 +132,7 @@ procedure TTestExpectations.CreateBeforeWhen_Expectation_Type_Set_To_BeforeWhen;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateBeforeWhen('', '', nil);
+  expectation := TExpectation.CreateBeforeWhen('', '', nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.BeforeWhen, 'CreateBeforeWhen expectation type isn''t set to BeforeWhen');
 
@@ -150,7 +152,7 @@ procedure TTestExpectations.CreateBetweenWhen_Expectation_Type_Set_To_BetweenWhe
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateBetweenWhen('', 0, 0, nil);
+  expectation := TExpectation.CreateBetweenWhen('', 0, 0, nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.BetweenWhen, 'CreateBetweenWhen expectation type isn''t set to BetweenWhen');
 end;
@@ -168,7 +170,7 @@ procedure TTestExpectations.CreateExactlyWhen_Expectation_Type_Set_To_ExactlyWhe
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateExactlyWhen('', 0, nil);
+  expectation := TExpectation.CreateExactlyWhen('', 0, nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.ExactlyWhen, 'CreateExactlyWhen expectation type isn''t set to ExactlyWhen');
 end;
@@ -186,7 +188,7 @@ procedure TTestExpectations.CreateNeverWhen_Expectation_Type_Set_To_NeverWhen;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateNeverWhen('', nil);
+  expectation := TExpectation.CreateNeverWhen('', nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.NeverWhen, 'CreateNeverWhen expectation type isn''t set to NeverWhen');
 end;
@@ -204,7 +206,7 @@ procedure TTestExpectations.CreateOnceWhen_Expectation_Type_Set_To_OnceWhen;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateOnceWhen('', nil);
+  expectation := TExpectation.CreateOnceWhen('', nil, FMatchers);
 
   Check(expectation.ExpectationType = TExpectationType.OnceWhen, 'CreateOnceWhen expectation type isn''t set to OnceWhen');
 end;
@@ -222,12 +224,13 @@ procedure TTestExpectations.ExpectationMet_With_OnceWhen_CalledOnce;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateOnceWhen('', nil);
+  expectation := TExpectation.CreateOnceWhen('', nil, FMatchers);
 
   expectation.RecordHit;
 
   CheckTrue(expectation.ExpectationMet, 'Exception not met for OnceWhen being called once');
 end;
+
 
 initialization
   TestFramework.RegisterTest(TTestExpectations.Suite);

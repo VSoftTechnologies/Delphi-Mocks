@@ -425,19 +425,24 @@ begin
     TSetupMode.Expectation:
     begin
       try
+        matchers := TMatcherFactory.GetMatchers;
+        if Length(matchers) > 0 then
+          if Length(matchers) < Length(Args) -1 then
+            raise EMockSetupException.Create('Setup called with Matchers but not on on all parameters : ' + Method.Name );
+
         //record expectations
         //first see if we know about this method
         methodData := GetMethodData(method.Name);
         Assert(methodData <> nil);
         case FNextExpectation of
-          OnceWhen        : methodData.OnceWhen(Args);
-          NeverWhen       : methodData.NeverWhen(Args) ;
-          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args);
-          AtLeastWhen     : methodData.AtLeastWhen(FTimes,args);
-          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args);
-          AtMostWhen      : methodData.AtMostWhen(FTimes,args);
-          BetweenWhen     : methodData.BetweenWhen(FBetween[0],FBetween[1],Args) ;
-          ExactlyWhen     : methodData.ExactlyWhen(FTimes,Args);
+          OnceWhen        : methodData.OnceWhen(Args, matchers);
+          NeverWhen       : methodData.NeverWhen(Args, matchers);
+          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args, matchers);
+          AtLeastWhen     : methodData.AtLeastWhen(FTimes, args, matchers);
+          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args, matchers);
+          AtMostWhen      : methodData.AtMostWhen(FTimes,args, matchers);
+          BetweenWhen     : methodData.BetweenWhen(FBetween[0], FBetween[1], Args, matchers);
+          ExactlyWhen     : methodData.ExactlyWhen(FTimes, Args, matchers);
           BeforeWhen      : raise exception.Create('not implemented') ;
           AfterWhen       : raise exception.Create('not implemented');
         end;

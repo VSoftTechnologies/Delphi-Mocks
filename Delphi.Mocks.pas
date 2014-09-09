@@ -191,6 +191,7 @@ type
   ///  Inspired by Moq
   It = record
     class function IsAny<T>() : T ;static;
+    class function Matches<T>(const predicate: TPredicate<T>) : T; static;
     class function IsNotNil<T> : T;static;
     class function IsEqualTo<T>(const value : T) : T;static;
     class function IsInRange<T>(const fromValue : T; const toValue : T) : T;static;
@@ -644,6 +645,12 @@ begin
       result := comparer.Equals(param,Default(T));
     end);
 
+end;
+
+class function It.Matches<T>(const predicate: TPredicate<T>): T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(predicate);
 end;
 
 {$IFDEF SUPPORTS_REGEX} //XE2 or later
