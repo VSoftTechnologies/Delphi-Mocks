@@ -188,7 +188,7 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
     result := True;
   end;
 
-  function MatchWithMatchers(const Args: TArray<TValue>): Boolean;
+  function MatchWithMatchers: Boolean;
   var
     i : integer;
   begin
@@ -206,7 +206,7 @@ begin
 
   if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers)  + 1)) then
   begin
-    result := MatchWithMatchers(Args);
+    result := MatchWithMatchers;
     exit;
   end;
 
