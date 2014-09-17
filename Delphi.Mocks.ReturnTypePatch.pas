@@ -66,6 +66,7 @@ type
   end;
 
 procedure PatchMethodReturnType(ATypeInfo: PTypeInfo); overload;
+procedure PatchMethodReturnType(const ATypeInfo: PTypeInfo; const AMethodName : string; const AReturnType: PTypeInfo); overload;
 procedure PatchMethodReturnType(AMethod: TRttiMethod; AReturnType: PTypeInfo); overload;
 
 implementation
@@ -96,6 +97,26 @@ function NeedsPatch(AMethod: TRttiMethod): Boolean;
 begin
   Result := (AMethod.MethodKind = mkFunction) and (AMethod.ReturnType = nil);
 end;
+
+procedure PatchMethodReturnType(const ATypeInfo: PTypeInfo; const AMethodName : string; const AReturnType: PTypeInfo); overload;
+var
+  LContext: TRttiContext;
+  LMethod: TRttiMethod;
+  LAttribute: TCustomAttribute;
+begin
+  for LMethod in LContext.GetType(ATypeInfo).GetDeclaredMethods do
+  begin
+    if LMethod.Name = AMethodName then
+    begin
+      if NeedsPatch(LMethod) then
+      begin
+        PatchMethodReturnType(LMethod, AReturnType);
+      end;
+    end;
+  end;
+  LContext.Free;
+end;
+
 
 procedure PatchMethodReturnType(ATypeInfo: PTypeInfo);
 var
