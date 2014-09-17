@@ -48,6 +48,9 @@ type
     FExpectations   : TList<IExpectation>;
     FIsStub         : boolean;
     FBehaviorMustBeDefined: boolean;
+    FAutoMocker     : IAutoMock;
+    procedure StubNoBehaviourRecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result : TValue);
+    procedure MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
   protected
 
     //Behaviors
@@ -90,7 +93,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
+    constructor Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
   end;
 
@@ -101,6 +104,7 @@ type
 implementation
 
 uses
+  System.TypInfo,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,
   Delphi.Mocks.Expectation;
@@ -110,7 +114,7 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean);
+constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const AIsStub : boolean; const ABehaviorMustBeDefined: boolean; const AAutoMocker : IAutoMock = nil);
 begin
   FTypeName := ATypeName;
   FMethodName := AMethodName;
@@ -119,6 +123,7 @@ begin
   FReturnDefault := TValue.Empty;
   FBehaviorMustBeDefined := ABehaviorMustBeDefined;
   FIsStub := AIsStub;
+  FAutoMocker := AAutoMocker;
 end;
 
 destructor TMethodData.Destroy;
@@ -243,6 +248,43 @@ begin
       exit;
     end;
   end;
+end;
+
+procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
+var
+  mockProxy: IProxy;
+begin
+  //If auto mocking has been turned on and this return type is either a class or interface, mock it.
+  if FAutoMocker <> nil then
+  begin
+    //TODO: Add more options for how to handle properties and procedures.
+    if returnType = nil then
+      Exit;
+
+    case returnType.TypeKind of
+      tkClass,
+      tkRecord,
+      tkInterface:
+      begin
+        mockProxy := FAutoMocker.Mock(returnType.Handle).ProxyFromType(returnType.Handle);
+        TValue.Make(@mockProxy, returnType.Handle, Result);
+      end
+    else
+      Result := FReturnDefault;
+    end;
+
+    Exit;
+  end;
+
+  //If we have no return type defined, and the default return type is empty
+  if (returnType <> nil) and (FReturnDefault.IsEmpty) then
+    //Say we didn't have a default return value
+    raise EMockException.Create(Format('[%s] has no default return value or return type was defined for method [%s]', [FTypeName, FMethodName]));
+
+  //If we have either a return type, or a default return value then check whether behaviour must be defined.
+  if FBehaviorMustBeDefined and (AExpectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
+    //If we must have default behaviour defined, and there was nothing defined raise a mock exception.
+    raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
 end;
 
 procedure TMethodData.After(const AAfterMethodName: string);
@@ -402,7 +444,6 @@ end;
 procedure TMethodData.RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result: TValue);
 var
   behavior : IBehavior;
-  returnVal : TValue;
   expectation : IExpectation;
   expectationHitCtr: integer;
 begin
@@ -418,32 +459,24 @@ begin
 
   behavior := FindBestBehavior(Args);
   if behavior <> nil then
-    returnVal := behavior.Execute(Args,returnType)
+    Result := behavior.Execute(Args,returnType)
   else
   begin
-    if (returnType <> nil) and (FReturnDefault.IsEmpty) then
-    begin
-      if FIsStub then
-      begin
-        //Stubs return default values.
-        result := GetDefaultValue(returnType);
-      end
-      else
-      begin
-        //If it's not a stub then we say we didn't have a default return value
-        raise EMockException.Create('No default return value defined for method ' + FMethodName);
-      end;
-    end
-    else if FBehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
-    begin
-      //If we must have default behaviour defined, and there was nothing defined raise a mock exception.
-      raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
-    end;
-
-    returnVal := FReturnDefault;
+    if FIsStub then
+      StubNoBehaviourRecordHit(Args, returnType, Result)
+    else
+      MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, Result);
   end;
-  if returnType <> nil then
-    Result := returnVal;
+end;
+
+procedure TMethodData.StubNoBehaviourRecordHit(const Args: TArray<TValue>; const returnType: TRttiType; out Result: TValue);
+begin
+  //If we have no return type defined, and the default return type is empty
+  if (returnType <> nil) and (FReturnDefault.IsEmpty) then
+  begin
+    //Return the default value for the passed in return type
+    Result := GetDefaultValue(returnType);
+  end;
 end;
 
 function TMethodData.Verify(var report : string) : boolean;

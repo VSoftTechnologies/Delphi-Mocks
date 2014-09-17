@@ -143,9 +143,16 @@ type
     function Proxy : T;
   end;
 
+  IAutoMock = interface
+    ['{9C7113DF-6F93-496D-A223-61D30782C7D8}']
+    function Mock(const ATypeInfo : PTypeInfo) : IProxy;
+    procedure Add(const ATypeName : string; const AMock: IProxy);
+  end;
+
   TStub<T> = record
   private
     FProxy : IStubProxy<T>;
+    FAutomocker : IAutoMock;
   public
     class operator Implicit(const Value: TStub<T>): T;
     function Setup : IStubSetup<T>;
@@ -162,10 +169,16 @@ type
   TMock<T> = record
   private
     FProxy : IProxy<T>;
+    FCreated : Boolean;
+    FAutomocker : IAutoMock;
+
+    procedure CheckCreated;
 
     class procedure CheckMockType(const ATypeInfo : PTypeInfo); static;
     class procedure CheckMockInterface(const ATypeInfo : PTypeInfo); static;
     class procedure CheckMockObject(const ATypeInfo : PTypeInfo); static;
+
+    class function Create(const AAutoMock : IAutoMock): TMock<T>; overload; static;
   public
     class operator Implicit(const Value: TMock<T>): T;
 
@@ -182,9 +195,19 @@ type
     function Instance : T; overload;
     function Instance<I : IInterface> : I; overload;
     function InstanceAsValue : TValue;
-    class function Create: TMock<T>; static;
-    // explicit cleanup. Not sure if we really need this.
+    class function Create: TMock<T>; overload; static;
+    //Explicit cleanup. Not sure if we really need this.
     procedure Free;
+  end;
+
+  TAutoMockContainer = record
+  private
+    FAutoMocker : IAutoMock;
+  public
+    function Mock<T> : TMock<T>; overload;
+    procedure Mock(const ATypeInfo : PTypeInfo); overload;
+
+    class function Create : TAutoMockContainer; static;
   end;
 
   ///  Used for defining permissable parameter values during method setup.
@@ -226,14 +249,31 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy,
-  Delphi.Mocks.ParamMatcher;
+  Delphi.Mocks.ParamMatcher,
+  Delphi.Mocks.AutoMock;
 
+
+procedure TMock<T>.CheckCreated;
+var
+  pInfo : PTypeInfo;
+begin
+  pInfo := TypeInfo(T);
+
+  if not FCreated then
+    raise EMockException.CreateFmt('Create for TMock<%s> was not called before use.', [pInfo.Name]);
+
+  if (FProxy = nil) then
+    raise EMockException.CreateFmt('Internal Error : Internal Proxy for TMock<%s> was nil.', [pInfo.Name]);
+
+end;
 
 function TMock<T>.CheckExpectations: string;
 var
   su : IMockSetup<T>;
   v : IVerify;
 begin
+  CheckCreated;
+
   if Supports(FProxy.Setup,IVerify,v) then
     Result := v.CheckExpectations
   else
@@ -241,12 +281,20 @@ begin
 end;
 
 class function TMock<T>.Create: TMock<T>;
+begin
+  Result := Create(nil);
+end;
+
+class function TMock<T>.Create(const AAutoMock : IAutoMock): TMock<T>;
 var
   proxy : IInterface;
   pInfo : PTypeInfo;
 begin
   //Make sure that we start off with a clean mock
   FillChar(Result, SizeOf(Result), 0);
+
+  //By default we don't auto mock TMock<T>. It changes when TAutoMock is used.
+  Result.FAutomocker := AAutoMock;
 
   pInfo := TypeInfo(T);
 
@@ -255,19 +303,23 @@ begin
 
   case pInfo.Kind of
     //Create our proxy object, which will implement our object T
-    tkClass : proxy := TObjectProxy<T>.Create(false);
+    tkClass : proxy := TObjectProxy<T>.Create(Result.FAutomocker, false);
     //Create our proxy interface object, which will implement our interface T
-    tkInterface : proxy := TProxy<T>.Create(false);
+    tkInterface : proxy := TProxy<T>.Create(Result.FAutomocker, false);
   end;
 
   //Push the proxy into the result we are returning.
   if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid, Result.FProxy) <> 0 then
     //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
     raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt IProxy<T>');
+
+  //The record has been created!
+  Result.FCreated := True;
 end;
 
 procedure TMock<T>.Free;
 begin
+  CheckCreated;
   FProxy := nil;
 end;
 
@@ -276,6 +328,8 @@ var
   proxy : IProxy<I>;
   pInfo : PTypeInfo;
 begin
+  CheckCreated;
+
   if FProxy is TObjectProxy<T> then
     raise ENotSupportedException.Create('Adding interface implementation to non interfaced objects not supported at this time');
 
@@ -290,18 +344,14 @@ end;
 
 class operator TMock<T>.Implicit(const Value: TMock<T>): T;
 begin
+  Value.CheckCreated;
+
   result := Value.FProxy.Proxy;
 end;
 
 function TMock<T>.Instance : T;
-var
-  pInfo : PTypeInfo;
 begin
-  if FProxy = nil then
-  begin
-    pInfo := TypeInfo(T);
-    raise EMockException.Create(format('Mock [%s] did not have create called before its use.', [pInfo.Name]));
-  end;
+  CheckCreated;
 
   result := FProxy.Proxy;
 end;
@@ -313,6 +363,8 @@ var
   pInfo : PTypeInfo;
 begin
   result := nil;
+
+  CheckCreated;
 
   //Does the proxy we have, or any of its children support a proxy for the passed
   //in interface type?
@@ -331,11 +383,15 @@ end;
 
 function TMock<T>.InstanceAsValue: TValue;
 begin
+  CheckCreated;
+
   result := TValue.From<T>(Self);
 end;
 
 function TMock<T>.Setup: IMockSetup<T>;
 begin
+  CheckCreated;
+
   result := FProxy.Setup;
 end;
 
@@ -346,6 +402,7 @@ var
   pInfo : PTypeInfo;
   pMockSetupInfo : PTypeInfo;
 begin
+  CheckCreated;
   //We have to ask for the proxy who owns the implementation of the interface/object
   //in question. The reason for this it that all proxies implement IProxy<T> and
   //therefore we will just get the first proxy always.
@@ -404,6 +461,8 @@ procedure TMock<T>.Verify(const message: string);
 var
   v : IVerify;
 begin
+  CheckCreated;
+
   if Supports(FProxy.Setup, IVerify, v) then
     v.Verify(message)
   else
@@ -417,6 +476,8 @@ var
   interfaceV : IVerify;
   pInfo : PTypeInfo;
 begin
+  CheckCreated;
+
   //Does the proxy we have, or any of its children support a proxy for the passed
   //in interface type?
 
@@ -435,6 +496,8 @@ procedure TMock<T>.VerifyAll(const message: string);
 var
   interfaceV : IVerify;
 begin
+  CheckCreated;
+
   if Supports(FProxy.Setup, IVerify, interfaceV) then
     interfaceV.VerifyAll(message)
   else
@@ -451,6 +514,9 @@ begin
   //Make sure that we start off with a clean mock
   FillChar(Result, SizeOf(Result), 0);
 
+  //By default we don't auto mock TMock<T>. It changes when TAutoMock is used.
+  Result.FAutomocker := nil;
+
   pInfo := TypeInfo(T);
 
   if not (pInfo.Kind in [tkInterface,tkClass]) then
@@ -466,7 +532,7 @@ begin
           raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
-      proxy := TObjectProxy<T>.Create(true);
+      proxy := TObjectProxy<T>.Create(Result.FAutomocker, true);
     end;
     tkInterface :
     begin
@@ -475,7 +541,7 @@ begin
         raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
 
       //Create our proxy interface object, which will implement our interface T
-      proxy := TProxy<T>.Create(true);
+      proxy := TProxy<T>.Create(Result.FAutomocker, true);
     end;
   else
     raise EMockException.Create('Invalid type kind T');
@@ -521,6 +587,33 @@ begin
 {$ELSE}
   result := Self.NameFld.ToString;
 {$ENDIF}
+end;
+
+{ TAutoMockContainer }
+
+class function TAutoMockContainer.Create: TAutoMockContainer;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+
+  Result.FAutoMocker := TAutoMock.Create;
+end;
+
+procedure TAutoMockContainer.Mock(const ATypeInfo: PTypeInfo);
+begin
+  FAutoMocker.Mock(ATypeInfo);
+end;
+
+function TAutoMockContainer.Mock<T>: TMock<T>;
+var
+  mock : TMock<T>;
+  pInfo : PTypeInfo;
+begin
+  pInfo := TypeInfo(T);
+
+  mock := TMock<T>.Create(FAutoMocker);
+  FAutoMocker.Add(pInfo.NameStr, mock.FProxy);
+
+  result := mock;
 end;
 
 { It }
