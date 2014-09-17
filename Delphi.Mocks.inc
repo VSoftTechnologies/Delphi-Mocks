@@ -28,6 +28,9 @@
    {$IF CompilerVersion < 21.0} // Before RAD Studio 2010
       {$DEFINE UNSUPPORTED_COMPILER_VERSION}
    {$IFEND}
+   {$IF CompilerVersion > 22.0} // XE2 or later
+      {$DEFINE SUPPORTS_REGEX}
+   {$IFEND}
 {$ELSE}
   {$DEFINE UNSUPPORTED_COMPILER_VERSION}
 {$ENDIF}

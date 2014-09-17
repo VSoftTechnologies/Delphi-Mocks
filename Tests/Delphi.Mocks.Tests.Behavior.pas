@@ -6,7 +6,8 @@ uses
   SysUtils,
   TestFramework,
   Rtti,
-  Delphi.Mocks;
+  Delphi.Mocks,
+  Delphi.Mocks.ParamMatcher;
 
 type
   ETestBehaviourException = class(Exception);
@@ -14,6 +15,7 @@ type
   TTestBehaviors = class(TTestCase)
   private
     FContext : TRttiContext;
+    FMatchers : TArray<IMatcher>;
   protected
     procedure SetUp; override;
   published
@@ -105,7 +107,7 @@ begin
   args[0] := 1;
   args[1] := 2;
   args[2] :=  'hello';
-  behavior := TBehavior.CreateWillReturnWhen(args,returnValue);
+  behavior := TBehavior.CreateWillReturnWhen(args,returnValue,Fmatchers);
   args[0] := 1;
   args[1] := 2;
   args[2] :=  'hello';
@@ -122,7 +124,7 @@ begin
   args[0] := 1;
   args[1] := 2;
   args[2] := 'hello';
-  behavior := TBehavior.CreateWillReturnWhen(args,returnValue);
+  behavior := TBehavior.CreateWillReturnWhen(args,returnValue,FMatchers);
   args[0] := 1;
   args[1] := 2;
   args[2] :=  'hello world';
@@ -142,7 +144,7 @@ procedure TTestBehaviors.CreateWillExecuteWhen_Behavior_Type_Set_To_WillExecuteW
 var
   behavior: IBehavior;
 begin
-  behavior := TBehavior.CreateWillExecuteWhen(nil, nil);
+  behavior := TBehavior.CreateWillExecuteWhen(nil, nil,FMatchers);
 
   Check(behavior.BehaviorType = TBehaviorType.WillExecuteWhen, 'CreateWillExecuteWhen behavior type isn''t WillExecuteWhen');
 end;
@@ -161,7 +163,7 @@ var
   behavior: IBehavior;
 begin
   //What is passed here shouldn't affect the result of the behavior being set. No way to avoid it however.
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '');
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '',FMatchers);
 
   Check(behavior.BehaviorType = TBehaviorType.WillRaise, 'CreateWillRaiseWhen behavior type isn''t WillRaise');
 end;
@@ -172,7 +174,7 @@ var
 const
   EXCEPTION_STRING = 'Exception!';
 begin
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, EXCEPTION_STRING);
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, EXCEPTION_STRING,FMatchers);
 
   StartExpectingException(ETestBehaviourException);
 
@@ -186,7 +188,7 @@ procedure TTestBehaviors.CreateWillRaiseWhen_Execute_Raises_Exception_Of_Our_Cho
 var
   behavior: IBehavior;
 begin
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '');
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '',FMatchers);
 
   StartExpectingException(ETestBehaviourException);
 
@@ -202,7 +204,7 @@ var
 const
   EXCEPTION_STRING = 'raised by mock';
 begin
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '');
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '',FMatchers);
 
   StartExpectingException(ETestBehaviourException);
 

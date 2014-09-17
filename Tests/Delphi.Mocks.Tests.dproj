@@ -97,22 +97,10 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\Delphi.Mocks.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.Utils.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.VirtualInterface.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.Utils.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.Behavior.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.Helpers.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.When.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.Behavior.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.Interfaces.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.MethodData.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.Expectations.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.Expectation.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.ObjectProxy.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.Proxy.pas"/>
 			<DCCReference Include="Delphi.Mocks.Utils.Tests.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.VirtualMethodInterceptor.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.TValue.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.Interfaces.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.OpenArrayIntf.pas"/>
@@ -121,14 +109,29 @@
 			<DCCReference Include="Delphi.Mocks.Tests.Base.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.ObjectProxy.pas"/>
 			<DCCReference Include="Delphi.Mocks.Examples.Objects.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.ReturnTypePatch.pas"/>
 			<DCCReference Include="Delphi.Mocks.Tests.InterfaceProxy.pas">
 				<Form>$R *.RES</Form>
 			</DCCReference>
 			<DCCReference Include="..\DUnitXML\VSoft.DUnit.XMLTestRunner.pas"/>
 			<DCCReference Include="..\DUnitXML\VSoft.MSXML6.pas"/>
-			<DCCReference Include="..\Delphi.Mocks.WeakReference.pas"/>
 			<DCCReference Include="Delphi.Mocks.Examples.Implement.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.AutoMock.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Behavior.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Expectation.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Helpers.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Interfaces.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.MethodData.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.ObjectProxy.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.ParamMatcher.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Proxy.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Proxy.TypeInfo.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.ReturnTypePatch.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.Utils.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.VirtualInterface.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.VirtualMethodInterceptor.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.WeakReference.pas"/>
+			<DCCReference Include="..\Delphi.Mocks.When.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
