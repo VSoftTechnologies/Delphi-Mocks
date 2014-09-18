@@ -35,6 +35,7 @@ procedure TestIOpenArray.TestMyMethodDynamicArray;
 var
   Mock: TMock<IDynamicArray>;
   Intf: IDynamicArray;
+  x: integer;
 begin
   Mock := TMock<IDynamicArray>.Create;
 
@@ -43,7 +44,8 @@ begin
   Intf := Mock;
 
   //TODO: Fix the privileged instruction. Something to do with TValue not liking Dynamic Arrays
-  CheckEquals(3, Intf.MyMethod([123], 1));
+  x := Intf.MyMethod([123], 1);
+  CheckEquals(3, x);
 end;
 
 procedure TestIOpenArray.TestMyMethodTypedArray;
