@@ -56,6 +56,7 @@ type
     function GetExpectationMet : boolean;
     function Match(const Args : TArray<TValue>) : boolean;
     procedure RecordHit;
+    procedure CheckExpectationMet;
     function Report : string;
     function ArgsToString : string;
     procedure CopyArgs(const Args: TArray<TValue>);
@@ -88,6 +89,8 @@ type
 
     constructor CreateAfterWhen(const AMethodName : string; const AAfterMethodName : string;const Args : TArray<TValue>; const matchers : TArray<IMatcher>);
     constructor CreateAfter(const AMethodName : string; const AAfterMethodName : string);
+
+    procedure AfterConstruction; override;
   end;
 
 
@@ -98,6 +101,12 @@ uses
   Delphi.Mocks.Helpers;
 
 { TExpectation }
+
+procedure TExpectation.AfterConstruction;
+begin
+  inherited;
+  CheckExpectationMet;
+end;
 
 function TExpectation.ArgsToString: string;
 var
@@ -249,14 +258,12 @@ constructor TExpectation.CreateNever(const AMethodName : string) ;
 begin
   Create(AMethodName);
   FExpectationType := TExpectationType.Never;
-  FExpectationMet := True;
 end;
 
 constructor TExpectation.CreateNeverWhen(const AMethodName : string; const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
 begin
   CreateWhen(AMethodName, Args, matchers);
   FExpectationType := TExpectationType.NeverWhen;
-  FExpectationMet := True;
 end;
 
 constructor TExpectation.CreateOnce(const AMethodName : string );
@@ -349,11 +356,16 @@ end;
 procedure TExpectation.RecordHit;
 begin
   Inc(FHitCount);
+  CheckExpectationMet;
+end;
+
+procedure TExpectation.CheckExpectationMet;
+begin
   case FExpectationType of
     Once,
     OnceWhen: FExpectationMet := FHitCount = 1;
     Never,
-    NeverWhen: FExpectationMet := False;
+    NeverWhen: FExpectationMet := FHitCount = 0;
     AtLeastOnce,
     AtLeastOnceWhen: FExpectationMet := FHitCount >= 1;
     AtLeast,
