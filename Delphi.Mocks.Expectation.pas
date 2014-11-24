@@ -31,7 +31,8 @@ interface
 uses
   Rtti,
   Delphi.Mocks,
-  Delphi.Mocks.Interfaces;
+  Delphi.Mocks.Interfaces,
+  Delphi.Mocks.Utils;
 
 
 //disable warnings about c++ compatibility, since we don't intend to support it.
@@ -107,17 +108,8 @@ begin
 end;
 
 function TExpectation.ArgsToString: string;
-var
-  i : integer;
 begin
-  result := '( ';
-  for i := Low(FArgs) to High(FArgs) do
-  begin
-    if i > 0 then
-      result := result + ', ';
-    result := result + FArgs[i].ToString;
-  end;
-  result := result + ' )';
+  Result := Delphi.Mocks.Utils.ArgsToString(FArgs);
 end;
 
 procedure TExpectation.CopyArgs(const Args: TArray<TValue>);
