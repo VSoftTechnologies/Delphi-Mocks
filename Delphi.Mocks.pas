@@ -86,6 +86,9 @@ type
     ['{3E6AD69A-11EA-47F1-B5C3-63F7B8C265B1}']
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
+    function GetAllowRedefineBehaviorDefinitions : boolean;
+    procedure SetAllowRedefineBehaviorDefinitions(const value : boolean);
+
     //set the return value for a method when called with the parameters specified on the When
     function WillReturn(const value : TValue) : IWhen<T>;
 
@@ -107,6 +110,9 @@ type
 
     //If true, calls to methods for which we have not defined a behavior will cause verify to fail.
     property BehaviorMustBeDefined : boolean read GetBehaviorMustBeDefined write SetBehaviorMustBeDefined;
+
+    //If true, it is possible to overwrite a already defined behaviour.
+    property AllowRedefineBehaviorDefinitions: boolean read GetAllowRedefineBehaviorDefinitions write SetAllowRedefineBehaviorDefinitions;
   end;
 
   //We use the Setup to configure our expected behaviour rules and to verify

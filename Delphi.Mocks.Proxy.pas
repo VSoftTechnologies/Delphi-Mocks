@@ -61,6 +61,7 @@ type
 
     FMethodData             : TDictionary<string, IMethodData>;
     FBehaviorMustBeDefined  : Boolean;
+    FAllowRedefineBehaviorDefinitions  : Boolean;
     FSetupMode              : TSetupMode;
     //behavior setup
     FNextBehavior           : TBehaviorType;
@@ -119,6 +120,9 @@ type
     //ISetup<T>
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
+    function GetAllowRedefineBehaviorDefinitions : boolean;
+    procedure SetAllowRedefineBehaviorDefinitions(const value : boolean);
+
     function Expect : IExpect<T>;
 
     {$Message 'TODO: Implement ISetup.Before and ISetup.After.'}
@@ -472,10 +476,17 @@ begin
   Result := FBehaviorMustBeDefined;
 end;
 
+function TProxy<T>.GetAllowRedefineBehaviorDefinitions : boolean;
+begin
+  result := FAllowRedefineBehaviorDefinitions;
+end;
+
+
 function TProxy<T>.GetMethodData(const AMethodName: string): IMethodData;
 var
   methodName : string;
   pInfo : PTypeInfo;
+  setupParams: TSetupMethodDataParameters;
 begin
   methodName := LowerCase(AMethodName);
   if FMethodData.TryGetValue(methodName,Result) then
@@ -483,7 +494,8 @@ begin
 
   pInfo := TypeInfo(T);
 
-  Result := TMethodData.Create(pInfo.Name, AMethodName, FIsStubOnly, FBehaviorMustBeDefined);
+  setupParams := TSetupMethodDataParameters.Create(FIsStubOnly, FBehaviorMustBeDefined, FAllowRedefineBehaviorDefinitions);
+  Result := TMethodData.Create(pInfo.Name, AMethodName, setupParams);
   FMethodData.Add(methodName,Result);
 end;
 
@@ -595,6 +607,12 @@ procedure TProxy<T>.SetBehaviorMustBeDefined(const value: boolean);
 begin
   FBehaviorMustBeDefined := value;
 end;
+
+procedure TProxy<T>.SetAllowRedefineBehaviorDefinitions(const value : boolean);
+begin
+  FAllowRedefineBehaviorDefinitions := value;
+end;
+
 
 procedure TProxy<T>.SetParentProxy(const AProxy : IProxy);
 begin
