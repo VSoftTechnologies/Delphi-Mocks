@@ -481,7 +481,8 @@ begin
       else
       begin
         //If it's not a stub then we say we didn't have a default return value
-        raise EMockException.Create(Format('[%s] has no default return value defined for method [%s]', [FTypeName, FMethodName]));
+        raise EMockException.Create(Format('[%s] has no default return value defined for method [%s] with args %s',
+             [FTypeName, FMethodName, Delphi.Mocks.Utils.ArgsToString(Args, 1)]));
       end;
     end
     else if FSetupParameters.BehaviorMustBeDefined and (expectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
