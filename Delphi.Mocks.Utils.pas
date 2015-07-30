@@ -39,6 +39,8 @@ function GetVirtualMethodCount(AClass: TClass): Integer;
 
 function GetDefaultValue(const rttiType : TRttiType) : TValue;
 
+function ArgsToString(const Args: TArray<TValue>; OffSet: Integer = 0): string;
+
 implementation
 
 uses
@@ -124,6 +126,18 @@ begin
   end;
 end;
 
-
+function ArgsToString(const Args: TArray<TValue>; OffSet: Integer = 0): string;
+var
+  i : integer;
+begin
+  result := EmptyStr;
+  for i := Low(Args) + OffSet to High(Args) do
+  begin
+    if (result <> EmptyStr) then
+      result := result + ', ';
+    result := result + Args[i].ToString;
+  end;
+  result := '( ' + result + ' )';
+end;
 
 end.

@@ -61,6 +61,7 @@ type
 
     FMethodData             : TDictionary<string, IMethodData>;
     FBehaviorMustBeDefined  : Boolean;
+    FAllowRedefineBehaviorDefinitions : Boolean;
     FSetupMode              : TSetupMode;
     //behavior setup
     FNextBehavior           : TBehaviorType;
@@ -76,9 +77,6 @@ type
 
     FQueryingInterface      : boolean;
     FQueryingInternalInterface : boolean;
-
-    FAutoMocker             : IAutoMock;
-
   protected type
     TProxyVirtualInterface = class(TVirtualInterface, IInterface, IProxyVirtualInterface)
     private
@@ -121,6 +119,9 @@ type
     //ISetup<T>
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
+    function GetAllowRedefineBehaviorDefinitions : boolean;
+    procedure SetAllowRedefineBehaviorDefinitions(const value : boolean);
+
     function Expect : IExpect<T>;
 
     {$Message 'TODO: Implement ISetup.Before and ISetup.After.'}
@@ -172,7 +173,7 @@ type
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
   public
-    constructor Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); virtual;
+    constructor Create(const AIsStubOnly : boolean = false); virtual;
     destructor Destroy; override;
   end;
 
@@ -361,13 +362,12 @@ begin
   FNextFunc := nil;
 end;
 
-constructor TProxy<T>.Create(const AAutoMocker : IAutoMock; const AIsStubOnly : boolean);
+constructor TProxy<T>.Create(const AIsStubOnly : boolean);
 var
   pInfo : PTypeInfo;
 begin
   inherited Create;
 
-  FAutoMocker := AAutoMocker;
   FParentProxy := nil;
   FVirtualInterface := nil;
 
@@ -529,10 +529,17 @@ begin
   Result := FBehaviorMustBeDefined;
 end;
 
+function TProxy<T>.GetAllowRedefineBehaviorDefinitions : boolean;
+begin
+  result := FAllowRedefineBehaviorDefinitions;
+end;
+
+
 function TProxy<T>.GetMethodData(const AMethodName: string; const ATypeName: string): IMethodData;
 var
   methodName : string;
   pInfo : PTypeInfo;
+  setupParams: TSetupMethodDataParameters;
 begin
   methodName := LowerCase(AMethodName);
   if FMethodData.TryGetValue(methodName,Result) then
@@ -540,7 +547,8 @@ begin
 
   pInfo := TypeInfo(T);
 
-  Result := TMethodData.Create(string(pInfo.Name), AMethodName, FIsStubOnly, FBehaviorMustBeDefined, FAutoMocker);
+  setupParams := TSetupMethodDataParameters.Create(FIsStubOnly, FBehaviorMustBeDefined, FAllowRedefineBehaviorDefinitions);
+  Result := TMethodData.Create(string(pInfo.Name), AMethodName, setupParams);
   FMethodData.Add(methodName,Result);
 end;
 
@@ -655,6 +663,12 @@ procedure TProxy<T>.SetBehaviorMustBeDefined(const value: boolean);
 begin
   FBehaviorMustBeDefined := value;
 end;
+
+procedure TProxy<T>.SetAllowRedefineBehaviorDefinitions(const value : boolean);
+begin
+  FAllowRedefineBehaviorDefinitions := value;
+end;
+
 
 procedure TProxy<T>.SetParentProxy(const AProxy : IProxy);
 begin
