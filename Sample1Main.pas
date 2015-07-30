@@ -101,7 +101,7 @@ begin
     ).When.ReturnObject;
 
 
-  mock.Setup.WillReturn('helloooooooo').When.Bar(It.IsAny<integer>,It.IsAny<string>);
+  mock.Setup.WillReturn('helloooooooo').When.Bar(It(0).IsAny<integer>,It(1).IsAny<string>);
 
   //Define our expectations - mostly about how many times we expect a method to be called.
 //
