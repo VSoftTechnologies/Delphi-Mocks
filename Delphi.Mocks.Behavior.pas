@@ -204,12 +204,11 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
 begin
   result := False;
 
-  if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers)  + 1)) then
+  if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers) + 1)) then
   begin
     result := MatchWithMatchers;
     exit;
   end;
-
 
   case FBehaviorType of
     WillReturn      : result := MatchArgs;

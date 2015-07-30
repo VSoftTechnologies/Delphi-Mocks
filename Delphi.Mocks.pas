@@ -206,20 +206,24 @@ type
 
   ///  Used for defining permissable parameter values during method setup.
   ///  Inspired by Moq
-  It = record
-    class function IsAny<T>() : T ;static;
-    class function Matches<T>(const predicate: TPredicate<T>) : T; static;
-    class function IsNotNil<T> : T;static;
-    class function IsEqualTo<T>(const value : T) : T;static;
-    class function IsInRange<T>(const fromValue : T; const toValue : T) : T;static;
-    class function IsIn<T>(const values : TArray<T>) : T;overload;static;
-    class function IsIn<T>(const values : IEnumerable<T>) : T;overload;static;
-    class function IsNotIn<T>(const values : TArray<T>) : T;overload;static;
-    class function IsNotIn<T>(const values : IEnumerable<T>) : T;overload;static;
-    {$IFDEF SUPPORTS_REGEX} //XE2 or later
-    class function IsRegex(const regex : string; const options : TRegExOptions = []) : string;static;
-    {$ENDIF}
+  ItRec = record
+    var
+      ParamIndex : cardinal;
 
+    constructor Create(const AParamIndex : Integer);
+
+    function IsAny<T>() : T ;
+    function Matches<T>(const predicate: TPredicate<T>) : T;
+    function IsNotNil<T> : T;
+    function IsEqualTo<T>(const value : T) : T;
+    function IsInRange<T>(const fromValue : T; const toValue : T) : T;
+    function IsIn<T>(const values : TArray<T>) : T; overload;
+    function IsIn<T>(const values : IEnumerable<T>) : T; overload;
+    function IsNotIn<T>(const values : TArray<T>) : T; overload;
+    function IsNotIn<T>(const values : IEnumerable<T>) : T; overload;
+    {$IFDEF SUPPORTS_REGEX} //XE2 or later
+    function IsRegex(const regex : string; const options : TRegExOptions = []) : string;
+    {$ENDIF}
   end;
 
   //Exception Types that the mocks will raise.
@@ -234,6 +238,18 @@ type
     function NameStr : string; inline;
   end;
 
+  function It(const AParamIndx : Integer) : ItRec;
+  function It0 : ItRec;
+  function It1 : ItRec;
+  function It2 : ItRec;
+  function It3 : ItRec;
+  function It4 : ItRec;
+  function It5 : ItRec;
+  function It6 : ItRec;
+  function It7 : ItRec;
+  function It8 : ItRec;
+  function It9 : ItRec;
+
 implementation
 
 uses
@@ -244,7 +260,6 @@ uses
   Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy,
   Delphi.Mocks.ParamMatcher;
-
 
 procedure TMock<T>.CheckCreated;
 var
@@ -577,22 +592,26 @@ begin
 end;
 
 { It }
+constructor ItRec.Create(const AParamIndex : Integer);
+begin
+  ParamIndex := AParamIndex;
+end;
 
-class function It.IsAny<T>: T;
+function ItRec.IsAny<T>: T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(value : T) : boolean
     begin
-        result := true;
+      result := true;
     end);
 end;
 
-class function It.IsEqualTo<T>(const value : T) : T;
+function ItRec.IsEqualTo<T>(const value : T) : T;
 begin
   result := Default(T);
 
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     var
       comparer : IEqualityComparer<T>;
@@ -602,10 +621,10 @@ begin
     end);
 end;
 
-class function It.IsIn<T>(const values: TArray<T>): T;
+function ItRec.IsIn<T>(const values: TArray<T>): T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     var
       comparer : IEqualityComparer<T>;
@@ -622,10 +641,10 @@ begin
     end);
 end;
 
-class function It.IsIn<T>(const values: IEnumerable<T>): T;
+function ItRec.IsIn<T>(const values: IEnumerable<T>): T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     var
       comparer : IEqualityComparer<T>;
@@ -642,15 +661,15 @@ begin
     end);
 end;
 
-class function It.IsInRange<T>(const fromValue, toValue: T): T;
+function ItRec.IsInRange<T>(const fromValue, toValue: T): T;
 begin
   result := Default(T);
 end;
 
-class function It.IsNotIn<T>(const values: TArray<T>): T;
+function ItRec.IsNotIn<T>(const values: TArray<T>): T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     var
       comparer : IEqualityComparer<T>;
@@ -667,10 +686,10 @@ begin
 
 end;
 
-class function It.IsNotIn<T>(const values: IEnumerable<T>): T;
+function ItRec.IsNotIn<T>(const values: IEnumerable<T>): T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     var
       comparer : IEqualityComparer<T>;
@@ -686,10 +705,10 @@ begin
     end);
 end;
 
-class function It.IsNotNil<T>: T;
+function ItRec.IsNotNil<T>: T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(
+  TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     var
       comparer : IEqualityComparer<T>;
@@ -700,17 +719,22 @@ begin
 
 end;
 
-class function It.Matches<T>(const predicate: TPredicate<T>): T;
+function ItRec.Matches<T>(const predicate: TPredicate<T>): T;
 begin
   result := Default(T);
-  TMatcherFactory.Create<T>(predicate);
+  TMatcherFactory.Create<T>(ParamIndex, predicate);
 end;
 
+//class function It.ParamIndex: integer;
+//begin
+//  result := 0;
+//end;
+
 {$IFDEF SUPPORTS_REGEX} //XE2 or later
-class function It.IsRegex(const regex : string; const options : TRegExOptions) : string;
+function ItRec.IsRegex(const regex : string; const options : TRegExOptions) : string;
 begin
   result := '';
-  TMatcherFactory.Create<string>(
+  TMatcherFactory.Create<string>(ParamIndex,
     function(param : string) : boolean
     begin
       result := TRegEx.IsMatch(param,regex,options)
@@ -718,7 +742,60 @@ begin
 end;
 {$ENDIF}
 
-{ TMatcherFactory }
+function It(const AParamIndx : Integer) : ItRec;
+begin
+  result := ItRec.Create(AParamIndx);
+end;
+
+function It0 : ItRec;
+begin
+  result := ItRec.Create(0);
+end;
+
+function It1 : ItRec;
+begin
+  result := ItRec.Create(1);
+end;
+
+function It2 : ItRec;
+begin
+  result := ItRec.Create(2);
+end;
+
+function It3 : ItRec;
+begin
+  result := ItRec.Create(3);
+end;
+
+function It4 : ItRec;
+begin
+  result := ItRec.Create(4);
+end;
+
+function It5 : ItRec;
+begin
+  result := ItRec.Create(5);
+end;
+
+function It6 : ItRec;
+begin
+  result := ItRec.Create(6);
+end;
+
+function It7 : ItRec;
+begin
+  result := ItRec.Create(7);
+end;
+
+function It8 : ItRec;
+begin
+  result := ItRec.Create(8);
+end;
+
+function It9 : ItRec;
+begin
+  result := ItRec.Create(9);
+end;
 
 
 end.

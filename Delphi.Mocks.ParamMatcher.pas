@@ -40,7 +40,7 @@ type
     function Match(const value : TValue) : boolean;
   end;
 
-  TMatcher<T> = class(TInterfacedObject,IMatcher)
+  TMatcher<T> = class(TInterfacedObject, IMatcher)
   private
     FPredicate : TPredicate<T>;
   protected
@@ -57,9 +57,9 @@ type
   protected
     class constructor Create;
     class destructor Destroy;
-    class procedure AddMatcher(const matcher : IMatcher);
+    class procedure AddMatcher(const paramIndex : integer;  const matcher : IMatcher);
   public
-    class procedure Create<T>(const predicate: TPredicate<T>);
+    class procedure Create<T>(const paramIndex : integer; const predicate: TPredicate<T>);
     class function  GetMatchers : TArray<IMatcher>;
   end;
 
@@ -73,12 +73,12 @@ uses
 
 { TMatcherFactory }
 
-class procedure TMatcherFactory.Create<T>(const predicate: TPredicate<T>);
+class procedure TMatcherFactory.Create<T>(const paramIndex : integer; const predicate: TPredicate<T>);
 var
   matcher : IMatcher;
 begin
   matcher := TMatcher<T>.Create(predicate);
-  AddMatcher(matcher);
+  AddMatcher(paramIndex, matcher);
 end;
 
 { TMatcher<T> }
@@ -111,14 +111,14 @@ end;
 
 class function TMatcherFactory.GetMatchers : TArray<IMatcher>;
 var
-  theadMatchers : TList<IMatcher>;
+  threadMatchers : TList<IMatcher>;
 begin
   SetLength(result,0);
   MonitorEnter(FLock);
   try
-    if FMatchers.TryGetValue(TThread.CurrentThread.ThreadID,theadMatchers) then
+    if FMatchers.TryGetValue(TThread.CurrentThread.ThreadID,threadMatchers) then
     begin
-      result := theadMatchers.ToArray;
+      result := threadMatchers.ToArray;
       FMatchers.Remove(TThread.CurrentThread.ThreadID);
     end;
   finally
@@ -126,18 +126,26 @@ begin
   end;
 end;
 
-class procedure TMatcherFactory.AddMatcher(const matcher : IMatcher);
+class procedure TMatcherFactory.AddMatcher(const paramIndex : integer; const matcher : IMatcher);
 var
-  theadMatchers : TList<IMatcher>;
+  threadMatchers : TList<IMatcher>;
 begin
   MonitorEnter(FLock);
   try
-    if not FMatchers.TryGetValue(TThread.CurrentThread.ThreadID,theadMatchers) then
+    if not FMatchers.TryGetValue(TThread.CurrentThread.ThreadID,threadMatchers) then
     begin
-      theadMatchers := TList<IMatcher>.Create;
-      FMatchers.Add(TThread.CurrentThread.ThreadID,theadMatchers);
+      threadMatchers := TList<IMatcher>.Create;
+      FMatchers.Add(TThread.CurrentThread.ThreadID,threadMatchers);
     end;
-    theadMatchers.Insert(0,matcher);
+
+    while paramIndex > threadMatchers.Count - 1 do
+      threadMatchers.Add(nil);
+
+    if threadMatchers[paramIndex] = nil then
+      threadMatchers[paramIndex] := matcher
+    else
+      threadMatchers.Insert(paramIndex, matcher);
+
   finally
     MonitorExit(FLock);
   end;

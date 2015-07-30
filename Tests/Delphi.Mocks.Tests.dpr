@@ -53,9 +53,10 @@ uses
   Delphi.Mocks.Utils in '..\Delphi.Mocks.Utils.pas',
   Delphi.Mocks.VirtualInterface in '..\Delphi.Mocks.VirtualInterface.pas',
   Delphi.Mocks.VirtualMethodInterceptor in '..\Delphi.Mocks.VirtualMethodInterceptor.pas',
-  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas' {$R *.RES},
+  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas',
   Delphi.Mocks.WeakReference in '..\Delphi.Mocks.WeakReference.pas',
-  Delphi.Mocks.When in '..\Delphi.Mocks.When.pas';
+  Delphi.Mocks.When in '..\Delphi.Mocks.When.pas',
+  Delphi.Mocks.Examples.Matchers in 'Delphi.Mocks.Examples.Matchers.pas';
 
 {$R *.RES}
 
