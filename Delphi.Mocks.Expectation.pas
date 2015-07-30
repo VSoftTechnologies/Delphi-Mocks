@@ -144,8 +144,6 @@ begin
   FMatchers := matchers;
 end;
 
-
-
 constructor TExpectation.CreateAfter(const AMethodName : string; const AAfterMethodName: string);
 begin
   Create(AMethodName);

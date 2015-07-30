@@ -478,6 +478,9 @@ begin
         //first see if we know about this method
         methodData := GetMethodData(method.Name, pInfo.NameStr);
         Assert(methodData <> nil);
+
+        matchers := TMatcherFactory.GetMatchers;
+
         case FNextExpectation of
           OnceWhen        : methodData.OnceWhen(Args, matchers);
           NeverWhen       : methodData.NeverWhen(Args, matchers) ;
