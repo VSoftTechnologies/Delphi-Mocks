@@ -89,6 +89,9 @@ type
     ['{3E6AD69A-11EA-47F1-B5C3-63F7B8C265B1}']
     function GetBehaviorMustBeDefined : boolean;
     procedure SetBehaviorMustBeDefined(const value : boolean);
+    function GetAllowRedefineBehaviorDefinitions : boolean;
+    procedure SetAllowRedefineBehaviorDefinitions(const value : boolean);
+
     //set the return value for a method when called with the parameters specified on the When
     function WillReturn(const value : TValue) : IWhen<T>;
 
@@ -110,6 +113,9 @@ type
 
     //If true, calls to methods for which we have not defined a behavior will cause verify to fail.
     property BehaviorMustBeDefined : boolean read GetBehaviorMustBeDefined write SetBehaviorMustBeDefined;
+
+    //If true, it is possible to overwrite a already defined behaviour.
+    property AllowRedefineBehaviorDefinitions: boolean read GetAllowRedefineBehaviorDefinitions write SetAllowRedefineBehaviorDefinitions;
   end;
 
   //We use the Setup to configure our expected behaviour rules and to verify
@@ -152,7 +158,6 @@ type
   TStub<T> = record
   private
     FProxy : IStubProxy<T>;
-    FAutomocker : IAutoMock;
   public
     class operator Implicit(const Value: TStub<T>): T;
     function Setup : IStubSetup<T>;
@@ -170,8 +175,7 @@ type
   private
     FProxy : IProxy<T>;
     FCreated : Boolean;
-    FAutomocker : IAutoMock;
-
+    
     procedure CheckCreated;
 
     class procedure CheckMockType(const ATypeInfo : PTypeInfo); static;
@@ -198,16 +202,6 @@ type
     class function Create: TMock<T>; overload; static;
     //Explicit cleanup. Not sure if we really need this.
     procedure Free;
-  end;
-
-  TAutoMockContainer = record
-  private
-    FAutoMocker : IAutoMock;
-  public
-    function Mock<T> : TMock<T>; overload;
-    procedure Mock(const ATypeInfo : PTypeInfo); overload;
-
-    class function Create : TAutoMockContainer; static;
   end;
 
   ///  Used for defining permissable parameter values during method setup.
@@ -249,8 +243,7 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy,
-  Delphi.Mocks.ParamMatcher,
-  Delphi.Mocks.AutoMock;
+  Delphi.Mocks.ParamMatcher;
 
 
 procedure TMock<T>.CheckCreated;
@@ -293,9 +286,6 @@ begin
   //Make sure that we start off with a clean mock
   FillChar(Result, SizeOf(Result), 0);
 
-  //By default we don't auto mock TMock<T>. It changes when TAutoMock is used.
-  Result.FAutomocker := AAutoMock;
-
   pInfo := TypeInfo(T);
 
   //Raise exceptions if the mock doesn't meet the requirements.
@@ -303,9 +293,9 @@ begin
 
   case pInfo.Kind of
     //Create our proxy object, which will implement our object T
-    tkClass : proxy := TObjectProxy<T>.Create(Result.FAutomocker, false);
+    tkClass : proxy := TObjectProxy<T>.Create(false);
     //Create our proxy interface object, which will implement our interface T
-    tkInterface : proxy := TProxy<T>.Create(Result.FAutomocker, false);
+    tkInterface : proxy := TProxy<T>.Create(false);
   end;
 
   //Push the proxy into the result we are returning.
@@ -514,9 +504,6 @@ begin
   //Make sure that we start off with a clean mock
   FillChar(Result, SizeOf(Result), 0);
 
-  //By default we don't auto mock TMock<T>. It changes when TAutoMock is used.
-  Result.FAutomocker := nil;
-
   pInfo := TypeInfo(T);
 
   if not (pInfo.Kind in [tkInterface,tkClass]) then
@@ -532,7 +519,7 @@ begin
           raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
-      proxy := TObjectProxy<T>.Create(Result.FAutomocker, true);
+      proxy := TObjectProxy<T>.Create(true);
     end;
     tkInterface :
     begin
@@ -541,7 +528,7 @@ begin
         raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
 
       //Create our proxy interface object, which will implement our interface T
-      proxy := TProxy<T>.Create(Result.FAutomocker, true);
+      proxy := TProxy<T>.Create(true);
     end;
   else
     raise EMockException.Create('Invalid type kind T');
@@ -587,33 +574,6 @@ begin
 {$ELSE}
   result := Self.NameFld.ToString;
 {$ENDIF}
-end;
-
-{ TAutoMockContainer }
-
-class function TAutoMockContainer.Create: TAutoMockContainer;
-begin
-  FillChar(Result, SizeOf(Result), 0);
-
-  Result.FAutoMocker := TAutoMock.Create;
-end;
-
-procedure TAutoMockContainer.Mock(const ATypeInfo: PTypeInfo);
-begin
-  FAutoMocker.Mock(ATypeInfo);
-end;
-
-function TAutoMockContainer.Mock<T>: TMock<T>;
-var
-  mock : TMock<T>;
-  pInfo : PTypeInfo;
-begin
-  pInfo := TypeInfo(T);
-
-  mock := TMock<T>.Create(FAutoMocker);
-  FAutoMocker.Add(pInfo.NameStr, mock.FProxy);
-
-  result := mock;
 end;
 
 { It }

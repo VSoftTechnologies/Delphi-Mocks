@@ -261,7 +261,7 @@ procedure TTestExpectations.ExpectationNotMet_With_OnceWhen_CalledNever;
 var
   expectation : IExpectation;
 begin
-  expectation := TExpectation.CreateOnceWhen('', nil);
+  expectation := TExpectation.CreateOnceWhen('', nil, nil);
 
   CheckFalse(expectation.ExpectationMet, 'Exception met for OnceWhen being not called');
 end;
