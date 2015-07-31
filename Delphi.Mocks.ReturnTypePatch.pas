@@ -102,7 +102,6 @@ procedure PatchMethodReturnType(const ATypeInfo: PTypeInfo; const AMethodName : 
 var
   LContext: TRttiContext;
   LMethod: TRttiMethod;
-  LAttribute: TCustomAttribute;
 begin
   for LMethod in LContext.GetType(ATypeInfo).GetDeclaredMethods do
   begin

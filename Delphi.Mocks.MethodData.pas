@@ -35,7 +35,8 @@ uses
   SysUtils,
   Generics.Collections,
   Delphi.Mocks,
-  Delphi.Mocks.Interfaces;
+  Delphi.Mocks.Interfaces,
+  Delphi.Mocks.ParamMatcher;
 
 type
   TSetupMethodDataParameters = record
@@ -53,6 +54,7 @@ type
     FReturnDefault  : TValue;
     FExpectations   : TList<IExpectation>;
     FSetupParameters: TSetupMethodDataParameters;
+    FAutoMocker     : IAutoMock;
   protected
 
     //Behaviors
@@ -95,7 +97,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters);
+    constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
   end;
 
@@ -106,6 +108,7 @@ type
 implementation
 
 uses
+  System.TypInfo,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,
   Delphi.Mocks.Expectation;
@@ -115,7 +118,7 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters);
+constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
 begin
   FTypeName := ATypeName;
   FMethodName := AMethodName;
@@ -123,6 +126,7 @@ begin
   FExpectations := TList<IExpectation>.Create;
   FReturnDefault := TValue.Empty;
   FSetupParameters := ASetupParameters;
+  FAutoMocker := AAutoMocker;
 end;
 
 destructor TMethodData.Destroy;
