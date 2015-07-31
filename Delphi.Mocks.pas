@@ -236,7 +236,6 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy,
-  Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.AutoMock;
 
 

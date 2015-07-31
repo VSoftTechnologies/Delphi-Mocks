@@ -123,7 +123,6 @@ uses
   Delphi.Mocks.Utils,
   Delphi.Mocks.When,
   Delphi.Mocks.MethodData,
-  Delphi.Mocks.ParamMatcher,
   Windows;
 
 {TProxy}

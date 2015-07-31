@@ -35,8 +35,7 @@ uses
   SysUtils,
   Generics.Collections,
   Delphi.Mocks,
-  Delphi.Mocks.Interfaces,
-  Delphi.Mocks.ParamMatcher;
+  Delphi.Mocks.Interfaces;
 
 type
   TSetupMethodDataParameters = record
