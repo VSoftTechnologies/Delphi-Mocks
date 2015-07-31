@@ -54,6 +54,7 @@ type
     FReturnDefault  : TValue;
     FExpectations   : TList<IExpectation>;
     FSetupParameters: TSetupMethodDataParameters;
+    FAutoMocker     : IAutoMock;
     procedure StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
     procedure MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
   protected
@@ -98,7 +99,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters);
+    constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
   end;
 
@@ -119,7 +120,7 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters);
+constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
 begin
   FTypeName := ATypeName;
   FMethodName := AMethodName;
@@ -127,6 +128,7 @@ begin
   FExpectations := TList<IExpectation>.Create;
   FReturnDefault := TValue.Empty;
   FSetupParameters := ASetupParameters;
+  FAutoMocker := AAutoMocker;
 end;
 
 destructor TMethodData.Destroy;
@@ -260,8 +262,6 @@ begin
 end;
 
 procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
-var
-  mockProxy: IProxy;
 begin
   //If we have no return type defined, and the default return type is empty
   if (returnType <> nil) and (FReturnDefault.IsEmpty) then

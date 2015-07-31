@@ -46,7 +46,7 @@ type
     procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
     function Proxy : T; override;
   public
-    constructor Create(const AIsStubOnly : boolean = false); override;
+    constructor Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); override;
     destructor Destroy; override;
   end;
 
@@ -57,14 +57,14 @@ uses
 
 { TObjectProxy<T> }
 
-constructor TObjectProxy<T>.Create(const AIsStubOnly : boolean = false);
+constructor TObjectProxy<T>.Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false);
 var
   ctx   : TRttiContext;
   rType : TRttiType;
   ctor : TRttiMethod;
   instance : TValue;
 begin
-  inherited Create(AIsStubOnly);
+  inherited Create(AAutoMocker, AIsStubOnly);
   ctx := TRttiContext.Create;
   rType := ctx.GetType(TypeInfo(T));
   if rType = nil then
