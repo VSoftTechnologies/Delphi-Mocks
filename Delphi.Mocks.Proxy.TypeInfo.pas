@@ -80,8 +80,8 @@ type
       function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
       function _AddRef: Integer; override; stdcall;
       function _Release: Integer; override; stdcall;
-      procedure AfterConstruction; override;
     public
+      procedure AfterConstruction; override;
       //TVirtualInterface overrides
       constructor Create(const AProxy : IProxy; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
@@ -94,8 +94,6 @@ type
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
     function _AddRef: Integer; override; stdcall;
     function _Release: Integer; override; stdcall;
-
-    procedure AfterConstruction; override;
 
     //IProxy
     function ProxyInterface : IInterface;
@@ -118,6 +116,8 @@ type
 
     procedure ClearSetupState;
   public
+    procedure AfterConstruction; override;
+
     constructor Create(const ATypeInfo : PTypeInfo; const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); virtual;
     destructor Destroy; override;
   end;
@@ -727,10 +727,12 @@ end;
 
 function TProxy.TProxyVirtualInterface.QueryProxy(const IID: TGUID; out Obj : IProxy): HRESULT;
 begin
+  Result := E_NOINTERFACE;
+
   //If this virtual proxy (and only this virtual proxy) supports the passed in
   //interface, return the proxy who owns us.
   if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
-    FProxy.QueryInterface(IProxy, Obj);
+    Result := FProxy.QueryInterface(IProxy, Obj);
 end;
 
 function TProxy.TProxyVirtualInterface._AddRef: Integer;

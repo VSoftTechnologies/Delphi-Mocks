@@ -40,6 +40,7 @@ uses
   VSoft.DUnit.XMLTestRunner in '..\DUnitXML\VSoft.DUnit.XMLTestRunner.pas',
   VSoft.MSXML6 in '..\DUnitXML\VSoft.MSXML6.pas',
   Delphi.Mocks.Examples.Implement in 'Delphi.Mocks.Examples.Implement.pas',
+  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas',
   Delphi.Mocks.AutoMock in '..\Delphi.Mocks.AutoMock.pas',
   Delphi.Mocks.Behavior in '..\Delphi.Mocks.Behavior.pas',
   Delphi.Mocks.Expectation in '..\Delphi.Mocks.Expectation.pas',
@@ -53,9 +54,9 @@ uses
   Delphi.Mocks.Proxy.TypeInfo in '..\Delphi.Mocks.Proxy.TypeInfo.pas',
   Delphi.Mocks.ReturnTypePatch in '..\Delphi.Mocks.ReturnTypePatch.pas',
   Delphi.Mocks.Utils in '..\Delphi.Mocks.Utils.pas',
+  Delphi.Mocks.Validation in '..\Delphi.Mocks.Validation.pas',
   Delphi.Mocks.VirtualInterface in '..\Delphi.Mocks.VirtualInterface.pas',
   Delphi.Mocks.VirtualMethodInterceptor in '..\Delphi.Mocks.VirtualMethodInterceptor.pas',
-  Delphi.Mocks.Tests.InterfaceProxy in 'Delphi.Mocks.Tests.InterfaceProxy.pas',
   Delphi.Mocks.WeakReference in '..\Delphi.Mocks.WeakReference.pas',
   Delphi.Mocks.When in '..\Delphi.Mocks.When.pas',
   Sample1Main in '..\Sample1Main.pas';

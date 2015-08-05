@@ -99,8 +99,8 @@ type
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
+    function _AddRef: Integer; override; stdcall;
+    function _Release: Integer; override; stdcall;
 
     //IProxy
     function ProxyInterface : IInterface;
@@ -866,10 +866,11 @@ end;
 
 function TProxy<T>.TProxyVirtualInterface.QueryProxy(const IID: TGUID; out Obj : IProxy): HRESULT;
 begin
+  Result := E_NOINTERFACE;
   //If this virtual proxy (and only this virtual proxy) supports the passed in
   //interface, return the proxy who owns us.
   if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
-    FProxy.QueryInterface(IProxy, Obj);
+    Result := FProxy.QueryInterface(IProxy, Obj);
 end;
 
 procedure TProxy<T>.VerifyAll(const message: string);

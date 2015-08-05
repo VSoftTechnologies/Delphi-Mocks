@@ -49,7 +49,6 @@ type
     procedure Implement_Single_Interface;
     procedure Implement_Multiple_Interfaces;
     procedure SetupAndVerify_Mulitple_Interfaces;
-    [Ignore]
     procedure SetupAndVerify_Object_And_Interfaces;
   end;
 

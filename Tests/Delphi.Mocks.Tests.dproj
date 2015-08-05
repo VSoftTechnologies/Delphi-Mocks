@@ -111,6 +111,9 @@
         <DCCReference Include="..\DUnitXML\VSoft.DUnit.XMLTestRunner.pas"/>
         <DCCReference Include="..\DUnitXML\VSoft.MSXML6.pas"/>
         <DCCReference Include="Delphi.Mocks.Examples.Implement.pas"/>
+        <DCCReference Include="Delphi.Mocks.Tests.InterfaceProxy.pas">
+            <Form>$R *.RES</Form>
+        </DCCReference>
         <DCCReference Include="..\Delphi.Mocks.AutoMock.pas"/>
         <DCCReference Include="..\Delphi.Mocks.Behavior.pas"/>
         <DCCReference Include="..\Delphi.Mocks.Expectation.pas"/>
@@ -124,11 +127,9 @@
         <DCCReference Include="..\Delphi.Mocks.Proxy.TypeInfo.pas"/>
         <DCCReference Include="..\Delphi.Mocks.ReturnTypePatch.pas"/>
         <DCCReference Include="..\Delphi.Mocks.Utils.pas"/>
+        <DCCReference Include="..\Delphi.Mocks.Validation.pas"/>
         <DCCReference Include="..\Delphi.Mocks.VirtualInterface.pas"/>
         <DCCReference Include="..\Delphi.Mocks.VirtualMethodInterceptor.pas"/>
-        <DCCReference Include="Delphi.Mocks.Tests.InterfaceProxy.pas">
-            <Form>$R *.RES</Form>
-        </DCCReference>
         <DCCReference Include="..\Delphi.Mocks.WeakReference.pas"/>
         <DCCReference Include="..\Delphi.Mocks.When.pas"/>
         <DCCReference Include="..\Sample1Main.pas"/>
