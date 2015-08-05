@@ -78,9 +78,12 @@ type
       function QueryProxy(const IID: TGUID; out Obj : IProxy) : HRESULT;
       function QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner : Boolean): HRESULT; overload;
       function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
+      function _AddRef: Integer; override; stdcall;
+      function _Release: Integer; override; stdcall;
+      procedure AfterConstruction; override;
     public
       //TVirtualInterface overrides
-      constructor Create(const AProxy : TProxy; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+      constructor Create(const AProxy : IProxy; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
     end;
 
@@ -89,8 +92,10 @@ type
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
+    function _AddRef: Integer; override; stdcall;
+    function _Release: Integer; override; stdcall;
+
+    procedure AfterConstruction; override;
 
     //IProxy
     function ProxyInterface : IInterface;
@@ -236,6 +241,11 @@ end;
 //
 //end;
 
+procedure TProxy.AfterConstruction;
+begin
+  inherited;
+end;
+
 function TProxy.CheckExpectations: string;
 var
   methodData : IMethodData;
@@ -263,8 +273,12 @@ begin
 end;
 
 constructor TProxy.Create(const ATypeInfo : PTypeInfo; const AAutoMocker : IAutoMock; const AIsStubOnly : boolean);
+var
+  selfProxy : IProxy;
 begin
   inherited Create;
+
+  FName := ATypeInfo.NameStr;
 
   FAutoMocker := AAutoMocker;
   FParentProxy := nil;
@@ -283,12 +297,11 @@ begin
     //Create our proxy interface object, which will implement our interface T
     tkInterface :
     begin
-      FVirtualInterface := TProxyVirtualInterface.Create(Self, FTypeInfo, Self.DoInvoke);
+      selfProxy := Self;
+      FVirtualInterface := TProxyVirtualInterface.Create(selfProxy, FTypeInfo, Self.DoInvoke);
 
     end;
   end;
-
-  FName := FTypeInfo.NameStr;
 end;
 
 destructor TProxy.Destroy;
@@ -665,7 +678,12 @@ end;
 
 { TProxy.TProxyVirtualInterface }
 
-constructor TProxy.TProxyVirtualInterface.Create(const AProxy : TProxy;
+procedure TProxy.TProxyVirtualInterface.AfterConstruction;
+begin
+  inherited;
+end;
+
+constructor TProxy.TProxyVirtualInterface.Create(const AProxy : IProxy;
   const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
 begin
   //Create a weak reference to our owner proxy. This is the proxy who implements
@@ -694,7 +712,10 @@ begin
   //who does implement it. This allows for a single proxy to implement multiple
   //interfaces at once.
   if (ACheckOwner) and (Result <> 0) then
-    Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
+  begin
+    if FProxy <> nil then
+      Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
+  end;
 end;
 
 function TProxy.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner: Boolean): HRESULT;
@@ -708,9 +729,18 @@ function TProxy.TProxyVirtualInterface.QueryProxy(const IID: TGUID; out Obj : IP
 begin
   //If this virtual proxy (and only this virtual proxy) supports the passed in
   //interface, return the proxy who owns us.
-  Result :=  QueryInterfaceWithOwner(IID, Obj, False);
-  if Result <> 0 then
-    Result := FProxy.QueryInterface(IProxy, Obj);
+  if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
+    FProxy.QueryInterface(IProxy, Obj);
+end;
+
+function TProxy.TProxyVirtualInterface._AddRef: Integer;
+begin
+  result := inherited;
+end;
+
+function TProxy.TProxyVirtualInterface._Release: Integer;
+begin
+  result := inherited;
 end;
 
 procedure TProxy.VerifyAll(const message: string);

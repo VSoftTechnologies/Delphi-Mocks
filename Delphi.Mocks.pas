@@ -180,10 +180,6 @@ type
 
     procedure CheckCreated;
 
-    class procedure CheckMockType(const ATypeInfo : PTypeInfo); static;
-    class procedure CheckMockInterface(const ATypeInfo : PTypeInfo); static;
-    class procedure CheckMockObject(const ATypeInfo : PTypeInfo); static;
-
     class function Create(const AAutoMock : IAutoMock): TMock<T>; overload; static;
   public
     class operator Implicit(const Value: TMock<T>): T;
@@ -274,7 +270,8 @@ uses
   Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy,
   Delphi.Mocks.ParamMatcher,
-  Delphi.Mocks.AutoMock;
+  Delphi.Mocks.AutoMock,
+  Delphi.Mocks.Validation;
 
 
 procedure TMock<T>.CheckCreated;
@@ -323,7 +320,7 @@ begin
   pInfo := TypeInfo(T);
 
   //Raise exceptions if the mock doesn't meet the requirements.
-  CheckMockType(pInfo);
+  TMocksValidation.CheckMockType(pInfo);
 
   case pInfo.Kind of
     //Create our proxy object, which will implement our object T
@@ -345,6 +342,7 @@ procedure TMock<T>.Free;
 begin
   CheckCreated;
   FProxy := nil;
+  FAutomocker := nil;
 end;
 
 procedure TMock<T>.Implement<I>;
@@ -359,7 +357,7 @@ begin
 
   pInfo := TypeInfo(I);
 
-  CheckMockInterface(pInfo);
+  TMocksValidation.CheckMockInterface(pInfo);
 
   proxy := TProxy<I>.Create;
 
@@ -452,34 +450,6 @@ begin
 end;
 {$O+}
 
-class procedure TMock<T>.CheckMockInterface(const ATypeInfo : PTypeInfo);
-begin
-  //Check to make sure we have
-  if not CheckInterfaceHasRTTI(ATypeInfo) then
-    raise EMockNoRTTIException.Create(ATypeInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
-end;
-
-class procedure TMock<T>.CheckMockObject(const ATypeInfo: PTypeInfo);
-begin
-  //Check to make sure we have
-  if not CheckClassHasRTTI(ATypeInfo) then
-    raise EMockNoRTTIException.Create(ATypeInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
-end;
-
-class procedure TMock<T>.CheckMockType(const ATypeInfo: PTypeInfo);
-begin
-  if not (ATypeInfo.Kind in [tkInterface,tkClass]) then
-    raise EMockException.Create(ATypeInfo.NameStr + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
-
-  case ATypeInfo.Kind of
-    //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
-    //NOTE: Object proxy doesn't require more than zero methods on the object.
-    tkClass : CheckMockObject(ATypeInfo);
-    tkInterface : CheckMockInterface(ATypeInfo);
-  else
-    raise EMockException.Create('Invalid type kind T');
-  end;
-end;
 
 procedure TMock<T>.Verify(const message: string);
 var

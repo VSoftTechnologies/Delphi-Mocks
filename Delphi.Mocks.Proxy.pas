@@ -90,7 +90,7 @@ type
       function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
     public
       //TVirtualInterface overrides
-      constructor Create(const AProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+      constructor Create(const AProxy : IProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
     end;
 
@@ -425,6 +425,7 @@ begin
       //record actual behavior
       methodData := GetMethodData(method.Name,pInfo.NameStr);
       Assert(methodData <> nil);
+
       methodData.RecordHit(Args,Method.ReturnType,Result);
     end;
     TSetupMode.Behavior:
@@ -821,7 +822,7 @@ end;
 
 { TProxy<T>.TProxyVirtualInterface }
 
-constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : TProxy<T>;
+constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : IProxy<T>;
   const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
 begin
   //Create a weak reference to our owner proxy. This is the proxy who implements

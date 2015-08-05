@@ -24,6 +24,8 @@ type
 implementation
 
 uses
+  Windows,
+  Delphi.Mocks.Validation,
   Delphi.Mocks.Proxy.TypeInfo;
 
 { TAutoMock }
@@ -53,12 +55,22 @@ end;
 
 function TAutoMock.Mock(const ATypeInfo : PTypeInfo) : IProxy;
 var
-  newMock: IProxy;
+  proxy: IProxy;
 begin
+  //Raise exceptions if the mock doesn't meet the requirements.
+  TMocksValidation.CheckMockType(ATypeInfo);
+
   //We create new mocks using ourself as the auto mocking reference
-  newMock := TProxy.Create(ATypeInfo, Self);
-  FMocks.Add(newMock);
-  result := newMock;
+  proxy := TProxy.Create(ATypeInfo, Self, false);
+
+  FMocks.Add(proxy);
+
+  //Push the proxy into the result we are returning.
+  if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy)).Guid, proxy) <> 0 then
+    //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
+    raise EMockNoProxyException.Create('Error casting to interface ' + ATypeInfo.NameStr + ' , proxy does not appear to implememnt IProxy');
+
+  result := proxy;
 end;
 
 end.
