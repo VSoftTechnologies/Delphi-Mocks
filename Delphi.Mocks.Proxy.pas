@@ -61,7 +61,7 @@ type
 
     FMethodData             : TDictionary<string, IMethodData>;
     FBehaviorMustBeDefined  : Boolean;
-    FAllowRedefineBehaviorDefinitions  : Boolean;
+    FAllowRedefineBehaviorDefinitions : Boolean;
     FSetupMode              : TSetupMode;
     //behavior setup
     FNextBehavior           : TBehaviorType;
@@ -77,7 +77,6 @@ type
 
     FQueryingInterface      : boolean;
     FQueryingInternalInterface : boolean;
-
     FAutoMocker             : IAutoMock;
 
   protected type
@@ -91,7 +90,7 @@ type
       function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
     public
       //TVirtualInterface overrides
-      constructor Create(const AProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+      constructor Create(const AProxy : IProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
     end;
 
@@ -415,6 +414,7 @@ var
   methodData : IMethodData;
   behavior : IBehavior;
   pInfo : PTypeInfo;
+  matchers : TArray<IMatcher>;
 begin
   pInfo := TypeInfo(T);
 
@@ -424,11 +424,16 @@ begin
       //record actual behavior
       methodData := GetMethodData(method.Name,pInfo.NameStr);
       Assert(methodData <> nil);
+
       methodData.RecordHit(Args,Method.ReturnType,Result);
     end;
     TSetupMode.Behavior:
     begin
       try
+        matchers := TMatcherFactory.GetMatchers;
+        if Length(matchers) > 0 then
+          if Length(matchers) < Length(Args) -1 then
+            raise EMockSetupException.Create('Setup called with Matchers but on on all parameters : ' + Method.Name );
         //record desired behavior
         //first see if we know about this method
         methodData := GetMethodData(method.Name,pInfo.NameStr);
@@ -454,7 +459,7 @@ begin
             if (FReturnValue.IsEmpty) then
               raise EMockSetupException.CreateFmt('Setup.WillReturn call on method [%s] was not passed a return value.', [Method.Name]);
 
-            methodData.WillReturnWhen(Args,FReturnValue);
+            methodData.WillReturnWhen(Args,FReturnValue,matchers);
           end;
           TBehaviorType.WillRaise:
           begin
@@ -462,7 +467,7 @@ begin
           end;
           TBehaviorType.WillExecuteWhen :
           begin
-            methodData.WillExecuteWhen(FNextFunc,Args);
+            methodData.WillExecuteWhen(FNextFunc,Args,matchers);
           end;
         end;
       finally
@@ -476,15 +481,18 @@ begin
         //first see if we know about this method
         methodData := GetMethodData(method.Name, pInfo.NameStr);
         Assert(methodData <> nil);
+
+        matchers := TMatcherFactory.GetMatchers;
+
         case FNextExpectation of
-          OnceWhen        : methodData.OnceWhen(Args);
-          NeverWhen       : methodData.NeverWhen(Args) ;
-          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args);
-          AtLeastWhen     : methodData.AtLeastWhen(FTimes,args);
-          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args);
-          AtMostWhen      : methodData.AtMostWhen(FTimes,args);
-          BetweenWhen     : methodData.BetweenWhen(FBetween[0],FBetween[1],Args) ;
-          ExactlyWhen     : methodData.ExactlyWhen(FTimes,Args);
+          OnceWhen        : methodData.OnceWhen(Args, matchers);
+          NeverWhen       : methodData.NeverWhen(Args, matchers) ;
+          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args, matchers);
+          AtLeastWhen     : methodData.AtLeastWhen(FTimes, args, matchers);
+          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args, matchers);
+          AtMostWhen      : methodData.AtMostWhen(FTimes, args, matchers);
+          BetweenWhen     : methodData.BetweenWhen(FBetween[0], FBetween[1],Args, matchers);
+          ExactlyWhen     : methodData.ExactlyWhen(FTimes, Args, matchers);
           BeforeWhen      : raise exception.Create('not implemented') ;
           AfterWhen       : raise exception.Create('not implemented');
         end;
@@ -813,7 +821,7 @@ end;
 
 { TProxy<T>.TProxyVirtualInterface }
 
-constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : TProxy<T>;
+constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : IProxy<T>;
   const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
 begin
   //Create a weak reference to our owner proxy. This is the proxy who implements

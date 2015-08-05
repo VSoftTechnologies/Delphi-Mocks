@@ -27,8 +27,6 @@ type
 
     procedure BehaviourMustBeDefined_IsFalse_AndBehaviourIsNotDefined_RaisesNoException;
     procedure BehaviourMustBeDefined_IsTrue_AndBehaviourIsNotDefined_RaisesException;
-
-    procedure RaiseExceptionWhenMissingArgsAndDontHaveDefaultValue;
   end;
 
 implementation
@@ -46,28 +44,6 @@ begin
   Check(False, 'Not implemented');
 end;
 
-procedure TTestMethodData.RaiseExceptionWhenMissingArgsAndDontHaveDefaultValue;
-const
-  EXPECTED_ERROR_MESSAGE = 'method [MissingArg] with args ( 4 )';
-var
-  vMock: TMock<ISimpleInterface>;
-begin
-  vMock := TMock<ISimpleInterface>.Create;
-  vMock.Setup.Expect.Once.When.MissingArg(123);
-
-  try
-    vMock.Instance.MissingArg(4);
-    Fail('Do not raise Exception');
-  except
-    on E: Exception do
-    begin
-      CheckEquals(EMockException.ClassName, E.ClassName, 'Expect a MockException');
-      CheckTrue(ContainsText(E.Message, EXPECTED_ERROR_MESSAGE),
-                Format('Expect the string <%s> contains the substring <%s>',[E.Message, EXPECTED_ERROR_MESSAGE]));
-    end;
-  end;
-end;
-
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsTrue_RedefinedIsAllowed;
 var
   methodData  : IMethodData;
@@ -78,8 +54,8 @@ begin
   someValue2 := TValue.From<Integer>(2);
 
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, False, TRUE));
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1);
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
 
   // no exception is raised
   CheckTrue(True);
@@ -95,10 +71,10 @@ begin
   someValue2 := TValue.From<Integer>(2);
 
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
 
   StartExpectingException(EMockException);
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
   StopExpectingException;
 end;
 
@@ -111,8 +87,8 @@ begin
   someValue1 := TValue.From<Integer>(1);
   someValue2 := TValue.From<Integer>(2);
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1);
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue2), someValue2);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue2), someValue2, nil);
 
   CheckTrue(True);
 end;
@@ -127,8 +103,8 @@ begin
   someValue1 := TValue.From<Integer>(1);
   someValue2 := TValue.From<Integer>(2);
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(TRUE, TRUE, TRUE));
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1);
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
+  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
 
   methodData.RecordHit(TArray<TValue>.Create(someValue1), TrttiContext.Create.GetType(TypeInfo(integer)), outValue);
 

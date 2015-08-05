@@ -33,6 +33,9 @@ uses
   TypInfo,
   Rtti,
   sysutils,
+  {$IFDEF SUPPORTS_REGEX}
+  System.RegularExpressions,
+  {$ENDIF}
   Delphi.Mocks.WeakReference;
 
 type
@@ -177,10 +180,6 @@ type
 
     procedure CheckCreated;
 
-    class procedure CheckMockType(const ATypeInfo : PTypeInfo); static;
-    class procedure CheckMockInterface(const ATypeInfo : PTypeInfo); static;
-    class procedure CheckMockObject(const ATypeInfo : PTypeInfo); static;
-
     class function Create(const AAutoMock : IAutoMock): TMock<T>; overload; static;
   public
     class operator Implicit(const Value: TMock<T>): T;
@@ -215,6 +214,28 @@ type
     class function Create : TAutoMockContainer; static;
   end;
 
+  ///  Used for defining permissable parameter values during method setup.
+  ///  Inspired by Moq
+  ItRec = record
+    var
+      ParamIndex : cardinal;
+
+    constructor Create(const AParamIndex : Integer);
+
+    function IsAny<T>() : T ;
+    function Matches<T>(const predicate: TPredicate<T>) : T;
+    function IsNotNil<T> : T;
+    function IsEqualTo<T>(const value : T) : T;
+    function IsInRange<T>(const fromValue : T; const toValue : T) : T;
+    function IsIn<T>(const values : TArray<T>) : T; overload;
+    function IsIn<T>(const values : IEnumerable<T>) : T; overload;
+    function IsNotIn<T>(const values : TArray<T>) : T; overload;
+    function IsNotIn<T>(const values : IEnumerable<T>) : T; overload;
+    {$IFDEF SUPPORTS_REGEX} //XE2 or later
+    function IsRegex(const regex : string; const options : TRegExOptions = []) : string;
+    {$ENDIF}
+  end;
+
   //Exception Types that the mocks will raise.
   EMockException = class(Exception);
   EMockProxyAlreadyImplemented = class(EMockException);
@@ -227,6 +248,18 @@ type
     function NameStr : string; inline;
   end;
 
+  function It(const AParamIndx : Integer) : ItRec;
+  function It0 : ItRec;
+  function It1 : ItRec;
+  function It2 : ItRec;
+  function It3 : ItRec;
+  function It4 : ItRec;
+  function It5 : ItRec;
+  function It6 : ItRec;
+  function It7 : ItRec;
+  function It8 : ItRec;
+  function It9 : ItRec;
+
 implementation
 
 uses
@@ -236,7 +269,9 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,
   Delphi.Mocks.ObjectProxy,
-  Delphi.Mocks.AutoMock;
+  Delphi.Mocks.ParamMatcher,
+  Delphi.Mocks.AutoMock,
+  Delphi.Mocks.Validation;
 
 
 procedure TMock<T>.CheckCreated;
@@ -285,7 +320,7 @@ begin
   pInfo := TypeInfo(T);
 
   //Raise exceptions if the mock doesn't meet the requirements.
-  CheckMockType(pInfo);
+  TMocksValidation.CheckMockType(pInfo);
 
   case pInfo.Kind of
     //Create our proxy object, which will implement our object T
@@ -307,6 +342,7 @@ procedure TMock<T>.Free;
 begin
   CheckCreated;
   FProxy := nil;
+  FAutomocker := nil;
 end;
 
 procedure TMock<T>.Implement<I>;
@@ -321,7 +357,7 @@ begin
 
   pInfo := TypeInfo(I);
 
-  CheckMockInterface(pInfo);
+  TMocksValidation.CheckMockInterface(pInfo);
 
   proxy := TProxy<I>.Create;
 
@@ -414,34 +450,6 @@ begin
 end;
 {$O+}
 
-class procedure TMock<T>.CheckMockInterface(const ATypeInfo : PTypeInfo);
-begin
-  //Check to make sure we have
-  if not CheckInterfaceHasRTTI(ATypeInfo) then
-    raise EMockNoRTTIException.Create(ATypeInfo.NameStr + ' does not have RTTI, specify {$M+} for the interface to enabled RTTI');
-end;
-
-class procedure TMock<T>.CheckMockObject(const ATypeInfo: PTypeInfo);
-begin
-  //Check to make sure we have
-  if not CheckClassHasRTTI(ATypeInfo) then
-    raise EMockNoRTTIException.Create(ATypeInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
-end;
-
-class procedure TMock<T>.CheckMockType(const ATypeInfo: PTypeInfo);
-begin
-  if not (ATypeInfo.Kind in [tkInterface,tkClass]) then
-    raise EMockException.Create(ATypeInfo.NameStr + ' is not an Interface or Class. TMock<T> supports interfaces and classes only');
-
-  case ATypeInfo.Kind of
-    //NOTE: We have a weaker requirement for an object proxy opposed to an interface proxy.
-    //NOTE: Object proxy doesn't require more than zero methods on the object.
-    tkClass : CheckMockObject(ATypeInfo);
-    tkInterface : CheckMockInterface(ATypeInfo);
-  else
-    raise EMockException.Create('Invalid type kind T');
-  end;
-end;
 
 procedure TMock<T>.Verify(const message: string);
 var
@@ -600,6 +608,212 @@ begin
   FAutoMocker.Add(pInfo.NameStr, mock.FProxy);
 
   result := mock;
+end;
+
+{ It }
+constructor ItRec.Create(const AParamIndex : Integer);
+begin
+  ParamIndex := AParamIndex;
+end;
+
+function ItRec.IsAny<T>: T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(value : T) : boolean
+    begin
+      result := true;
+    end);
+end;
+
+function ItRec.IsEqualTo<T>(const value : T) : T;
+begin
+  result := Default(T);
+
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+    begin
+      comparer := TEqualityComparer<T>.Default;
+      result := comparer.Equals(param,value);
+    end);
+end;
+
+function ItRec.IsIn<T>(const values: TArray<T>): T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := false;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        result := comparer.Equals(param,value);
+        if result then
+          exit;
+      end;
+    end);
+end;
+
+function ItRec.IsIn<T>(const values: IEnumerable<T>): T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := false;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        result := comparer.Equals(param,value);
+        if result then
+          exit;
+      end;
+    end);
+end;
+
+function ItRec.IsInRange<T>(const fromValue, toValue: T): T;
+begin
+  result := Default(T);
+end;
+
+function ItRec.IsNotIn<T>(const values: TArray<T>): T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := true;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        if comparer.Equals(param,value) then
+          exit(false);
+      end;
+    end);
+
+end;
+
+function ItRec.IsNotIn<T>(const values: IEnumerable<T>): T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+      value : T;
+    begin
+      result := true;
+      comparer := TEqualityComparer<T>.Default;
+      for value in values do
+      begin
+        if comparer.Equals(param,value) then
+          exit(false);
+      end;
+    end);
+end;
+
+function ItRec.IsNotNil<T>: T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(param : T) : boolean
+    var
+      comparer : IEqualityComparer<T>;
+    begin
+      comparer := TEqualityComparer<T>.Default;
+      result := comparer.Equals(param,Default(T));
+    end);
+
+end;
+
+function ItRec.Matches<T>(const predicate: TPredicate<T>): T;
+begin
+  result := Default(T);
+  TMatcherFactory.Create<T>(ParamIndex, predicate);
+end;
+
+//class function It.ParamIndex: integer;
+//begin
+//  result := 0;
+//end;
+
+{$IFDEF SUPPORTS_REGEX} //XE2 or later
+function ItRec.IsRegex(const regex : string; const options : TRegExOptions) : string;
+begin
+  result := '';
+  TMatcherFactory.Create<string>(ParamIndex,
+    function(param : string) : boolean
+    begin
+      result := TRegEx.IsMatch(param,regex,options)
+    end);
+end;
+{$ENDIF}
+
+function It(const AParamIndx : Integer) : ItRec;
+begin
+  result := ItRec.Create(AParamIndx);
+end;
+
+function It0 : ItRec;
+begin
+  result := ItRec.Create(0);
+end;
+
+function It1 : ItRec;
+begin
+  result := ItRec.Create(1);
+end;
+
+function It2 : ItRec;
+begin
+  result := ItRec.Create(2);
+end;
+
+function It3 : ItRec;
+begin
+  result := ItRec.Create(3);
+end;
+
+function It4 : ItRec;
+begin
+  result := ItRec.Create(4);
+end;
+
+function It5 : ItRec;
+begin
+  result := ItRec.Create(5);
+end;
+
+function It6 : ItRec;
+begin
+  result := ItRec.Create(6);
+end;
+
+function It7 : ItRec;
+begin
+  result := ItRec.Create(7);
+end;
+
+function It8 : ItRec;
+begin
+  result := ItRec.Create(8);
+end;
+
+function It9 : ItRec;
+begin
+  result := ItRec.Create(9);
 end;
 
 

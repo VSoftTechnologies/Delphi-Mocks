@@ -62,8 +62,8 @@ type
     FWeakReferences : Array of Pointer;
     FRefCount: Integer;
     function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
+    function _AddRef: Integer; virtual; stdcall;
+    function _Release: Integer; virtual; stdcall;
     procedure AddWeakRef(value : Pointer);
     procedure RemoveWeakRef(value : Pointer);
     function GetRefCount : integer;
@@ -97,6 +97,7 @@ type
 implementation
 
 uses
+  windows,
   TypInfo,
   classes,
   sysutils;

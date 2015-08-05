@@ -101,9 +101,10 @@ begin
     ).When.ReturnObject;
 
 
+  mock.Setup.WillReturn('helloooooooo').When.Bar(It(0).IsAny<integer>,It(1).IsAny<string>);
 
   //Define our expectations - mostly about how many times we expect a method to be called.
-
+//
   //we expect the TestMe method to never be called
   mock.Setup.Expect.Never.When.TestMe;
 
@@ -128,6 +129,7 @@ begin
 
   WriteLn('Calling Bar(1) : ' + mock.Instance.Bar(1));
   WriteLn('Calling Bar(2) : ' + mock.Instance.Bar(2));
+  WriteLn('Calling Bar(2,sdfsd) : ' + mock.Instance.Bar(999,'sdfsd'));
   WriteLn('Calling Bar(2,sdfsd) : ' + mock.Instance.Bar(2,'sdfsd'));
   WriteLn('Calling Bar(200) : ' + mock.Instance.Bar(200));
 
