@@ -56,21 +56,21 @@ end;
 function TAutoMock.Mock(const ATypeInfo : PTypeInfo) : IProxy;
 var
   proxy: IProxy;
+  proxyAsType: IProxy;
 begin
   //Raise exceptions if the mock doesn't meet the requirements.
   TMocksValidation.CheckMockType(ATypeInfo);
 
   //We create new mocks using ourself as the auto mocking reference
   proxy := TProxy.Create(ATypeInfo, Self, false);
+  proxyAsType := proxy.ProxyFromType(ATypeInfo);
 
   FMocks.Add(proxy);
 
   //Push the proxy into the result we are returning.
-  if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy)).Guid, proxy) <> 0 then
+  if proxyAsType.QueryInterface(GetTypeData(TypeInfo(IProxy)).Guid, result) <> 0 then
     //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
     raise EMockNoProxyException.Create('Error casting to interface ' + ATypeInfo.NameStr + ' , proxy does not appear to implememnt IProxy');
-
-  result := proxy;
 end;
 
 end.
