@@ -59,6 +59,7 @@ type
     function IsUInt64: Boolean;
     function IsVariant: Boolean;
     function IsWord: Boolean;
+	function IsGuid: Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -202,6 +203,10 @@ begin
   begin
     Result := Left.AsVariant = Right.AsVariant;
   end else
+  if Left.IsGuid and Right.IsGuid then
+  begin
+    Result := IsEqualGuid( Left.AsType<TGUID>, Right.AsType<TGUID> );
+  end else
   if Left.TypeInfo = Right.TypeInfo then
   begin
     Result := Left.AsPointer = Right.AsPointer;
@@ -338,6 +343,10 @@ begin
   Result := TypeInfo = System.TypeInfo(Word);
 end;
 
+function TValueHelper.IsGuid: Boolean;
+begin
+  Result := TypeInfo = System.TypeInfo(TGUID);
+end;
 
 
 
