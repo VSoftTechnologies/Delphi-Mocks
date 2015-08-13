@@ -3,7 +3,7 @@ unit Delphi.Mocks.Examples.Implement;
 interface
 
 uses
-  TestFramework;
+  DUnitX.TestFramework;
 
 type
   {$M+}
@@ -44,7 +44,7 @@ type
   end;
   {$M-}
 
-  TExample_InterfaceImplementTests = class(TTestcase)
+  TExample_InterfaceImplementTests = class
   published
     procedure Implement_Single_Interface;
     procedure Implement_Multiple_Interfaces;
@@ -132,9 +132,9 @@ begin
     //by the mocking library.
 
     //Didn't use CheckException to simpilfy this test.
-    Check(False);
+    Assert.Fail;
   except
-    Check(True);
+    Assert.Pass;
   end;
 end;
 
@@ -210,6 +210,5 @@ begin
 end;
 
 initialization
-  TestFramework.RegisterTest(TExample_InterfaceImplementTests.Suite);
 
 end.

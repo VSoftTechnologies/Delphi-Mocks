@@ -6,7 +6,6 @@ program Sample1;
 
 uses
   SysUtils,
-  Delphi.Mocks.Examples.Implement in 'Tests\Delphi.Mocks.Examples.Implement.pas',
   Delphi.Mocks.AutoMock in 'Delphi.Mocks.AutoMock.pas',
   Delphi.Mocks.Behavior in 'Delphi.Mocks.Behavior.pas',
   Delphi.Mocks.Expectation in 'Delphi.Mocks.Expectation.pas',
@@ -25,7 +24,11 @@ uses
   Delphi.Mocks.VirtualMethodInterceptor in 'Delphi.Mocks.VirtualMethodInterceptor.pas',
   Delphi.Mocks.WeakReference in 'Delphi.Mocks.WeakReference.pas',
   Delphi.Mocks.When in 'Delphi.Mocks.When.pas',
-  Sample1Main in 'Sample1Main.pas';
+  Sample1Main in 'Sample1Main.pas',
+  Delphi.Mocks.Examples.Factory in 'Tests\Delphi.Mocks.Examples.Factory.pas',
+  Delphi.Mocks.Examples.Implement in 'Tests\Delphi.Mocks.Examples.Implement.pas',
+  Delphi.Mocks.Examples.Matchers in 'Tests\Delphi.Mocks.Examples.Matchers.pas',
+  Delphi.Mocks.Examples.Objects in 'Tests\Delphi.Mocks.Examples.Objects.pas';
 
 begin
   try

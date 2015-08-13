@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils,
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
@@ -28,7 +28,7 @@ type
   end;
   {$M-}
 
-  TAutoMockTests = class(TTestCase)
+  TAutoMockTests = class
   published
     procedure AutoMock_Can_Mock_Interface;
     procedure AutoMock_Automatically_Mocks_Contained_Returned_Interface;
@@ -52,8 +52,8 @@ begin
   mockInterface := mock.Instance.FuncToReturnInterface;
   mockObject := mock.Instance.FuncToReturnClass;
 
-  CheckNotNull(mockInterface, 'Expected the interface off the mock to be auotmatically created and the instance returned.');
-  CheckNotNull(mockObject, 'Expected the object off the mock to be auotmatically created and the instance returned.');
+  Assert.IsNotNull(mockInterface, 'Expected the interface off the mock to be auotmatically created and the instance returned.');
+  Assert.IsNotNull(mockObject, 'Expected the object off the mock to be auotmatically created and the instance returned.');
 end;
 
 procedure TAutoMockTests.AutoMock_Can_Mock_Interface;
@@ -65,10 +65,10 @@ begin
 
   mock := automockSUT.Mock<IAutoMockedInterface>;
 
-  CheckNotNull(mock.Instance, 'Expect the interface returned from mock is not null');
+  Assert.IsNotNull(mock.Instance, 'Expect the interface returned from mock is not null');
 end;
 
 initialization
-  TestFramework.RegisterTest(TAutoMockTests.Suite);
+  TDUnitX.RegisterTestFixture(TAutoMockTests);
 
 end.

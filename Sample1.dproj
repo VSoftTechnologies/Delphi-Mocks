@@ -54,6 +54,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <DCC_UnitSearchPath>$(DUNITX);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <SanitizedProjectName>Sample1</SanitizedProjectName>
         <DCC_DUPLICATE_CTOR_DTOR>false</DCC_DUPLICATE_CTOR_DTOR>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.2.3.4;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0</VerInfo_Keys>
@@ -124,7 +125,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Tests\Delphi.Mocks.Examples.Implement.pas"/>
         <DCCReference Include="Delphi.Mocks.AutoMock.pas"/>
         <DCCReference Include="Delphi.Mocks.Behavior.pas"/>
         <DCCReference Include="Delphi.Mocks.Expectation.pas"/>
@@ -144,6 +144,10 @@
         <DCCReference Include="Delphi.Mocks.WeakReference.pas"/>
         <DCCReference Include="Delphi.Mocks.When.pas"/>
         <DCCReference Include="Sample1Main.pas"/>
+        <DCCReference Include="Tests\Delphi.Mocks.Examples.Factory.pas"/>
+        <DCCReference Include="Tests\Delphi.Mocks.Examples.Implement.pas"/>
+        <DCCReference Include="Tests\Delphi.Mocks.Examples.Matchers.pas"/>
+        <DCCReference Include="Tests\Delphi.Mocks.Examples.Objects.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -197,14 +201,15 @@
                     <Parameters Name="LoadAllSymbols">True</Parameters>
                     <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
                 </Parameters>
-                <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k160.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp160.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                </Excluded_Packages>
+                <Excluded_Packages/>
             </Delphi.Personality>
             <Deployment>
+                <DeployFile LocalName="Win32\Debug\Sample1.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>Sample1.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Win32\Debug\Sample1.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win32">
                         <RemoteName>Sample1.rsm</RemoteName>
@@ -216,12 +221,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                     <Platform Name="iOSSimulator">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Win32\Debug\Sample1.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>Sample1.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

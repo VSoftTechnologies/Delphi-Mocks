@@ -3,10 +3,10 @@ unit Delphi.Mocks.Tests.TValue;
 interface
 
 uses
-  TestFramework;
+  DUnitX.TestFramework;
 
 type
-  TValueTests = class(TTestcase)
+  TValueTests = class
   published
   end;
 
@@ -16,5 +16,5 @@ uses
   Delphi.Mocks.Helpers;
 
 initialization
-  RegisterTest(TValueTests.Suite);
+  TDUnitX.RegisterTestFixture(TValueTests);
 end.

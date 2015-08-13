@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils,
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
@@ -24,7 +24,7 @@ type
     procedure CallsSimpleMethodOnMock;virtual;
   end;
 
-  TMockObjectTests = class(TTestcase)
+  TMockObjectTests = class
   published
     procedure MockObject_Can_Call_Function;virtual;
   end;
@@ -49,9 +49,10 @@ begin
 
   systemUnderTest := TSystemUnderTest.Create(mock.Instance);
   try
-    StartExpectingException(ESimpleException);
-    systemUnderTest.CallsSimpleMethodOnMock;
-    StopExpectingException;
+    Assert.WillRaise(procedure
+    begin
+      systemUnderTest.CallsSimpleMethodOnMock;
+    end, ESimpleException);
   finally
    systemUnderTest.Free;
   end;
@@ -76,6 +77,4 @@ begin
   FMocked := AMock;
 end;
 
-initialization
-  TestFramework.RegisterTest(TMockObjectTests.Suite);
 end.

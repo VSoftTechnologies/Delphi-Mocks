@@ -5,7 +5,7 @@ interface
 uses
   Rtti,
   SysUtils,
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
@@ -64,7 +64,7 @@ type
   //--Without RTTI
 
 
-  TTestMock = class(TTestCase)
+  TTestMock = class
   published
     procedure CreateMock_With_Object_Which_Has_No_RTTI_Raises_No_Exception;
     procedure CreateMock_With_Object_Which_Has_RTTI_But_No_Exposed_Functions_Raises_Exception;
@@ -118,7 +118,7 @@ begin
     end;
   end;
 
-  CheckFalse(exceptionRaised, exceptionMsg);
+  Assert.IsFalse(exceptionRaised, exceptionMsg);
 end;
 
 procedure TTestMock.CreateMock_With_Interface_We_Get_Valid_Proxy;
@@ -127,31 +127,27 @@ var
 begin
   mock := TMock<ISimpleTestInterface_WithRTTI>.Create;
 
-  CheckNotNull(mock.Instance);
+  Assert.IsNotNull(mock.Instance);
 end;
 
 procedure TTestMock.CreateMock_With_Interface_Which_Has_No_RTTI_Raises_Exception;
 var
   mock : TMock<ISimpleTestInterface_WithoutRTTI>;
 begin
-  StartExpectingException(EMockNoRTTIException);
-
-  mock := TMock<ISimpleTestInterface_WithoutRTTI>.Create;
-
-  //Would also like to test the exception string.
-  StopExpectingException;
+  Assert.WillRaise(procedure
+  begin
+    mock := TMock<ISimpleTestInterface_WithoutRTTI>.Create;
+  end, EMockNoRTTIException);
 end;
 
 procedure TTestMock.CreateMock_With_Interface_Which_Has_RTTI_But_No_Exposed_Functions_Raises_Exception;
 var
   mock : TMock<IBlankTestInterface_WithRTTI>;
 begin
-  StartExpectingException(EMockNoRTTIException);
-
-  mock := TMock<IBlankTestInterface_WithRTTI>.Create;
-
-  //Would also like to test the exception string.
-  StopExpectingException;
+  Assert.WillRaise(procedure
+  begin
+    mock := TMock<IBlankTestInterface_WithRTTI>.Create;
+  end, EMockNoRTTIException);
 end;
 
 procedure TTestMock.CreateMock_With_Interface_Which_Has_RTTI_Raises_No_Exception;
@@ -173,31 +169,27 @@ begin
     end;
   end;
 
-  CheckFalse(exceptionRaised, exceptionMsg);
+  Assert.IsFalse(exceptionRaised, exceptionMsg);
 end;
 
 procedure TTestMock.CreateMock_With_Object_Which_Has_RTTI_But_No_Exposed_Functions_Raises_Exception;
 var
   mock : TMock<TBlankTestObject_WithRTTI>;
 begin
-  StartExpectingException(EMockNoRTTIException);
-
-  mock := TMock<TBlankTestObject_WithRTTI>.Create;
-
-  //Would also like to test the exception string.
-  StopExpectingException;
+  Assert.WillRaise(procedure
+  begin
+    mock := TMock<TBlankTestObject_WithRTTI>.Create;
+  end, EMockNoRTTIException);
 end;
 
 procedure TTestMock.CreateMock_With_Record_Structure_Raises_Exception;
 var
   mock : TMock<TSimpleRecord_WithoutRTTI>;
 begin
-  StartExpectingException(EMockException);
-
-  mock := TMock<TSimpleRecord_WithoutRTTI>.Create;
-
-  //Would also like to test the exception string.
-  StopExpectingException;
+  Assert.WillRaise(procedure
+  begin
+    mock := TMock<TSimpleRecord_WithoutRTTI>.Create;
+  end, EMockException);
 end;
 
 procedure TTestMock.After_AddImplement_And_Expects_Both_Interfaces_VerifyAll_Succeeds;
@@ -255,7 +247,7 @@ begin
   //The proxy should implement all the interfaces its defined with. Can't test
   //for IProxy<IInterfaceTwo> as this has the same GUID as IProxy<IInterfaceOne>
   //Therefore test that the instance of the proxy implements IInterfaceTwo.
-  CheckTrue(Supports(prox.ProxyInterface, IInterfaceTwo));
+  Assert.IsTrue(Supports(prox.ProxyInterface, IInterfaceTwo));
 end;
 
 procedure TTestMock.After_Implement_MockSetupT_Returns_ISetup_Of_The_Implemented_Type;
@@ -274,8 +266,8 @@ begin
   //It simply will return the first IProxy<T> that it finds from QueryInterface. Therefore
   //we need to double check that the actual proxy can return a ISecondTestInterface
   //to make sure that the correct proxy has been returned for mocksetup.
-  CheckTrue(Supports(mockSetup, IProxy<ISecondTestInterface>, proxy));
-  CheckTrue(Supports(proxy.Proxy, ISecondTestInterface));
+  Assert.IsTrue(Supports(mockSetup, IProxy<ISecondTestInterface>, proxy));
+  Assert.IsTrue(Supports(proxy.Proxy, ISecondTestInterface));
 end;
 
 procedure TTestMock.Proxy_Should_Not_Support_IProxy;
@@ -285,7 +277,7 @@ var
 begin
   proxyOne := TProxy<IInterfaceOne>.Create;
 
-  CheckFalse(Supports(proxyOne.Proxy, IProxy, outProxyTwo), 'IProxy<T>.Proxy should support IProxy');
+  Assert.IsFalse(Supports(proxyOne.Proxy, IProxy, outProxyTwo), 'IProxy<T>.Proxy should support IProxy');
 end;
 
 procedure TTestMock.When_Proxy_With_Implemented_Interface_Returns_IProxy_From_Instance_For_Implemented_Interface;
@@ -302,8 +294,8 @@ begin
 
   bSupports := Supports(proxyOne.ProxyFromType(TypeInfo(IInterfaceTwo)), IProxy<IInterfaceTwo>, outProxyTwo);
 
-  CheckTrue(bSupports, 'IProxy<T>.Proxy should support IProxy<I> after AddImplements called');
-  CheckTrue((proxyTwo as IProxy<IInterfaceTwo>) = outProxyTwo, 'IProxy<T>.Proxy should return the same IProxy<I> as was added through AddImplements');
+  Assert.IsTrue(bSupports, 'IProxy<T>.Proxy should support IProxy<I> after AddImplements called');
+  Assert.IsTrue((proxyTwo as IProxy<IInterfaceTwo>) = outProxyTwo, 'IProxy<T>.Proxy should return the same IProxy<I> as was added through AddImplements');
 end;
 
 procedure TTestMock.When_Proxy_With_Implemented_Interface_Returns_That_Interface;
@@ -317,8 +309,8 @@ begin
 
   proxyOne.AddImplement(proxyTwo, TypeInfo(IInterfaceTwo));
 
-  CheckTrue(Supports(proxyOne.Proxy, IInterfaceTwo, outProxyTwo));
-  CheckTrue(proxyTwo.Proxy = outProxyTwo);
+  Assert.IsTrue(Supports(proxyOne.Proxy, IInterfaceTwo, outProxyTwo));
+  Assert.IsTrue(proxyTwo.Proxy = outProxyTwo);
 end;
 
 procedure TTestMock.When_Proxy_With_Implmeneted_Interface_Returns_IExpect_Of_Interface_From_Instance_For_Implemented_Interface;
@@ -335,8 +327,8 @@ begin
 
   bSupports := Supports(proxyOne.ProxyFromType(TypeInfo(IInterfaceTwo)), IExpect<IInterfaceTwo>, outProxyTwo);
 
-  CheckTrue(bSupports, 'IProxy<T>.Proxy should support IExpect<I> after AddImplements called');
-  CheckTrue((proxyTwo as IExpect<IInterfaceTwo>) = outProxyTwo, 'IProxy<T>.Proxy should return the same IExpect<I> as was added through AddImplements');
+  Assert.IsTrue(bSupports, 'IProxy<T>.Proxy should support IExpect<I> after AddImplements called');
+  Assert.IsTrue((proxyTwo as IExpect<IInterfaceTwo>) = outProxyTwo, 'IProxy<T>.Proxy should return the same IExpect<I> as was added through AddImplements');
 end;
 
 { TSimpleTestObject_WithRTTI }
@@ -354,6 +346,6 @@ begin
 end;
 
 initialization
-  TestFramework.RegisterTest(TTestMock.Suite);
+  TDUnitX.RegisterTestFixture(TTestMock);
 
 end.

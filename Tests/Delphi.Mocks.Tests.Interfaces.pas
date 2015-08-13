@@ -3,7 +3,7 @@ unit Delphi.Mocks.Tests.Interfaces;
 interface
 
 uses
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
@@ -25,7 +25,7 @@ type
   end;
   {$M-}
 
-  TSafeCallTest = class(TTestcase)
+  TSafeCallTest = class
   published
     procedure CanMockSafecallFunction;
     procedure CanMockSafecallProc;
@@ -64,7 +64,7 @@ begin
 
   value := mock.Instance.DoSomething('hello');
 
-  CheckEquals(123, value);
+  Assert.AreEqual(123, value);
 end;
 
 procedure TSafeCallTest.CanMockSafecallProc;
@@ -105,6 +105,7 @@ begin
 end;
 
 initialization
-  TestFramework.RegisterTest(TSafeCallTest.Suite);
+  TDUnitX.RegisterTestFixture(TSafeCallTest);
+
 
 end.

@@ -6,7 +6,7 @@ uses
   Rtti,
   TypInfo,
   SysUtils,
-  TestFramework;
+  DUnitX.TestFramework;
 
 type
   {$M+}
@@ -78,7 +78,7 @@ type
   end;
   {$M-}
 
-  TExample_MockFactoryTests = class(TTestcase)
+  TExample_MockFactoryTests = class
   published
     procedure Implement_Multiple_Interfaces;
     procedure Create_T_From_TypeInfo;
@@ -178,11 +178,11 @@ var
 begin
   fakeExporter := TFakeGeneric<TLogExporter>.Create;
 
-  CheckEqualsString(fakeExporter.Value.ClassName, 'TLogExporter');
+  Assert.AreEqual(fakeExporter.Value.ClassName, 'TLogExporter');
 
   fakeLine := TFakeGeneric<ILogLine>.Create;
 
-  CheckEqualsString(fakeLine.Value.FormattedLine, 'TLogExporter');
+  Assert.AreEqual(fakeLine.Value.FormattedLine, 'TLogExporter');
 end;
 
 procedure TExample_MockFactoryTests.Implement_Multiple_Interfaces;
@@ -270,6 +270,6 @@ begin
 end;
 
 initialization
-  TestFramework.RegisterTest(TExample_MockFactoryTests.Suite);
+  TDUnitX.RegisterTestFixture(TExample_MockFactoryTests);
 
 end.

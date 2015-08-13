@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils,
-  TestFramework,
+  DUnitX.TestFramework,
   Rtti,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces;
@@ -16,7 +16,7 @@ type
   end;
   {$M-}
 
-  TTestMethodData = class(TTestCase)
+  TTestMethodData = class
   published
     procedure Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
 
@@ -41,7 +41,7 @@ uses
 
 procedure TTestMethodData.Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
 begin
-  Check(False, 'Not implemented');
+  Assert.IsTrue(False, 'Not implemented');
 end;
 
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsTrue_RedefinedIsAllowed;
@@ -58,7 +58,7 @@ begin
   methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
 
   // no exception is raised
-  CheckTrue(True);
+  Assert.IsTrue(True);
 end;
 
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsFalse_ExceptionIsThrown_WhenRedefining;
@@ -73,9 +73,10 @@ begin
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
   methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
 
-  StartExpectingException(EMockException);
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
-  StopExpectingException;
+  Assert.WillRaise(procedure
+  begin
+    methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
+  end, EMockException);
 end;
 
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsFalse_NoExceptionIsThrown_WhenAddingNormal;
@@ -90,7 +91,7 @@ begin
   methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
   methodData.WillReturnWhen(TArray<TValue>.Create(someValue2), someValue2, nil);
 
-  CheckTrue(True);
+  Assert.IsTrue(True);
 end;
 
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsTrue_OldBehaviorIsDeleted;
@@ -108,7 +109,7 @@ begin
 
   methodData.RecordHit(TArray<TValue>.Create(someValue1), TrttiContext.Create.GetType(TypeInfo(integer)), outValue);
 
-  CheckEquals(someValue2.AsInteger, outValue.AsInteger );
+  Assert.AreEqual(someValue2.AsInteger, outValue.AsInteger );
 end;
 
 
@@ -120,7 +121,7 @@ begin
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
   methodData.RecordHit(TArray<TValue>.Create(), nil, someValue);
   // no exception should be raised
-  CheckTrue(True);
+  Assert.IsTrue(True);
 end;
 
 procedure TTestMethodData.BehaviourMustBeDefined_IsTrue_AndBehaviourIsNotDefined_RaisesException;
@@ -130,13 +131,14 @@ var
 begin
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, TRUE, FALSE));
 
-  StartExpectingException(EMockException);
+  Assert.WillRaise(procedure
+  begin
   methodData.RecordHit(TArray<TValue>.Create(), TRttiContext.Create.GetType(TypeInfo(Integer)), someValue);
-  StopExpectingException;
+  end, EMockException);
 end;
 
-initialization
-  TestFramework.RegisterTest(TTestMethodData.Suite);
 
+initialization
+  TDUnitX.RegisterTestFixture(TTestMethodData);
 
 end.

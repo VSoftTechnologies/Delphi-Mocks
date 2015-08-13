@@ -28,7 +28,7 @@ unit Delphi.Mocks.Tests.InterfaceProxy;
 interface
 
 uses
-  TestFramework;
+  DUnitX.TestFramework;
 
 type
   {$M+}
@@ -58,7 +58,7 @@ type
   end;
   {$M-}
 
-  TTestInterfaceProxy = class(TTestCase)
+  TTestInterfaceProxy = class
   published
     procedure After_Proxy_AddImplement_ProxyProxy_Implements_Original_Interface;
     procedure After_Proxy_AddImplement_ProxyProxy_Implements_New_Interface;
@@ -99,7 +99,7 @@ begin
   newProxy := proxySUT.ProxyFromType(TypeInfo(IInterfaceTwo));
 
   //TEST - Make sure proxy value implements IInterfaceTwo
-  CheckTrue(Supports(newProxy.ProxyInterface, IInterfaceTwo, newInterface));
+  Assert.IsTrue(Supports(newProxy.ProxyInterface, IInterfaceTwo, newInterface));
 end;
 
 procedure TTestInterfaceProxy.After_Proxy_AddImplement_ProxyProxy_Implements_New_Interface;
@@ -114,7 +114,7 @@ begin
   proxySUT.AddImplement(TProxy<IInterfaceTwo>.Create, TypeInfo(IInterfaceTwo));
 
   //TEST - Make sure proxy value implements IInterfaceTwo
-  CheckTrue(Supports(proxySUT.Proxy, IInterfaceTwo, newInterface));
+  Assert.IsTrue(Supports(proxySUT.Proxy, IInterfaceTwo, newInterface));
 end;
 
 procedure TTestInterfaceProxy.After_Proxy_AddImplement_ProxyProxy_Implements_Original_Interface;
@@ -129,9 +129,9 @@ begin
   proxySUT.AddImplement(TProxy<IInterfaceTwo>.Create, TypeInfo(IInterfaceTwo));
 
   //TEST - Make sure proxy value implements IInterfaceOne
-  CheckTrue(Supports(proxySUT.Proxy, IInterfaceOne, originalInterface));
-  CheckNotNull(originalInterface);
-  CheckTrue(originalInterface = proxySUT.Proxy);
+  Assert.IsTrue(Supports(proxySUT.Proxy, IInterfaceOne, originalInterface));
+  Assert.IsNotNull(originalInterface);
+  Assert.IsTrue(originalInterface = proxySUT.Proxy);
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtLeastOnceWhen;
@@ -221,7 +221,7 @@ begin
   mock.Setup.WillExecute(
     function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
     begin
-      CheckEquals(2, Length(Args), 'Args Length');
+      Assert.AreEqual(2, Length(Args), 'Args Length');
       //Argument Zero is Self Instance
       args[1] := RETURN_MSG;
     end
@@ -230,7 +230,7 @@ begin
   msg := EmptyStr;
   mock.Instance.TestOutParam(msg);
 
-  CheckEquals(RETURN_MSG, msg);
+  Assert.AreEqual(RETURN_MSG, msg);
 
   mock.Verify;
 end;
@@ -247,7 +247,7 @@ begin
   mock.Setup.WillExecute(
     function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
     begin
-      CheckEquals(2, Length(Args), 'Args Length');
+      Assert.AreEqual(2, Length(Args), 'Args Length');
       //Argument Zero is Self Instance
       args[1] := RETURN_MSG;
     end
@@ -256,11 +256,14 @@ begin
   msg := EmptyStr;
   mock.Instance.TestVarParam(msg);
 
-  CheckEquals(RETURN_MSG, msg);
+  Assert.AreEqual(RETURN_MSG, msg);
 
   mock.Verify;
 end;
 
+
 initialization
-  TestFramework.RegisterTest(TTestInterfaceProxy.Suite);
+  TDUnitX.RegisterTestFixture(TTestInterfaceProxy);
+
+
 end.

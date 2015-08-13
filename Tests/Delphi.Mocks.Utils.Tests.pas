@@ -2,9 +2,9 @@ unit Delphi.Mocks.Utils.Tests;
 
 interface
 uses
-  TestFramework;
+  DUnitX.TestFramework;
 type
-  TUtilsTests = class(TTestcase)
+  TUtilsTests = class
   published
     procedure CheckInterfaceHasRTTIWithoutRTTI;
     procedure CheckInterfaceHasRTTIWithNonInterface;
@@ -26,19 +26,20 @@ uses
 procedure TUtilsTests.CheckInterfaceHasRTTIWithInterfaceRTTI;
 
 begin
-  CheckTrue(CheckInterfaceHasRTTI(TypeInfo(ITestable)));
+  Assert.IsTrue(CheckInterfaceHasRTTI(TypeInfo(ITestable)));
 end;
 
 procedure TUtilsTests.CheckInterfaceHasRTTIWithNonInterface;
 begin
-  CheckTrue(CheckInterfaceHasRTTI(TypeInfo(TObject)));
+  Assert.IsTrue(CheckInterfaceHasRTTI(TypeInfo(TObject)));
 end;
 
 procedure TUtilsTests.CheckInterfaceHasRTTIWithoutRTTI;
 begin
-  CheckFalse(CheckInterfaceHasRTTI(TypeInfo(IInterface)));
+  Assert.IsFalse(CheckInterfaceHasRTTI(TypeInfo(IInterface)));
 end;
 
+
 initialization
-  RegisterTest(TUtilsTests.Suite);
+  TDUnitX.RegisterTestFixture(TUtilsTests);
 end.

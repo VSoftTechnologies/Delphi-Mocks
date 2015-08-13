@@ -5,11 +5,11 @@ interface
 uses
   Rtti,
   SysUtils,
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
-  TTestMock = class(TTestCase)
+  TTestMock = class
   published
     procedure Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
   end;
@@ -24,4 +24,13 @@ uses
 
 
 
+{ TTestMock }
+
+procedure TTestMock.Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
+begin
+
+end;
+
+initialization
+  TDUnitX.RegisterTestFixture(TTestMock);
 end.
