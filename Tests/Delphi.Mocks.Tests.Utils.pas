@@ -25,6 +25,10 @@ type
 
     // VARIANT
     // includes tests for VarArray of variant
+    // when using Variants with varArray of Variant, you need to follow the code convention
+    //  Assign to TValue using, TValue.From<Variant>(myVar)
+    //  Do not use TValue.FromVariant, as this does not support varArray
+    //  Otherwise, it will work as expected
     procedure Test_TValue_Equals_Variants;
     procedure Test_TValue_Equals_Variants_BothEmpty;
     procedure Test_TValue_Equals_Variants_BothUnAssigned;
@@ -35,6 +39,21 @@ type
     procedure Test_TValue_NotEquals_Variants_OneUnAssigned;
     procedure Test_TValue_NotEquals_Variants_VarArray_DifferentLengths;
     procedure Test_TValue_NotEquals_Variants_VarArray_DifferentContent;
+
+    procedure Test_TValue_Equals_Variants_VarArray_Of_Variant;
+    procedure Test_TValue_NotEquals_Variants_VarArray_Of_Variant;
+
+    // OLEVARIANT
+    procedure Test_TValue_Equals_OLEVariants;
+    procedure Test_TValue_Equals_OLEVariants_BothEmpty;
+    procedure Test_TValue_Equals_OLEVariants_BothUnAssigned;
+    procedure Test_TValue_Equals_OLEVariants_VarArray;
+    procedure Test_TValue_Equals_OLEVariants_VarArray_DifferentInstances;
+    procedure Test_TValue_NotEquals_OLEVariants;
+    procedure Test_TValue_NotEquals_OLEVariants_OneEmpty;
+    procedure Test_TValue_NotEquals_OLEVariants_OneUnAssigned;
+    procedure Test_TValue_NotEquals_OLEVariants_VarArray_DifferentLengths;
+    procedure Test_TValue_NotEquals_OLEVariants_VarArray_DifferentContent;
   end;
 
 implementation
@@ -182,8 +201,8 @@ begin
   var2[1] := '1';
   var2[2] := '2';
 
-  v1 := TValue.FromVariant( var1 );
-  v2 := TValue.FromVariant( var2 );
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
   CheckTrue(v1.Equals(v2));
 end;
 
@@ -201,9 +220,9 @@ begin
   var2[1] := '1';
   var2[2] := '2';
 
-  v1 := TValue.FromVariant( var1 );
-  v2 := TValue.FromVariant( var2 );
-  CheckFalse(v1.Equals(v2));
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckTrue(v1.Equals(v2));
 end;
 
 procedure TTestTValue.Test_TValue_NotEquals_Variants;
@@ -255,8 +274,8 @@ begin
   var2[0] := '0';
   var2[1] := '1';
 
-  v1 := TValue.FromVariant( var1 );
-  v2 := TValue.FromVariant( var2 );
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
   CheckFalse(v1.Equals(v2));
 end;
 procedure TTestTValue.Test_TValue_NotEquals_Variants_VarArray_DifferentContent;
@@ -273,8 +292,211 @@ begin
   var2[1] := '1';
   var2[2] := '2';
 
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckFalse(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_Equals_Variants_VarArray_Of_Variant;
+var
+  var1,var2, inner1, inner2 : variant;
+  v1, v2 : TValue;
+begin
+  var1   := VarArrayCreate( [0,3], varVariant );
+  inner1 := VarArrayCreate( [0,3], varVariant );
+  inner1[0] := '1';
+  inner1[1] := '1';
+  inner1[2] := '1';
+  var1[0] := inner1;
+  var1[1] := inner1;
+  var1[2] := inner1;
+
+  var2   := VarArrayCreate( [0,3], varVariant );
+  inner2 := VarArrayCreate( [0,3], varVariant );
+  inner2[0] := '1';
+  inner2[1] := '1';
+  inner2[2] := '1';
+  var2[0] := inner2;
+  var2[1] := inner2;
+  var2[2] := inner2;
+
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_NotEquals_Variants_VarArray_Of_Variant;
+var
+  var1,var2, inner1, inner2 : variant;
+  v1, v2 : TValue;
+begin
+  var1   := VarArrayCreate( [0,3], varVariant );
+  inner1 := VarArrayCreate( [0,3], varVariant );
+  inner1[0] := '1';
+  inner1[1] := '1';
+  inner1[2] := '1';
+  var1[0] := inner1;
+  var1[1] := inner1;
+  var1[2] := inner1;
+
+  var2   := VarArrayCreate( [0,3], varVariant );
+  inner2 := VarArrayCreate( [0,3], varVariant );
+  inner2[0] := '22';
+  inner2[1] := '22';
+  inner2[2] := '22';
+  var2[0] := inner2;
+  var2[1] := inner2;
+  var2[2] := inner2;
+
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckFalse(v1.Equals(v2));
+end;
+
+
+procedure TTestTValue.Test_TValue_Equals_OLEVariants;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := 'hello';
+  var2 := 'hello';
   v1 := TValue.FromVariant( var1 );
   v2 := TValue.FromVariant( var2 );
+  CheckTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_Equals_OLEVariants_BothEmpty;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := varEmpty;
+  var2 := varEmpty;
+  v1 := TValue.FromVariant( var1 );
+  v2 := TValue.FromVariant( var2 );
+  CheckTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_Equals_OLEVariants_BothUnAssigned;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := UnAssigned;
+  var2 := UnAssigned;
+  v1 := TValue.FromVariant( var1 );
+  v2 := TValue.FromVariant( var2 );
+  CheckTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_Equals_OLEVariants_VarArray;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := VarArrayCreate( [0,3], varVariant );
+  var1[0] := '0';
+  var1[1] := '1';
+  var1[2] := '2';
+  var2 := VarArrayCreate( [0,3], varVariant );
+  var2[0] := '0';
+  var2[1] := '1';
+  var2[2] := '2';
+
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_Equals_OLEVariants_VarArray_DifferentInstances;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := VarArrayCreate( [0,3], varVariant );
+  var1[0] := '0';
+  var1[1] := '1';
+  var1[2] := '2';
+  var2 := VarArrayCreate( [0,3], varVariant );
+  var2[0] := '0';
+  var2[1] := '1';
+  var2[2] := '2';
+
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_NotEquals_OLEVariants;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := 'hello';
+  var2 := 'goodbye';
+  v1 := TValue.FromVariant( var1 );
+  v2 := TValue.FromVariant( var2 );
+  CheckFalse(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_NotEquals_OLEVariants_OneEmpty;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := 'hello';
+  var2 := varEmpty;
+  v1 := TValue.FromVariant( var1 );
+  v2 := TValue.FromVariant( var2 );
+  CheckFalse(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_NotEquals_OLEVariants_OneUnAssigned;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := 'hello';
+  var2 := UnAssigned;
+  v1 := TValue.FromVariant( var1 );
+  v2 := TValue.FromVariant( var2 );
+  CheckFalse(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TValue_NotEquals_OLEVariants_VarArray_DifferentLengths;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := VarArrayCreate( [0,3], varVariant );
+  var1[0] := '0';
+  var1[1] := '1';
+  var1[2] := '2';
+  var2 := VarArrayCreate( [0,2], varVariant );
+  var2[0] := '0';
+  var2[1] := '1';
+
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
+  CheckFalse(v1.Equals(v2));
+end;
+procedure TTestTValue.Test_TValue_NotEquals_OLEVariants_VarArray_DifferentContent;
+var
+  var1,var2 : OLEVariant;
+  v1, v2 : TValue;
+begin
+  var1 := VarArrayCreate( [0,3], varVariant );
+  var1[0] := 'a';
+  var1[1] := 'b';
+  var1[2] := 'c';
+  var2 := VarArrayCreate( [0,3], varVariant );
+  var2[0] := '0';
+  var2[1] := '1';
+  var2[2] := '2';
+
+  v1 := TValue.From<Variant>( var1 );
+  v2 := TValue.From<Variant>( var2 );
   CheckFalse(v1.Equals(v2));
 end;
 
