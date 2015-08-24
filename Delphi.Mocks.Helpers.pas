@@ -127,7 +127,7 @@ begin
       begin
         Result := True; // be optimistic and look for where values dont match
 
-        for i := VarArrayLowBound(Left,1) to VarArrayHighBound(Left,1) do
+        for i := VarArrayLowBound(Left,1) to VarArrayHighBound(Left,1) - 1 do
         begin
           // recurse down as it may be multi-dimensional array
           Result := SameVariant(Left[i], Right[i]);
