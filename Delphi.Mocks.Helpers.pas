@@ -38,6 +38,7 @@ uses
 type
   //TValue really needs to have an Equals operator overload!
   TValueHelper = record helper for TValue
+    class function FromVariant(const Value: Variant): TValue; static;
     function Equals(const value : TValue) : boolean;
     function IsFloat: Boolean;
     function IsNumeric: Boolean;
@@ -59,7 +60,7 @@ type
     function IsUInt64: Boolean;
     function IsVariant: Boolean;
     function IsWord: Boolean;
-	function IsGuid: Boolean;
+	  function IsGuid: Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -81,7 +82,9 @@ implementation
 uses
   SysUtils,
   Math,
-  TypInfo;
+  TypInfo,
+  Variants,
+  SysConst;
 
 function CompareValue(const Left, Right: TValue): Integer;
 begin
@@ -103,6 +106,9 @@ begin
 end;
 
 function SameValue(const Left, Right: TValue): Boolean;
+var
+  varLeft, varRight: variant;
+  i: integer;
 begin
   if Left.IsNumeric and Right.IsNumeric then
   begin
@@ -201,7 +207,36 @@ begin
   end else
   if Left.IsVariant and Right.IsVariant then
   begin
-    Result := Left.AsVariant = Right.AsVariant;
+    varLeft  := Left.AsVariant;
+    varRight := Right.AsVariant;
+
+    // a varArray of variants needs to be correctly checked, as implicit comparison does not work
+    if ( VarType(varLeft) = VarType(varRight) ) AND
+       ( VarType(varLeft) = varArray + varVariant ) then
+    begin
+      // first check if the pointers are the same, which would indicate the same variant instance
+      Result := @varLeft = @varRight;
+
+      if NOT Result then
+      begin
+        // second, we can check if the array length is the same, which would be a quick way to determine NOT being the same array
+        Result := VarArrayHighBound(varLeft, 1) = VarArrayHighBound(varRight, 1);
+
+        if Result then
+        begin
+          Result := True; // be optimistic and look for where values dont match
+
+          for i := VarArrayLowBound(varLeft,1) to VarArrayHighBound(varLeft,1) do
+          begin
+            Result := varLeft[i] = varRight[i];
+            if NOT Result then
+              Break;
+          end;
+        end;
+      end;
+    end
+    else
+      Result := Left.AsVariant = Right.AsVariant;
   end else
   if Left.IsGuid and Right.IsGuid then
   begin
@@ -217,6 +252,44 @@ begin
 end;
 
 { TValueHelper }
+
+class function TValueHelper.FromVariant(const Value: Variant): TValue;
+begin
+  // This code is a copy of the code from XE7 TValue.FromVariant.
+  // Record Helpers do not allow inheritance, and so we are replacing the
+  // FromVariant call with this one with no way to call the Rtti method.
+  // That code does not support 8204, which is an array of variants.
+  // This has been added to the case below.
+
+  case TVarData(Value).VType of
+    varEmpty, varNull: Exit(Empty);
+    varBoolean: Result := TVarData(Value).VBoolean;
+    varShortInt: Result := TVarData(Value).VShortInt;
+    varSmallint: Result := TVarData(Value).VSmallInt;
+    varInteger: Result := TVarData(Value).VInteger;
+    varSingle: Result := TVarData(Value).VSingle;
+    varDouble: Result := TVarData(Value).VDouble;
+    varCurrency: Result := TVarData(Value).VCurrency;
+    varDate: Result := From<TDateTime>(TVarData(Value).VDate);
+    varOleStr: Result := string(TVarData(Value).VOleStr);
+    varDispatch: Result := From<IDispatch>(IDispatch(TVarData(Value).VDispatch));
+    varError: Result := From<HRESULT>(TVarData(Value).VError);
+    varUnknown: Result := From<IInterface>(IInterface(TVarData(Value).VUnknown));
+    varByte: Result := TVarData(Value).VByte;
+    varWord: Result := TVarData(Value).VWord;
+    varLongWord: Result := TVarData(Value).VLongWord;
+    varInt64: Result := TVarData(Value).VInt64;
+    varUInt64: Result := TVarData(Value).VUInt64;
+{$IFNDEF NEXTGEN}
+    varString: Result := string(AnsiString(TVarData(Value).VString));
+{$ENDIF !NEXTGEN}
+    varUString: Result := UnicodeString(TVarData(Value).VUString);
+
+    varArray + varVariant: Result := From<Variant>(Value);
+  else
+    raise EVariantTypeCastError.CreateRes(@SInvalidVarCast);
+  end;
+end;
 
 function TValueHelper.AsDouble: Double;
 begin
