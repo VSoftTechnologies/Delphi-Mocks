@@ -3,7 +3,7 @@ unit MockMemoryLeakTest;
 interface
 
 uses
-  TestFramework, Delphi.Mocks;
+  DUnitX.TestFramework, Delphi.Mocks;
 
 type
   {$M+}

@@ -61,7 +61,7 @@ type
 
     FMethodData             : TDictionary<string, IMethodData>;
     FBehaviorMustBeDefined  : Boolean;
-    FAllowRedefineBehaviorDefinitions  : Boolean;
+    FAllowRedefineBehaviorDefinitions : Boolean;
     FSetupMode              : TSetupMode;
     //behavior setup
     FNextBehavior           : TBehaviorType;
@@ -77,6 +77,7 @@ type
 
     FQueryingInterface      : boolean;
     FQueryingInternalInterface : boolean;
+    FAutoMocker             : IAutoMock;
 
   protected type
     TProxyVirtualInterface = class(TVirtualInterface, IInterface, IProxyVirtualInterface)
@@ -89,7 +90,7 @@ type
       function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
     public
       //TVirtualInterface overrides
-      constructor Create(const AProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+      constructor Create(const AProxy : IProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
     end;
 
@@ -98,8 +99,8 @@ type
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
+    function _AddRef: Integer; override; stdcall;
+    function _Release: Integer; override; stdcall;
 
     //IProxy
     function ProxyInterface : IInterface;
@@ -142,7 +143,7 @@ type
 
     function CheckExpectations: string;
 
-    function GetMethodData(const AMethodName : string) : IMethodData;overload;
+    function GetMethodData(const AMethodName : string; const ATypeName: string) : IMethodData; overload;
 
     procedure ClearSetupState;
 
@@ -174,12 +175,13 @@ type
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
   public
-    constructor Create(const AIsStubOnly : boolean = false); virtual;
+    constructor Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); virtual;
     destructor Destroy; override;
   end;
 
 function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; out Intf; const ACheckOwner: Boolean): Boolean; overload;
 function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; const ACheckOwner: Boolean): Boolean; overload;
+function MethodKindToStr(const AMethodKind : TMethodKind) : string;
 
 implementation
 
@@ -187,6 +189,7 @@ uses
   Delphi.Mocks.Utils,
   Delphi.Mocks.When,
   Delphi.Mocks.MethodData,
+  Delphi.Mocks.ParamMatcher,
   Windows;
 
 function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; out Intf; const ACheckOwner: Boolean): Boolean;
@@ -203,6 +206,24 @@ begin
   Result := (Instance <> nil) and (Instance.QueryInterfaceWithOwner(IID, ACheckOwner) = 0);
 end;
 
+function MethodKindToStr(const AMethodKind : TMethodKind) : string;
+begin
+  case AMethodKind of
+    mkProcedure: Result := 'Procedure';
+    mkFunction: Result := 'Function';
+    mkConstructor: Result := 'Constructor';
+    mkDestructor: Result := 'Destructor';
+    mkClassProcedure: Result := 'Class Procedure';
+    mkClassFunction: Result := 'Class Function';
+    mkClassConstructor: Result := 'Class Constructor';
+    mkClassDestructor: Result := 'Class Destructor';
+    mkOperatorOverload: Result := 'Operator Overload';
+    mkSafeProcedure: Result := 'Safe Procedure';
+    mkSafeFunction: Result := 'Safe Function';
+  else
+    raise Exception.CreateFmt('Unexpected method kind passed to [%s]', [Ord(AMethodKind)]);
+  end;
+end;
 { TProxyBase }
 
 procedure TProxy<T>.AddImplement(const AProxy: IProxy; const ATypeInfo : PTypeInfo);
@@ -228,8 +249,10 @@ end;
 procedure TProxy<T>.AtLeast(const AMethodName: string; const times: Cardinal);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName, pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.AtLeast(times);
   ClearSetupState;
@@ -246,8 +269,10 @@ end;
 procedure TProxy<T>.AtLeastOnce(const AMethodName: string);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.AtLeastOnce;
   ClearSetupState;
@@ -264,8 +289,10 @@ end;
 procedure TProxy<T>.AtMost(const AMethodName: string; const times: Cardinal);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName, pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.AtMost(times);
   ClearSetupState;
@@ -292,8 +319,10 @@ end;
 procedure TProxy<T>.Between(const AMethodName: string; const a,  b: Cardinal);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.Between(a,b);
   ClearSetupState;
@@ -335,12 +364,13 @@ begin
   FNextFunc := nil;
 end;
 
-constructor TProxy<T>.Create(const AIsStubOnly : boolean);
+constructor TProxy<T>.Create(const AAutoMocker : IAutoMock; const AIsStubOnly : boolean);
 var
   pInfo : PTypeInfo;
 begin
   inherited Create;
 
+  FAutoMocker := AAutoMocker;
   FParentProxy := nil;
   FVirtualInterface := nil;
 
@@ -384,28 +414,53 @@ var
   returnVal : TValue;
   methodData : IMethodData;
   behavior : IBehavior;
+  pInfo : PTypeInfo;
+  matchers : TArray<IMatcher>;
 begin
+  pInfo := TypeInfo(T);
+
   case FSetupMode of
     TSetupMode.None:
     begin
       //record actual behavior
-      methodData := GetMethodData(method.Name);
+      methodData := GetMethodData(method.Name,pInfo.NameStr);
       Assert(methodData <> nil);
+
       methodData.RecordHit(Args,Method.ReturnType,Result);
     end;
     TSetupMode.Behavior:
     begin
       try
+        matchers := TMatcherFactory.GetMatchers;
+        if Length(matchers) > 0 then
+          if Length(matchers) < Length(Args) -1 then
+            raise EMockSetupException.Create('Setup called with Matchers but on on all parameters : ' + Method.Name );
         //record desired behavior
         //first see if we know about this method
-        methodData := GetMethodData(method.Name);
+        methodData := GetMethodData(method.Name,pInfo.NameStr);
         Assert(methodData <> nil);
         case FNextBehavior of
           TBehaviorType.WillReturn:
           begin
-            if (Method.ReturnType = nil) and (not FReturnValue.IsEmpty) then
-              raise EMockSetupException.Create('Setup.WillReturn called on procedure : ' + Method.Name );
-            methodData.WillReturnWhen(Args,FReturnValue);
+            case Method.MethodKind of
+              mkProcedure,
+              mkDestructor,
+              mkClassProcedure,
+              mkClassDestructor,
+              mkSafeProcedure : raise EMockSetupException.CreateFmt('Setup.WillReturn called on [%s] method [%s] which does not have a return value.', [MethodKindToStr(Method.MethodKind), Method.Name]);
+
+              //Method kinds which have a return value.
+              mkFunction, mkConstructor, mkClassFunction,
+              mkClassConstructor, mkOperatorOverload, mkSafeFunction: ;
+            end;
+
+            //We don't test for the return type being valid as XE5 and below have a RTTI bug which does not return
+            //a return type for function which reference their own class/interface. Even when RTTI is specified on
+            //the declaration and forward declaration.
+            if (FReturnValue.IsEmpty) then
+              raise EMockSetupException.CreateFmt('Setup.WillReturn call on method [%s] was not passed a return value.', [Method.Name]);
+
+            methodData.WillReturnWhen(Args,FReturnValue,matchers);
           end;
           TBehaviorType.WillRaise:
           begin
@@ -413,7 +468,7 @@ begin
           end;
           TBehaviorType.WillExecuteWhen :
           begin
-            methodData.WillExecuteWhen(FNextFunc,Args);
+            methodData.WillExecuteWhen(FNextFunc,Args,matchers);
           end;
         end;
       finally
@@ -425,17 +480,20 @@ begin
       try
         //record expectations
         //first see if we know about this method
-        methodData := GetMethodData(method.Name);
+        methodData := GetMethodData(method.Name, pInfo.NameStr);
         Assert(methodData <> nil);
+
+        matchers := TMatcherFactory.GetMatchers;
+
         case FNextExpectation of
-          OnceWhen        : methodData.OnceWhen(Args);
-          NeverWhen       : methodData.NeverWhen(Args) ;
-          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args);
-          AtLeastWhen     : methodData.AtLeastWhen(FTimes,args);
-          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args);
-          AtMostWhen      : methodData.AtMostWhen(FTimes,args);
-          BetweenWhen     : methodData.BetweenWhen(FBetween[0],FBetween[1],Args) ;
-          ExactlyWhen     : methodData.ExactlyWhen(FTimes,Args);
+          OnceWhen        : methodData.OnceWhen(Args, matchers);
+          NeverWhen       : methodData.NeverWhen(Args, matchers) ;
+          AtLeastOnceWhen : methodData.AtLeastOnceWhen(Args, matchers);
+          AtLeastWhen     : methodData.AtLeastWhen(FTimes, args, matchers);
+          AtMostOnceWhen  : methodData.AtLeastOnceWhen(Args, matchers);
+          AtMostWhen      : methodData.AtMostWhen(FTimes, args, matchers);
+          BetweenWhen     : methodData.BetweenWhen(FBetween[0], FBetween[1],Args, matchers);
+          ExactlyWhen     : methodData.ExactlyWhen(FTimes, Args, matchers);
           BeforeWhen      : raise exception.Create('not implemented') ;
           AfterWhen       : raise exception.Create('not implemented');
         end;
@@ -451,8 +509,10 @@ end;
 procedure TProxy<T>.Exactly(const AMethodName: string; const times: Cardinal);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.Exactly(times);
   ClearSetupState;
@@ -481,8 +541,7 @@ begin
   result := FAllowRedefineBehaviorDefinitions;
 end;
 
-
-function TProxy<T>.GetMethodData(const AMethodName: string): IMethodData;
+function TProxy<T>.GetMethodData(const AMethodName: string; const ATypeName: string): IMethodData;
 var
   methodName : string;
   pInfo : PTypeInfo;
@@ -491,11 +550,9 @@ begin
   methodName := LowerCase(AMethodName);
   if FMethodData.TryGetValue(methodName,Result) then
     exit;
-
-  pInfo := TypeInfo(T);
-
+  
   setupParams := TSetupMethodDataParameters.Create(FIsStubOnly, FBehaviorMustBeDefined, FAllowRedefineBehaviorDefinitions);
-  Result := TMethodData.Create(pInfo.Name, AMethodName, setupParams);
+  Result := TMethodData.Create(ATypeName, AMethodName, setupParams, FAutoMocker);
   FMethodData.Add(methodName,Result);
 end;
 
@@ -533,8 +590,10 @@ end;
 procedure TProxy<T>.Never(const AMethodName: string);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName, pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.Never;
   ClearSetupState;
@@ -557,8 +616,9 @@ end;
 procedure TProxy<T>.Once(const AMethodName: string);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
-  methodData := GetMethodData(AMethodName);
+  methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.Once;
   ClearSetupState;
@@ -612,7 +672,6 @@ procedure TProxy<T>.SetAllowRedefineBehaviorDefinitions(const value : boolean);
 begin
   FAllowRedefineBehaviorDefinitions := value;
 end;
-
 
 procedure TProxy<T>.SetParentProxy(const AProxy : IProxy);
 begin
@@ -698,9 +757,11 @@ end;
 procedure TProxy<T>.WillExecute(const AMethodName: string; const func: TExecuteFunc);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
   //actually record the behaviour here!
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.WillExecute(func);
   ClearSetupState;
@@ -718,9 +779,11 @@ end;
 procedure TProxy<T>.WillRaise(const AMethodName: string; const exceptionClass: ExceptClass;const message : string);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
   //actually record the behaviour here!
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName, pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.WillRaiseAlways(exceptionClass,message);
   ClearSetupState;
@@ -737,9 +800,11 @@ end;
 procedure TProxy<T>.WillReturnDefault(const AMethodName : string; const value : TValue);
 var
   methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
   //actually record the behaviour here!
-  methodData := GetMethodData(AMethodName);
+  pInfo := TypeInfo(T);
+  methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.WillReturnDefault(value);
   ClearSetupState;
@@ -757,7 +822,7 @@ end;
 
 { TProxy<T>.TProxyVirtualInterface }
 
-constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : TProxy<T>;
+constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : IProxy<T>;
   const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
 begin
   //Create a weak reference to our owner proxy. This is the proxy who implements
@@ -786,7 +851,10 @@ begin
   //who does implement it. This allows for a single proxy to implement multiple
   //interfaces at once.
   if (ACheckOwner) and (Result <> 0) then
-    Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
+  begin
+    if FProxy <> nil then
+      Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
+  end;
 end;
 
 function TProxy<T>.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner: Boolean): HRESULT;
@@ -798,10 +866,11 @@ end;
 
 function TProxy<T>.TProxyVirtualInterface.QueryProxy(const IID: TGUID; out Obj : IProxy): HRESULT;
 begin
+  Result := E_NOINTERFACE;
   //If this virtual proxy (and only this virtual proxy) supports the passed in
   //interface, return the proxy who owns us.
   if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
-    FProxy.QueryInterface(IProxy, Obj);
+    Result := FProxy.QueryInterface(IProxy, Obj);
 end;
 
 procedure TProxy<T>.VerifyAll(const message: string);

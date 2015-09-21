@@ -4,18 +4,20 @@ interface
 
 uses
   SysUtils,
-  TestFramework,
+  DUnitX.TestFramework,
   Rtti,
-  Delphi.Mocks;
+  Delphi.Mocks,
+  Delphi.Mocks.ParamMatcher;
 
 type
   ETestBehaviourException = class(Exception);
 
-  TTestBehaviors = class(TTestCase)
+  TTestBehaviors = class
   private
     FContext : TRttiContext;
+    FMatchers : TArray<IMatcher>;
   protected
-    procedure SetUp; override;
+    procedure SetUp;
   published
     procedure Test_WillReturnBehavior_Match;
     procedure Test_WillReturnBehavior_NoMatch;
@@ -74,7 +76,7 @@ begin
 
   returnValue := behavior.Execute(nil,nil);
 
-  CheckTrue(SameText(returnValue.AsString,'hello world'));
+  Assert.IsTrue(SameText(returnValue.AsString,'hello world'));
 end;
 
 procedure TTestBehaviors.Test_WillReturnBehavior_Default;
@@ -92,7 +94,7 @@ begin
   args[2] := 3;
   rType := FContext.GetType(TypeInfo(Int64));
   returnValue := behavior.Execute(args,rType);
-  CheckTrue(returnValue.AsInt64 = 123);
+  Assert.IsTrue(returnValue.AsInt64 = 123);
 end;
 
 procedure TTestBehaviors.Test_WillReturnBehavior_Match;
@@ -105,11 +107,11 @@ begin
   args[0] := 1;
   args[1] := 2;
   args[2] :=  'hello';
-  behavior := TBehavior.CreateWillReturnWhen(args,returnValue);
+  behavior := TBehavior.CreateWillReturnWhen(args,returnValue,Fmatchers);
   args[0] := 1;
   args[1] := 2;
   args[2] :=  'hello';
-  CheckTrue(behavior.Match(args));
+  Assert.IsTrue(behavior.Match(args));
 end;
 
 procedure TTestBehaviors.Test_WillReturnBehavior_NoMatch;
@@ -122,11 +124,11 @@ begin
   args[0] := 1;
   args[1] := 2;
   args[2] := 'hello';
-  behavior := TBehavior.CreateWillReturnWhen(args,returnValue);
+  behavior := TBehavior.CreateWillReturnWhen(args,returnValue,FMatchers);
   args[0] := 1;
   args[1] := 2;
   args[2] :=  'hello world';
-  CheckFalse(behavior.Match(args));
+  Assert.IsFalse(behavior.Match(args));
 end;
 
 procedure TTestBehaviors.CreateReturnDefault_Behavior_Type_Set_To_ReturnDefault;
@@ -135,16 +137,16 @@ var
 begin
   behavior := TBehavior.CreateReturnDefault(nil);
 
-  Check(behavior.BehaviorType = TBehaviorType.ReturnDefault, 'CreateReturnDefault behavior type isn''t ReturnDefault');
+  Assert.IsTrue(behavior.BehaviorType = TBehaviorType.ReturnDefault, 'CreateReturnDefault behavior type isn''t ReturnDefault');
 end;
 
 procedure TTestBehaviors.CreateWillExecuteWhen_Behavior_Type_Set_To_WillExecuteWhen;
 var
   behavior: IBehavior;
 begin
-  behavior := TBehavior.CreateWillExecuteWhen(nil, nil);
+  behavior := TBehavior.CreateWillExecuteWhen(nil, nil,FMatchers);
 
-  Check(behavior.BehaviorType = TBehaviorType.WillExecuteWhen, 'CreateWillExecuteWhen behavior type isn''t WillExecuteWhen');
+  Assert.IsTrue(behavior.BehaviorType = TBehaviorType.WillExecuteWhen, 'CreateWillExecuteWhen behavior type isn''t WillExecuteWhen');
 end;
 
 procedure TTestBehaviors.CreateWillExecute_Behavior_Type_Set_To_WillExecute;
@@ -153,7 +155,7 @@ var
 begin
   behavior := TBehavior.CreateWillExecute(nil);
 
-  Check(behavior.BehaviorType = TBehaviorType.WillExecute, 'CreateWillExecute behavior type isn''t WillExecute');
+  Assert.IsTrue(behavior.BehaviorType = TBehaviorType.WillExecute, 'CreateWillExecute behavior type isn''t WillExecute');
 end;
 
 procedure TTestBehaviors.CreateWillRaiseWhen_Behavior_Type_Set_To_WillRaise;
@@ -161,9 +163,9 @@ var
   behavior: IBehavior;
 begin
   //What is passed here shouldn't affect the result of the behavior being set. No way to avoid it however.
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '');
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '',FMatchers);
 
-  Check(behavior.BehaviorType = TBehaviorType.WillRaise, 'CreateWillRaiseWhen behavior type isn''t WillRaise');
+  Assert.IsTrue(behavior.BehaviorType = TBehaviorType.WillRaise, 'CreateWillRaiseWhen behavior type isn''t WillRaise');
 end;
 
 procedure TTestBehaviors.CreateWillRaiseWhen_Execute_Raises_Exception_Message_Of_Our_Choice;
@@ -172,28 +174,27 @@ var
 const
   EXCEPTION_STRING = 'Exception!';
 begin
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, EXCEPTION_STRING);
-
-  StartExpectingException(ETestBehaviourException);
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, EXCEPTION_STRING,FMatchers);
 
   //Passing nils as we don't care about these values for the exception
-  behavior.Execute(nil, nil);
-
-  StopExpectingException('');
+  Assert.WillRaise(procedure
+    begin
+     behavior.Execute(nil, nil);
+    end, ETestBehaviourException);
 end;
 
 procedure TTestBehaviors.CreateWillRaiseWhen_Execute_Raises_Exception_Of_Our_Choice;
 var
   behavior: IBehavior;
 begin
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '');
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '',FMatchers);
 
-  StartExpectingException(ETestBehaviourException);
+  Assert.WillRaise(procedure
+  begin
+    //Passing nils as we don't care about these values for the exception
+    behavior.Execute(nil, nil);
+  end, ETestBehaviourException);
 
-  //Passing nils as we don't care about these values for the exception
-  behavior.Execute(nil, nil);
-
-  StopExpectingException;
 end;
 
 procedure TTestBehaviors.CreateWillRaiseWhen_Execute_Raises_Exception_Of_Our_Choice_With_Default_Message;
@@ -202,14 +203,14 @@ var
 const
   EXCEPTION_STRING = 'raised by mock';
 begin
-  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '');
+  behavior := TBehavior.CreateWillRaiseWhen(nil, ETestBehaviourException, '',FMatchers);
 
-  StartExpectingException(ETestBehaviourException);
+  Assert.WillRaiseWithMessage(procedure
+  begin
+    //Passing nils as we don't care about these values for the exception
+    behavior.Execute(nil, nil);
+  end, ETestBehaviourException, EXCEPTION_STRING);
 
-  //Passing nils as we don't care about these values for the exception
-  behavior.Execute(nil, nil);
-
-  StopExpectingException(EXCEPTION_STRING);
 end;
 
 procedure TTestBehaviors.CreateWillRaiseWhen_Execute_Raises_No_Exception_If_Passed_Nil_For_Exception_Class;
@@ -222,7 +223,7 @@ begin
   behavior.Execute(nil, nil);
 
   //If we have gotten here no exception was recieved.
-  Check(True);
+  Assert.IsTrue(True);
 end;
 
 procedure TTestBehaviors.CreateWillRaise_Behavior_Type_Set_To_WillAlwaysRaise;
@@ -238,12 +239,11 @@ const
 begin
   behavior := TBehavior.CreateWillRaise(ETestBehaviourException, EXCEPTION_STRING);
 
-  StartExpectingException(ETestBehaviourException);
-
-  //Passing nils as we don't care about these values for the exception
-  behavior.Execute(nil, nil);
-
-  StopExpectingException('');
+  Assert.WillRaise(procedure
+  begin
+    //Passing nils as we don't care about these values for the exception
+    behavior.Execute(nil, nil);
+  end, ETestBehaviourException);
 end;
 
 procedure TTestBehaviors.CreateWillRaise_Execute_Raises_Exception_Of_Our_Choice;
@@ -252,12 +252,11 @@ var
 begin
   behavior := TBehavior.CreateWillRaise(ETestBehaviourException, '');
 
-  StartExpectingException(ETestBehaviourException);
-
-  //Passing nils as we don't care about these values for the exception
-  behavior.Execute(nil, nil);
-
-  StopExpectingException;
+  Assert.WillRaise(procedure
+  begin
+    //Passing nils as we don't care about these values for the exception
+    behavior.Execute(nil, nil);
+  end, ETestBehaviourException);
 end;
 
 
@@ -269,12 +268,11 @@ const
 begin
   behavior := TBehavior.CreateWillRaise(ETestBehaviourException, '');
 
-  StartExpectingException(ETestBehaviourException);
-
+  Assert.WillRaiseWithMessage(procedure
+  begin
   //Passing nils as we don't care about these values for the exception
   behavior.Execute(nil, nil);
-
-  StopExpectingException(EXCEPTION_STRING);
+  end, ETestBehaviourException, EXCEPTION_STRING);
 end;
 
 procedure TTestBehaviors.CreateWillRaise_Execute_Raises_No_Exception_If_Passed_Nil_For_Exception_Class;
@@ -287,7 +285,7 @@ begin
   behavior.Execute(nil, nil);
 
   //If we have gotten here no exception was recieved.
-  Check(True);
+  Assert.IsTrue(True);
 end;
 
 procedure TTestBehaviors.CreateWillReturnWhen_Behavior_Type_Set_To_WillReturn;
@@ -295,6 +293,8 @@ begin
 
 end;
 
+
 initialization
-  TestFramework.RegisterTest(TTestBehaviors.Suite);
+  TDUnitX.RegisterTestFixture(TTestBehaviors);
+
 end.

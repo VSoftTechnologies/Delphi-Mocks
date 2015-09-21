@@ -31,7 +31,8 @@ uses
   Rtti,
   SysUtils,
   Delphi.Mocks,
-  Delphi.Mocks.Interfaces;
+  Delphi.Mocks.Interfaces,
+  Delphi.Mocks.ParamMatcher;
 
 type
   TBehavior = class(TInterfacedObject,IBehavior)
@@ -43,6 +44,7 @@ type
     FArgs : TArray<TValue>;
     FBehaviorType : TBehaviorType;
     FHitCount : integer;
+    FMatchers : TArray<IMatcher>;
   protected
     function GetBehaviorType: TBehaviorType;
     function Match(const Args: TArray<TValue>): Boolean;
@@ -52,11 +54,11 @@ type
     //disable warnings about c++ compatibility, since we don't intend to support it.
     {$WARN DUPLICATE_CTOR_DTOR OFF}
     constructor CreateWillExecute(const AAction: TExecuteFunc);
-    constructor CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc );
-    constructor CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue);
+    constructor CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc; const matchers : TArray<IMatcher>);
+    constructor CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue; const matchers : TArray<IMatcher>);
     constructor CreateReturnDefault(const ReturnValue: TValue);
     constructor CreateWillRaise(const AExceptClass : ExceptClass; const message : string);
-    constructor CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass : ExceptClass; const message : string);
+    constructor CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass : ExceptClass; const message : string; const matchers : TArray<IMatcher>);
   end;
 
 implementation
@@ -93,12 +95,13 @@ begin
   FHitCount := 0;
 end;
 
-constructor TBehavior.CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc);
+constructor TBehavior.CreateWillExecuteWhen(const Args: TArray<TValue>; const AAction: TExecuteFunc; const matchers : TArray<IMatcher>);
 begin
   FBehaviorType := TBehaviorType.WillExecuteWhen;
   CopyArgs(Args);
   FAction := AAction;
   FHitCount := 0;
+  FMatchers := matchers;
 end;
 
 constructor TBehavior.CreateWillRaise(const AExceptClass: ExceptClass; const message : string);
@@ -109,21 +112,23 @@ begin
   FHitCount := 0;
 end;
 
-constructor TBehavior.CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass: ExceptClass; const message : string);
+constructor TBehavior.CreateWillRaiseWhen(const Args: TArray<TValue>; const AExceptClass: ExceptClass; const message : string; const matchers : TArray<IMatcher>);
 begin
   FBehaviorType := TBehaviorType.WillRaise;
   FExceptClass := AExceptClass;
   FExceptionMessage := message;
   CopyArgs(Args);
   FHitCount := 0;
+  FMatchers := matchers;
 end;
 
-constructor TBehavior.CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue);
+constructor TBehavior.CreateWillReturnWhen(const Args: TArray<TValue>; const ReturnValue: TValue; const matchers : TArray<IMatcher>);
 begin
   FBehaviorType := TBehaviorType.WillReturn;
   CopyArgs(Args);
   FReturnValue := ReturnValue;
   FHitCount := 0;
+  FMatchers := matchers;
 end;
 
 function TBehavior.Execute(const Args: TArray<TValue>; const returnType: TRttiType): TValue;
@@ -183,8 +188,28 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
     result := True;
   end;
 
+  function MatchWithMatchers: Boolean;
+  var
+    i : integer;
+  begin
+    result := False;
+    for i := 0 to High(FMatchers) do
+    begin
+      if not FMatchers[i].Match(Args[i+1]) then
+        exit;
+    end;
+    result := True;
+  end;
+
 begin
   result := False;
+
+  if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers) + 1)) then
+  begin
+    result := MatchWithMatchers;
+    exit;
+  end;
+
   case FBehaviorType of
     WillReturn      : result := MatchArgs;
     ReturnDefault   : result := True;

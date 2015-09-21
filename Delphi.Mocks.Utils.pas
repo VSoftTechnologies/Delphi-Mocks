@@ -33,6 +33,7 @@ uses
   RTTI;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
+
 function CheckClassHasRTTI(const info: PTypeInfo): boolean;
 
 function GetVirtualMethodCount(AClass: TClass): Integer;

@@ -2,13 +2,13 @@ unit Delphi.Mocks.Tests.Utils;
 
 interface
 uses
-  TestFramework,
+  DUnitX.TestFramework,
   Rtti,
   Delphi.Mocks.Helpers;
 
 type
   //Testing TValue helper methods in TValueHelper
-  TTestTValue = class(TTestCase)
+  TTestTValue = class
   published
     procedure Test_TValue_Equals_Interfaces;
     procedure Test_TValue_NotEquals_Interfaces;
@@ -38,7 +38,7 @@ begin
   v1 := TValue.From<IInterface>(i1);
   v2 := TValue.From<IInterface>(i2);
 
-  CheckTrue(v1.Equals(v2));
+  Assert.IsTrue(v1.Equals(v2));
 end;
 
 procedure TTestTValue.Test_TValue_Equals_Strings;
@@ -50,7 +50,7 @@ begin
   s2 := 'hello';
   v1 := s1;
   v2 := s2;
-  CheckTrue(v1.Equals(v2));
+  Assert.IsTrue(v1.Equals(v2));
 end;
 
 procedure TTestTValue.Test_TValue_Equals_SameGuid_Instance;
@@ -98,7 +98,7 @@ begin
   i2 := TInterfacedObject.Create;
   v1 := TValue.From<IInterface>(i1);
   v2 := TValue.From<IInterface>(i2);
-  CheckFalse(v1.Equals(v2));
+  Assert.IsTrue(v1.Equals(v2));
 end;
 
 procedure TTestTValue.Test_TValue_NotEquals_Strings;
@@ -110,10 +110,10 @@ begin
   s2 := 'goodbye';
   v1 := s1;
   v2 := s2;
-  CheckFalse(v1.Equals(v2));
+  Assert.IsTrue(v1.Equals(v2));
 end;
 
 initialization
-  TestFramework.RegisterTest(TTestTValue.Suite);
+  TDUnitX.RegisterTestFixture(TTestTValue);
 
 end.

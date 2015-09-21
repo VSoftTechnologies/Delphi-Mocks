@@ -3,7 +3,7 @@ unit Delphi.Mocks.Tests.Interfaces;
 interface
 
 uses
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
@@ -25,11 +25,15 @@ type
   end;
   {$M-}
 
-  TSafeCallTest = class(TTestcase)
+  TSafeCallTest = class
   published
+    [Test]
     procedure CanMockSafecallFunction;
+    [Test, Ignore]
     procedure CanMockSafecallProc;
+    [Test, Ignore]
     procedure CanMockSimpleProcedureCall;
+    [Test]
     procedure CanMockProcedureWithVariantParam;
   end;
 
@@ -64,7 +68,7 @@ begin
 
   value := mock.Instance.DoSomething('hello');
 
-  CheckEquals(123, value);
+  Assert.AreEqual(123, value);
 end;
 
 procedure TSafeCallTest.CanMockSafecallProc;
@@ -73,16 +77,7 @@ var
 begin
   mock := TMock<ISafeCallInterface>.Create;
 
-  //  mock.Setup.WillExecute(
-  //    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
-  //    begin
-  //       Result := TValue.Empty;
-  //    end
-  //  ).When.Foo('hello');
-
-  // mock.Instance.Foo;
-
-  // mock.Free;
+  Assert.NotImplemented;
 end;
 
 
@@ -92,19 +87,13 @@ var
 begin
   mock := TMock<ISimpleInterface>.Create;
 
-  // mock.Setup.Expect.Exactly(1).When.SimpleProcedure('');
-
-  //  mock.Setup.WillExecute(
-  //    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
-  //    begin
-  //      Result := TValue.Empty;
-  //    end
-  //  ).When.SimpleProcedure('hello');
-
   mock.Instance.SimpleProcedure('hello');
+
+  Assert.NotImplemented;
 end;
 
 initialization
-  TestFramework.RegisterTest(TSafeCallTest.Suite);
+  TDUnitX.RegisterTestFixture(TSafeCallTest);
+
 
 end.
