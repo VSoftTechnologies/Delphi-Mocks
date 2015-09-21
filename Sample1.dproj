@@ -144,10 +144,12 @@
         <DCCReference Include="Delphi.Mocks.WeakReference.pas"/>
         <DCCReference Include="Delphi.Mocks.When.pas"/>
         <DCCReference Include="Sample1Main.pas"/>
-        <DCCReference Include="Tests\Delphi.Mocks.Examples.Factory.pas"/>
-        <DCCReference Include="Tests\Delphi.Mocks.Examples.Implement.pas"/>
-        <DCCReference Include="Tests\Delphi.Mocks.Examples.Matchers.pas"/>
-        <DCCReference Include="Tests\Delphi.Mocks.Examples.Objects.pas"/>
+        <DCCReference Include="Examples\Delphi.Mocks.Example.ProjectSaveCheckVisitor.pas"/>
+        <DCCReference Include="Examples\Delphi.Mocks.Examples.Factory.pas"/>
+        <DCCReference Include="Examples\Delphi.Mocks.Examples.Implement.pas"/>
+        <DCCReference Include="Examples\Delphi.Mocks.Examples.Interfaces.pas"/>
+        <DCCReference Include="Examples\Delphi.Mocks.Examples.Matchers.pas"/>
+        <DCCReference Include="Examples\Delphi.Mocks.Examples.Objects.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -204,9 +206,11 @@
                 <Excluded_Packages/>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="Win32\Debug\Sample1.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>Sample1.exe</RemoteName>
+                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -216,11 +220,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
+                <DeployFile LocalName="Win32\Debug\Sample1.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>Sample1.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
