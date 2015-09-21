@@ -25,10 +25,12 @@ uses
   Delphi.Mocks.WeakReference in 'Delphi.Mocks.WeakReference.pas',
   Delphi.Mocks.When in 'Delphi.Mocks.When.pas',
   Sample1Main in 'Sample1Main.pas',
-  Delphi.Mocks.Examples.Factory in 'Tests\Delphi.Mocks.Examples.Factory.pas',
-  Delphi.Mocks.Examples.Implement in 'Tests\Delphi.Mocks.Examples.Implement.pas',
-  Delphi.Mocks.Examples.Matchers in 'Tests\Delphi.Mocks.Examples.Matchers.pas',
-  Delphi.Mocks.Examples.Objects in 'Tests\Delphi.Mocks.Examples.Objects.pas';
+  Delphi.Mocks.Example.ProjectSaveCheckVisitor in 'Examples\Delphi.Mocks.Example.ProjectSaveCheckVisitor.pas',
+  Delphi.Mocks.Examples.Factory in 'Examples\Delphi.Mocks.Examples.Factory.pas',
+  Delphi.Mocks.Examples.Implement in 'Examples\Delphi.Mocks.Examples.Implement.pas',
+  Delphi.Mocks.Examples.Interfaces in 'Examples\Delphi.Mocks.Examples.Interfaces.pas',
+  Delphi.Mocks.Examples.Matchers in 'Examples\Delphi.Mocks.Examples.Matchers.pas',
+  Delphi.Mocks.Examples.Objects in 'Examples\Delphi.Mocks.Examples.Objects.pas';
 
 begin
   try
