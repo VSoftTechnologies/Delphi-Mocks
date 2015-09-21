@@ -77,6 +77,8 @@ type
 
     FQueryingInterface      : boolean;
     FQueryingInternalInterface : boolean;
+    FAutoMocker             : IAutoMock;
+
   protected type
     TProxyVirtualInterface = class(TVirtualInterface, IInterface, IProxyVirtualInterface)
     private
@@ -88,7 +90,7 @@ type
       function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
     public
       //TVirtualInterface overrides
-      constructor Create(const AProxy : TProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
+      constructor Create(const AProxy : IProxy<T>; const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
       function QueryInterface(const IID: TGUID; out Obj): HRESULT; override; stdcall;
     end;
 
@@ -97,8 +99,8 @@ type
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;
+    function _AddRef: Integer; override; stdcall;
+    function _Release: Integer; override; stdcall;
 
     //IProxy
     function ProxyInterface : IInterface;
@@ -173,7 +175,7 @@ type
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
   public
-    constructor Create(const AIsStubOnly : boolean = false); virtual;
+    constructor Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); virtual;
     destructor Destroy; override;
   end;
 
@@ -250,7 +252,7 @@ var
   pInfo : PTypeInfo;
 begin
   pInfo := TypeInfo(T);
-  methodData := GetMethodData(AMethodName,pInfo.NameStr);
+  methodData := GetMethodData(AMethodName, pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.AtLeast(times);
   ClearSetupState;
@@ -290,7 +292,7 @@ var
   pInfo : PTypeInfo;
 begin
   pInfo := TypeInfo(T);
-  methodData := GetMethodData(AMethodName,pInfo.NameStr);
+  methodData := GetMethodData(AMethodName, pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.AtMost(times);
   ClearSetupState;
@@ -362,12 +364,13 @@ begin
   FNextFunc := nil;
 end;
 
-constructor TProxy<T>.Create(const AIsStubOnly : boolean);
+constructor TProxy<T>.Create(const AAutoMocker : IAutoMock; const AIsStubOnly : boolean);
 var
   pInfo : PTypeInfo;
 begin
   inherited Create;
 
+  FAutoMocker := AAutoMocker;
   FParentProxy := nil;
   FVirtualInterface := nil;
 
@@ -422,6 +425,7 @@ begin
       //record actual behavior
       methodData := GetMethodData(method.Name,pInfo.NameStr);
       Assert(methodData <> nil);
+
       methodData.RecordHit(Args,Method.ReturnType,Result);
     end;
     TSetupMode.Behavior:
@@ -537,7 +541,6 @@ begin
   result := FAllowRedefineBehaviorDefinitions;
 end;
 
-
 function TProxy<T>.GetMethodData(const AMethodName: string; const ATypeName: string): IMethodData;
 var
   methodName : string;
@@ -547,11 +550,9 @@ begin
   methodName := LowerCase(AMethodName);
   if FMethodData.TryGetValue(methodName,Result) then
     exit;
-
-  pInfo := TypeInfo(T);
-
+  
   setupParams := TSetupMethodDataParameters.Create(FIsStubOnly, FBehaviorMustBeDefined, FAllowRedefineBehaviorDefinitions);
-  Result := TMethodData.Create(string(pInfo.Name), AMethodName, setupParams);
+  Result := TMethodData.Create(ATypeName, AMethodName, setupParams, FAutoMocker);
   FMethodData.Add(methodName,Result);
 end;
 
@@ -671,7 +672,6 @@ procedure TProxy<T>.SetAllowRedefineBehaviorDefinitions(const value : boolean);
 begin
   FAllowRedefineBehaviorDefinitions := value;
 end;
-
 
 procedure TProxy<T>.SetParentProxy(const AProxy : IProxy);
 begin
@@ -822,7 +822,7 @@ end;
 
 { TProxy<T>.TProxyVirtualInterface }
 
-constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : TProxy<T>;
+constructor TProxy<T>.TProxyVirtualInterface.Create(const AProxy : IProxy<T>;
   const AInterface: Pointer; const InvokeEvent: TVirtualInterfaceInvokeEvent);
 begin
   //Create a weak reference to our owner proxy. This is the proxy who implements
@@ -851,7 +851,10 @@ begin
   //who does implement it. This allows for a single proxy to implement multiple
   //interfaces at once.
   if (ACheckOwner) and (Result <> 0) then
-    Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
+  begin
+    if FProxy <> nil then
+      Result := FProxy.Data.QueryImplementedInterface(IID, Obj);
+  end;
 end;
 
 function TProxy<T>.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner: Boolean): HRESULT;
@@ -863,10 +866,11 @@ end;
 
 function TProxy<T>.TProxyVirtualInterface.QueryProxy(const IID: TGUID; out Obj : IProxy): HRESULT;
 begin
+  Result := E_NOINTERFACE;
   //If this virtual proxy (and only this virtual proxy) supports the passed in
   //interface, return the proxy who owns us.
   if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
-    FProxy.QueryInterface(IProxy, Obj);
+    Result := FProxy.QueryInterface(IProxy, Obj);
 end;
 
 procedure TProxy<T>.VerifyAll(const message: string);

@@ -3,14 +3,14 @@ unit Delphi.Mocks.Tests.Expectations;
 interface
 
 uses
-  TestFramework,
+  DUnitX.TestFramework,
   Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Expectation;
 
 
 type
-  TTestExpectations = class(TTestCase)
+  TTestExpectations = class
   protected
     FMatchers : TArray<IMatcher>;
   published
@@ -79,7 +79,7 @@ var
 begin
   expectation := TExpectation.CreateAfterWhen('', '', nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.AfterWhen, 'CreateAfterWhen expectation type isn''t set to AfterWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AfterWhen, 'CreateAfterWhen expectation type isn''t set to AfterWhen');
 end;
 
 procedure TTestExpectations.CreateAfter_Expectation_Type_Set_To_After;
@@ -88,7 +88,7 @@ var
 begin
   expectation := TExpectation.CreateAfter('', '');
 
-  Check(expectation.ExpectationType = TExpectationType.After, 'CreateAfter expectation type isn''t set to After');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.After, 'CreateAfter expectation type isn''t set to After');
 
 end;
 
@@ -98,7 +98,7 @@ var
 begin
   expectation := TExpectation.CreateAtLeastOnceWhen('', nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.AtLeastOnceWhen, 'CreateAtLeastOnceWhen expectation type isn''t set to AtLeastOnceWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AtLeastOnceWhen, 'CreateAtLeastOnceWhen expectation type isn''t set to AtLeastOnceWhen');
 
 end;
 
@@ -108,7 +108,7 @@ var
 begin
   expectation := TExpectation.CreateAtLeastOnce('');
 
-  Check(expectation.ExpectationType = TExpectationType.AtLeastOnce, 'CreateAtLeastOnce expectation type isn''t set to AtLeastOnce');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AtLeastOnce, 'CreateAtLeastOnce expectation type isn''t set to AtLeastOnce');
 
 end;
 
@@ -118,7 +118,7 @@ var
 begin
   expectation := TExpectation.CreateAtLeastWhen('', 0, nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.AtLeastWhen, 'CreateAtLeastWhen expectation type isn''t set to AtLeastWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AtLeastWhen, 'CreateAtLeastWhen expectation type isn''t set to AtLeastWhen');
 
 end;
 
@@ -128,7 +128,7 @@ var
 begin
   expectation := TExpectation.CreateAtLeast('', 0);
 
-  Check(expectation.ExpectationType = TExpectationType.AtLeast, 'CreateAtLeast expectation type isn''t set to AtLeast');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AtLeast, 'CreateAtLeast expectation type isn''t set to AtLeast');
 
 
 end;
@@ -139,7 +139,7 @@ var
 begin
   expectation := TExpectation.CreateAtMostWhen('', 0, nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.AtMostWhen, 'CreateAtMostWhen expectation type isn''t set to AtMostWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AtMostWhen, 'CreateAtMostWhen expectation type isn''t set to AtMostWhen');
 
 
 end;
@@ -150,7 +150,7 @@ var
 begin
   expectation := TExpectation.CreateAtMost('', 0);
 
-  Check(expectation.ExpectationType = TExpectationType.AtMost, 'CreateAtMost expectation type isn''t set to AtMost');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.AtMost, 'CreateAtMost expectation type isn''t set to AtMost');
 
 end;
 
@@ -160,7 +160,7 @@ var
 begin
   expectation := TExpectation.CreateBeforeWhen('', '', nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.BeforeWhen, 'CreateBeforeWhen expectation type isn''t set to BeforeWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.BeforeWhen, 'CreateBeforeWhen expectation type isn''t set to BeforeWhen');
 
 end;
 
@@ -170,7 +170,7 @@ var
 begin
   expectation := TExpectation.CreateBefore('', '');
 
-  Check(expectation.ExpectationType = TExpectationType.Before, 'CreateBefore expectation type isn''t set to Before');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.Before, 'CreateBefore expectation type isn''t set to Before');
 
 end;
 
@@ -180,7 +180,7 @@ var
 begin
   expectation := TExpectation.CreateBetweenWhen('', 0, 0, nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.BetweenWhen, 'CreateBetweenWhen expectation type isn''t set to BetweenWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.BetweenWhen, 'CreateBetweenWhen expectation type isn''t set to BetweenWhen');
 end;
 
 procedure TTestExpectations.CreateBetween_Expectation_Type_Set_To_Between;
@@ -189,7 +189,7 @@ var
 begin
   expectation := TExpectation.CreateBetween('', 0, 0);
 
-  Check(expectation.ExpectationType = TExpectationType.Between, 'CreateBetween expectation type isn''t set to Between');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.Between, 'CreateBetween expectation type isn''t set to Between');
 end;
 
 procedure TTestExpectations.CreateExactlyWhen_Expectation_Type_Set_To_ExactlyWhen;
@@ -198,7 +198,7 @@ var
 begin
   expectation := TExpectation.CreateExactlyWhen('', 0, nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.ExactlyWhen, 'CreateExactlyWhen expectation type isn''t set to ExactlyWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.ExactlyWhen, 'CreateExactlyWhen expectation type isn''t set to ExactlyWhen');
 end;
 
 procedure TTestExpectations.CreateExactly_Expectation_Type_Set_To_Exactly;
@@ -207,7 +207,7 @@ var
 begin
   expectation := TExpectation.CreateExactly('', 0);
 
-  Check(expectation.ExpectationType = TExpectationType.Exactly, 'CreateExactly expectation type isn''t set to Exactly');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.Exactly, 'CreateExactly expectation type isn''t set to Exactly');
 end;
 
 procedure TTestExpectations.CreateNeverWhen_Expectation_Type_Set_To_NeverWhen;
@@ -216,7 +216,7 @@ var
 begin
   expectation := TExpectation.CreateNeverWhen('', nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.NeverWhen, 'CreateNeverWhen expectation type isn''t set to NeverWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.NeverWhen, 'CreateNeverWhen expectation type isn''t set to NeverWhen');
 end;
 
 procedure TTestExpectations.CreateNever_Expectation_Type_Set_To_Never;
@@ -225,7 +225,7 @@ var
 begin
   expectation := TExpectation.CreateNever('');
 
-  Check(expectation.ExpectationType = TExpectationType.Never, 'CreateNever expectation type isn''t set to Never');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.Never, 'CreateNever expectation type isn''t set to Never');
 end;
 
 procedure TTestExpectations.CreateOnceWhen_Expectation_Type_Set_To_OnceWhen;
@@ -234,7 +234,7 @@ var
 begin
   expectation := TExpectation.CreateOnceWhen('', nil, FMatchers);
 
-  Check(expectation.ExpectationType = TExpectationType.OnceWhen, 'CreateOnceWhen expectation type isn''t set to OnceWhen');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.OnceWhen, 'CreateOnceWhen expectation type isn''t set to OnceWhen');
 end;
 
 procedure TTestExpectations.CreateOnce_Expectation_Type_Set_To_Once;
@@ -243,7 +243,7 @@ var
 begin
   expectation := TExpectation.CreateOnce('');
 
-  Check(expectation.ExpectationType = TExpectationType.Once, 'CreateOnce expectation type isn''t set to Once');
+  Assert.IsTrue(expectation.ExpectationType = TExpectationType.Once, 'CreateOnce expectation type isn''t set to Once');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_OnceWhen_CalledOnce;
@@ -254,7 +254,7 @@ begin
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for OnceWhen being called once');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for OnceWhen being called once');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_OnceWhen_CalledNever;
@@ -263,7 +263,7 @@ var
 begin
   expectation := TExpectation.CreateOnceWhen('', nil, nil);
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for OnceWhen being not called');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for OnceWhen being not called');
 end;
 
 
@@ -273,7 +273,7 @@ var
 begin
   expectation := TExpectation.CreateBetween('', 1, 4);
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for Between 1 to 4 being not called');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for Between 1 to 4 being not called');
 end;
 
 
@@ -283,7 +283,7 @@ var
 begin
   expectation := TExpectation.CreateBetween('', 0, 4);
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for Between 0 to 4 being not called');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for Between 0 to 4 being not called');
 end;
 
 
@@ -293,11 +293,11 @@ var
 begin
   expectation := TExpectation.CreateBetween('', 1, 4);
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for Between 1 to 4 being not called');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for Between 1 to 4 being not called');
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for Between 1 to 4 being called once');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for Between 1 to 4 being called once');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_Never_CalledNever;
@@ -306,7 +306,7 @@ var
 begin
   expectation := TExpectation.CreateNever('');
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for Never being not called');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for Never being not called');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_Never_CalledOnce;
@@ -317,7 +317,7 @@ begin
 
   expectation.RecordHit;
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for Never being called once');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for Never being called once');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_Exactly2_Called2Times;
@@ -329,7 +329,7 @@ begin
   expectation.RecordHit;
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for Exaclty 2 being called 2 times');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for Exaclty 2 being called 2 times');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_Exactly2_CalledNever;
@@ -338,7 +338,7 @@ var
 begin
   expectation := TExpectation.CreateExactly('', 2);
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for Exaclty 2 being not called');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for Exaclty 2 being not called');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_Exactly2_CalledOnceAnd3Times;
@@ -349,12 +349,12 @@ begin
 
   expectation.RecordHit;
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for Exaclty 2 being called once');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for Exaclty 2 being called once');
 
   expectation.RecordHit;
   expectation.RecordHit;
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for Exaclty 2 being called 3 times');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for Exaclty 2 being called 3 times');
 end;
 
 
@@ -366,11 +366,11 @@ begin
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtLeastOnce being called once');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtLeastOnce being called once');
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtLeastOnce being called once');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtLeastOnce being called once');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_AtLeastOnce_CalledNever;
@@ -379,7 +379,7 @@ var
 begin
   expectation := TExpectation.CreateAtLeastOnce('');
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for AtLeastOnce being not called');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for AtLeastOnce being not called');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_AtLeast2_CalledTwoTimeAndThreeTimes;
@@ -391,11 +391,11 @@ begin
   expectation.RecordHit;
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtLeast2 being called two times');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtLeast2 being called two times');
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtLeast2 being called three times');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtLeast2 being called three times');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_AtLeast2_CalledNeverAndOnce;
@@ -404,11 +404,11 @@ var
 begin
   expectation := TExpectation.CreateAtLeast('', 2);
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for AtLeast2 being never called');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for AtLeast2 being never called');
 
   expectation.RecordHit;
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for AtLeast2 being called once');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for AtLeast2 being called once');
 end;
 
 
@@ -418,15 +418,15 @@ var
 begin
   expectation := TExpectation.CreateAtMost('', 2);
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtMost2 being called never');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtMost2 being called never');
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtMost2 being called once');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtMost2 being called once');
 
   expectation.RecordHit;
 
-  CheckTrue(expectation.ExpectationMet, 'Exception not met for AtMost2 being called two times');
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for AtMost2 being called two times');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_AtMost2_CalledThreeTimes;
@@ -439,32 +439,30 @@ begin
   expectation.RecordHit;
   expectation.RecordHit;
 
-  CheckFalse(expectation.ExpectationMet, 'Exception met for AtMost2 being called three times');
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception met for AtMost2 being called three times');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_After;
 begin
-  Fail('Expectation for After/AfterWhen doesn''t work yet');
+  Assert.Fail('Expectation for After/AfterWhen doesn''t work yet');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_After;
 begin
-  Fail('Expectation for After/AfterWhen doesn''t work yet');
+  Assert.Fail('Expectation for After/AfterWhen doesn''t work yet');
 end;
 
 procedure TTestExpectations.ExpectationMet_With_Before;
 begin
-  Fail('Expectation for Before/BeforeWhen doesn''t work yet');
+  Assert.Fail('Expectation for Before/BeforeWhen doesn''t work yet');
 end;
 
 procedure TTestExpectations.ExpectationNotMet_With_Before;
 begin
-  Fail('Expectation for Before/BeforeWhen doesn''t work yet');
+  Assert.Fail('Expectation for Before/BeforeWhen doesn''t work yet');
 end;
 
-
-
 initialization
-  TestFramework.RegisterTest(TTestExpectations.Suite);
+  TDUnitX.RegisterTestFixture(TTestExpectations);
 
 end.

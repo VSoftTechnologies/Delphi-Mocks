@@ -3,10 +3,10 @@ unit Delphi.Mocks.Tests.OpenArrayIntf;
 interface
 
 uses
-  TestFramework;
+  DUnitX.TestFramework;
 
 type
-  TestIOpenArray = class(TTestCase)
+  TestIOpenArray = class
   published
     procedure TestMyMethodDynamicArray;
     procedure TestMyMethodTypedArray;
@@ -43,10 +43,10 @@ begin
 
   Intf := Mock;
 
-  // in XE6 there was only an access violation, when using the Method inside the "CheckEquals" method
+  // in XE6 there was only an access violation, when using the Method inside the "Assert.AreEqual" method
   // Using a local variable fixed this AV
   returnValue := Intf.MyMethod([123], 1);
-  CheckEquals(3, returnValue);
+  Assert.AreEqual(3, returnValue);
 end;
 
 procedure TestIOpenArray.TestMyMethodTypedArray;
@@ -66,11 +66,9 @@ begin
   Intf := Mock;
 
   // This works! yay :D
-  CheckEquals(2, Intf.MyMethod(MyArray, 1));
+  Assert.AreEqual(2, Intf.MyMethod(MyArray, 1));
 end;
 
 initialization
-
-RegisterTest(TestIOpenArray.Suite);
-
+  TDUnitX.RegisterTestFixture(TestIOpenArray);
 end.

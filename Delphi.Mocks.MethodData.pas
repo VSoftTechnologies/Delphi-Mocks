@@ -54,6 +54,7 @@ type
     FReturnDefault  : TValue;
     FExpectations   : TList<IExpectation>;
     FSetupParameters: TSetupMethodDataParameters;
+    FAutoMocker     : IAutoMock;
     procedure StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
     procedure MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
   protected
@@ -70,8 +71,6 @@ type
     function FindBehavior(const behaviorType : TBehaviorType) : IBehavior; overload;
     function FindBestBehavior(const Args: TArray<TValue>) : IBehavior;
     procedure RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result : TValue);
-
-
 
     //Expectations
     function FindExpectation(const expectationType : TExpectationType; const Args: TArray<TValue>) : IExpectation;overload;
@@ -98,7 +97,7 @@ type
 
     function Verify(var report : string) : boolean;
   public
-    constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters);
+    constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
   end;
 
@@ -109,6 +108,7 @@ type
 implementation
 
 uses
+  Windows,
   System.TypInfo,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,
@@ -119,7 +119,7 @@ uses
 { TMethodData }
 
 
-constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters);
+constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
 begin
   FTypeName := ATypeName;
   FMethodName := AMethodName;
@@ -127,6 +127,7 @@ begin
   FExpectations := TList<IExpectation>.Create;
   FReturnDefault := TValue.Empty;
   FSetupParameters := ASetupParameters;
+  FAutoMocker := AAutoMocker;
 end;
 
 destructor TMethodData.Destroy;
@@ -261,8 +262,37 @@ end;
 
 procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
 var
-  mockProxy: IProxy;
+  behavior : IBehavior;
+  mock : IProxy;
 begin
+  Result := TValue.Empty;
+
+  //If auto mocking has been turned on and this return type is either a class or interface, mock it.
+  if FAutoMocker <> nil then
+  begin
+    //TODO: Add more options for how to handle properties and procedures.
+    if returnType = nil then
+      Exit;
+
+    case returnType.TypeKind of
+      tkClass,
+      tkRecord,
+      tkInterface:
+      begin
+        mock := FAutoMocker.Mock(returnType.Handle);
+        result := TValue.From<IProxy>(mock);
+
+        //Add a behaviour to return the value next time.
+        behavior := TBehavior.CreateWillReturnWhen(Args, Result, []);
+        FBehaviors.Add(behavior);
+      end
+    else
+      Result := FReturnDefault;
+    end;
+
+    Exit;
+  end;
+
   //If we have no return type defined, and the default return type is empty
   if (returnType <> nil) and (FReturnDefault.IsEmpty) then
     //Say we didn't have a default return value
@@ -496,6 +526,7 @@ begin
 
   if returnType <> nil then
     Result := returnValue;
+
 end;
 
 procedure TMethodData.StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
