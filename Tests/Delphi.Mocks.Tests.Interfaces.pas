@@ -27,9 +27,13 @@ type
 
   TSafeCallTest = class
   published
+    [Test]
     procedure CanMockSafecallFunction;
+    [Test, Ignore]
     procedure CanMockSafecallProc;
+    [Test, Ignore]
     procedure CanMockSimpleProcedureCall;
+    [Test]
     procedure CanMockProcedureWithVariantParam;
   end;
 
@@ -73,16 +77,7 @@ var
 begin
   mock := TMock<ISafeCallInterface>.Create;
 
-  //  mock.Setup.WillExecute(
-  //    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
-  //    begin
-  //       Result := TValue.Empty;
-  //    end
-  //  ).When.Foo('hello');
-
-  // mock.Instance.Foo;
-
-  // mock.Free;
+  Assert.NotImplemented;
 end;
 
 
@@ -92,16 +87,9 @@ var
 begin
   mock := TMock<ISimpleInterface>.Create;
 
-  // mock.Setup.Expect.Exactly(1).When.SimpleProcedure('');
-
-  //  mock.Setup.WillExecute(
-  //    function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
-  //    begin
-  //      Result := TValue.Empty;
-  //    end
-  //  ).When.SimpleProcedure('hello');
-
   mock.Instance.SimpleProcedure('hello');
+
+  Assert.NotImplemented;
 end;
 
 initialization

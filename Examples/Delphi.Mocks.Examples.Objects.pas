@@ -1,4 +1,4 @@
-unit Delphi.Mocks.Tests.Objects;
+unit Delphi.Mocks.Examples.Objects;
 
 interface
 
@@ -9,23 +9,24 @@ uses
 
 type
   ESimpleException = exception;
-
+  {$M+}
   TSimpleMockedObject = class(TObject)
   public
-    procedure SimpleMethod;
+    procedure SimpleMethod;virtual;
   end;
+  {$M-}
 
   TSystemUnderTest = class(TObject)
   private
     FMocked : TSimpleMockedObject;
   public
     constructor Create(const AMock: TSimpleMockedObject);
-    procedure CallsSimpleMethodOnMock;
+    procedure CallsSimpleMethodOnMock;virtual;
   end;
 
   TMockObjectTests = class
   published
-    procedure MockObject_Can_Call_Function;
+    procedure MockObject_Can_Call_Function;virtual;
   end;
 
 implementation
@@ -47,12 +48,14 @@ begin
   mock.Setup.WillRaise('SimpleMethod', ESimpleException);
 
   systemUnderTest := TSystemUnderTest.Create(mock.Instance);
-
-  systemUnderTest.CallsSimpleMethodOnMock;
-
-  mock.VerifyAll;
-
-  Assert.Pass;
+  try
+    Assert.WillRaise(procedure
+    begin
+      systemUnderTest.CallsSimpleMethodOnMock;
+    end, ESimpleException);
+  finally
+   systemUnderTest.Free;
+  end;
 end;
 
 { TSimpleObject }
@@ -74,6 +77,4 @@ begin
   FMocked := AMock;
 end;
 
-initialization
-  TDUnitX.RegisterTestFixture(TMockObjectTests);
 end.

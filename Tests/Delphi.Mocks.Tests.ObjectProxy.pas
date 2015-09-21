@@ -36,18 +36,29 @@ type
 
   TTestObjectProxy = class
   published
+    [Test]
     procedure ProxyObject_Calls_The_Create_Of_The_Object_Type;
+    [Test]
     procedure ProxyObject_MultipleConstructor;
-
+    [Test]
     procedure MockWithArgProcedureUsingOnce;
+    [Test]
     procedure MockNoArgProcedureUsingOnce;
+    [Test]
     procedure MockNoArgProcedureUsingOnceWhen;
+    [Test]
     procedure MockNoArgProcedureUsingNeverWhen;
+    [Test]
     procedure MockNoArgProcedureUsingAtLeastOnceWhen;
+    [Test]
     procedure MockNoArgProcedureUsingAtLeastWhen;
+    [Test]
     procedure MockNoArgProcedureUsingAtMostBetweenWhen;
+    [Test]
     procedure MockNoArgProcedureUsingExactlyWhen;
+    [Test]
     procedure TestOuParam;
+    [Test]
     procedure TestVarParam;
   end;
 
@@ -182,10 +193,11 @@ var
 begin
   mock := TMock<TCommand>.Create;
   mock.Setup.Expect.Never.When.Execute;
-
   mock.Instance.Execute;
-
-  mock.Verify;
+  Assert.WillRaiseAny(procedure
+    begin
+      mock.Verify;
+    end);
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingOnce;
@@ -206,6 +218,7 @@ begin
   mock.Setup.Expect.Once.When.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockWithArgProcedureUsingOnce;
@@ -216,6 +229,7 @@ begin
   mock.Setup.Expect.Once.When.Run(3);
   mock.Instance.Run(3);
   mock.Verify;
+  Assert.Pass;
 end;
 
 { TSimpleObject }

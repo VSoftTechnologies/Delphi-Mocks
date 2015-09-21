@@ -11,15 +11,23 @@ type
   {$M+}
   TReturnedObject = class(TObject)
   end;
+  {$M-}
 
+  {$M+}
   IReturnedInterface = interface
     ['{8C9AA0D8-5788-4B40-986A-46422BB05E9A}']
+    procedure Dud;
   end;
+  {$M-}
 
+  {$M+}
   IReturnedInterfaceWhichAlsoReturns = interface
     ['{8E3D166F-ED6A-40D9-8C0A-4EC8FF969AF9}']
+    procedure Dud;
   end;
+  {$M-}
 
+  {$M+}
   IAutoMockedInterface = interface
     ['{CC254E0F-63D0-49CB-9918-63AE5D388842}']
     function FuncToReturnInterface : IReturnedInterface;

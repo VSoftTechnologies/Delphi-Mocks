@@ -11,6 +11,7 @@ uses
 type
   TTestMock = class
   published
+    [Test, Ignore]
     procedure Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
   end;
 
@@ -28,7 +29,7 @@ uses
 
 procedure TTestMock.Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
 begin
-
+  Assert.NotImplemented;
 end;
 
 initialization

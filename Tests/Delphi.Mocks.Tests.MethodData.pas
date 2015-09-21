@@ -18,14 +18,19 @@ type
 
   TTestMethodData = class
   published
+    [Test, Ignore]
     procedure Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
-
+    [Test]
     procedure AllowRedefineBehaviorDefinitions_IsTrue_RedefinedIsAllowed;
+    [Test]
     procedure AllowRedefineBehaviorDefinitions_IsFalse_ExceptionIsThrown_WhenRedefining;
+    [Test]
     procedure AllowRedefineBehaviorDefinitions_IsFalse_NoExceptionIsThrown_WhenAddingNormal;
+    [Test]
     procedure AllowRedefineBehaviorDefinitions_IsTrue_OldBehaviorIsDeleted;
-
+    [Test]
     procedure BehaviourMustBeDefined_IsFalse_AndBehaviourIsNotDefined_RaisesNoException;
+    [Test]
     procedure BehaviourMustBeDefined_IsTrue_AndBehaviourIsNotDefined_RaisesException;
   end;
 
