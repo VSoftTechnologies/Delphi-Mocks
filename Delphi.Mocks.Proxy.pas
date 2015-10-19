@@ -66,6 +66,7 @@ type
     //behavior setup
     FNextBehavior           : TBehaviorType;
     FReturnValue            : TValue;
+    FReturnValueNilAllowed  : Boolean;
     FNextFunc               : TExecuteFunc;
     FExceptClass            : ExceptClass;
     FExceptionMessage       : string;
@@ -129,6 +130,7 @@ type
     {$Message 'TODO: Implement ISetup.Before and ISetup.After.'}
     function WillReturn(const value : TValue) : IWhen<T>;
     procedure WillReturnDefault(const AMethodName : string; const value : TValue);
+    function WillReturnNil: IWhen<T>;
     function WillRaise(const exceptionClass : ExceptClass; const message : string = '') : IWhen<T>; overload;
     procedure WillRaise(const AMethodName : string; const exceptionClass : ExceptClass; const message : string = ''); overload;
 
@@ -457,7 +459,8 @@ begin
             //We don't test for the return type being valid as XE5 and below have a RTTI bug which does not return
             //a return type for function which reference their own class/interface. Even when RTTI is specified on
             //the declaration and forward declaration.
-            if (FReturnValue.IsEmpty) then
+            if (FReturnValue.IsEmpty and not FReturnValueNilAllowed) or
+              (FReturnValueNilAllowed and ((FReturnValue.TypeInfo = nil) or (FReturnValue.TypeData = nil))) then
               raise EMockSetupException.CreateFmt('Setup.WillReturn call on method [%s] was not passed a return value.', [Method.Name]);
 
             methodData.WillReturnWhen(Args,FReturnValue,matchers);
@@ -808,6 +811,15 @@ begin
   Assert(methodData <> nil);
   methodData.WillReturnDefault(value);
   ClearSetupState;
+end;
+
+function TProxy<T>.WillReturnNil: IWhen<T>;
+begin
+  FSetupMode := TSetupMode.Behavior;
+  FReturnValue := TValue.From<Pointer>(nil);
+  FReturnValueNilAllowed := True;
+  FNextBehavior := TBehaviorType.WillReturn;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 function TProxy<T>._AddRef: Integer;
