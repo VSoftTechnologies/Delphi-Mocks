@@ -128,7 +128,8 @@ type
     function Expect : IExpect<T>;
 
     {$Message 'TODO: Implement ISetup.Before and ISetup.After.'}
-    function WillReturn(const value : TValue) : IWhen<T>;
+    function WillReturn(const value : TValue) : IWhen<T>; overload;
+    function WillReturn(const value : TValue; const AllowNil: Boolean) : IWhen<T>; overload;
     procedure WillReturnDefault(const AMethodName : string; const value : TValue);
     function WillReturnNil: IWhen<T>;
     function WillRaise(const exceptionClass : ExceptClass; const message : string = '') : IWhen<T>; overload;
@@ -796,6 +797,15 @@ function TProxy<T>.WillReturn(const value: TValue): IWhen<T>;
 begin
   FSetupMode := TSetupMode.Behavior;
   FReturnValue := value;
+  FNextBehavior := TBehaviorType.WillReturn;
+  result := TWhen<T>.Create(Self.Proxy);
+end;
+
+function TProxy<T>.WillReturn(const value: TValue; const AllowNil: Boolean): IWhen<T>;
+begin
+  FSetupMode := TSetupMode.Behavior;
+  FReturnValue := value;
+  FReturnValueNilAllowed := AllowNil;
   FNextBehavior := TBehaviorType.WillReturn;
   result := TWhen<T>.Create(Self.Proxy);
 end;
