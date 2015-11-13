@@ -38,6 +38,8 @@ uses
   Delphi.Mocks.Behavior;
 
 type
+  {$M-}
+
   TProxyBaseInvokeEvent = procedure (Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue) of object;
 
   TSetupMode = (None, Behavior, Expectation);

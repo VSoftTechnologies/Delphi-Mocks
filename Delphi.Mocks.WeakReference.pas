@@ -46,6 +46,8 @@ Delphi 2010 and has so far proven to be very reliable.
 interface
 
 type
+  {$M-}
+
   /// Implemented by our weak referenced object base class
   IWeakReferenceableObject = interface
     ['{3D7F9CB5-27F2-41BF-8C5F-F6195C578755}']

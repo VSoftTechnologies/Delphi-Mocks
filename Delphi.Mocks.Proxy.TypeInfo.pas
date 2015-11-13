@@ -39,6 +39,8 @@ uses
   Delphi.Mocks.Behavior;
 
 type
+  {$M-}
+
   TProxy = class(TWeakReferencedObject, IWeakReferenceableObject, IInterface, IProxy, IVerify)
   private
     FTypeInfo               : PTypeInfo;
