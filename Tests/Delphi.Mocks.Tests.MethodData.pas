@@ -81,7 +81,7 @@ begin
   Assert.WillRaise(procedure
   begin
     methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
-  end, EMockException);
+  end, EMockSetupException);
 end;
 
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsFalse_NoExceptionIsThrown_WhenAddingNormal;
