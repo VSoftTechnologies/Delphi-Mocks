@@ -12,6 +12,7 @@ uses
 type
   ETestBehaviourException = class(Exception);
 
+  {$M+}
   TTestBehaviors = class
   private
     FContext : TRttiContext;
@@ -44,6 +45,7 @@ type
     procedure CreateWillRaise_Behavior_Type_Set_To_WillAlwaysRaise;
     procedure CreateWillRaiseWhen_Behavior_Type_Set_To_WillRaise;
   end;
+  {$M-}
 
 implementation
 

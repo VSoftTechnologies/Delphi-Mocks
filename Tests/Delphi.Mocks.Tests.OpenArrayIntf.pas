@@ -6,11 +6,13 @@ uses
   DUnitX.TestFramework;
 
 type
+  {$M+}
   TestIOpenArray = class
   published
     procedure TestMyMethodDynamicArray;
     procedure TestMyMethodTypedArray;
   end;
+  {$M-}
 
   TMyArray = array of Integer;
 

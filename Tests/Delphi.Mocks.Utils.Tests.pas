@@ -4,12 +4,14 @@ interface
 uses
   DUnitX.TestFramework;
 type
+  {$M+}
   TUtilsTests = class
   published
     procedure CheckInterfaceHasRTTIWithoutRTTI;
     procedure CheckInterfaceHasRTTIWithNonInterface;
     procedure CheckInterfaceHasRTTIWithInterfaceRTTI;
   end;
+  {$M-}
 
   {$M+}
   ITestable = interface

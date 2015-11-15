@@ -7,6 +7,7 @@ uses
   DUnitX.TestFramework;
 
 type
+  {$M+}
   TExample_InterfaceImplementTests = class
   published
     procedure Implement_Single_Interface;
@@ -14,6 +15,7 @@ type
     procedure SetupAndVerify_Mulitple_Interfaces;
     procedure SetupAndVerify_Object_And_Interfaces;
   end;
+  {$M-}
 
 
 implementation

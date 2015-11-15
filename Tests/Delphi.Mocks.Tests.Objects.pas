@@ -23,10 +23,13 @@ type
     procedure CallsSimpleMethodOnMock;
   end;
 
+  {$M+}
   TMockObjectTests = class
   published
     procedure MockObject_Can_Call_Function;
   end;
+  {$M-}
+
 
 implementation
 
