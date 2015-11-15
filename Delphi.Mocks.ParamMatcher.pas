@@ -52,7 +52,7 @@ type
   TMatcherFactory = class
   private
     class var
-       FMatchers : TDictionary<TThreadID,TList<IMatcher>>;
+       FMatchers : TObjectDictionary<TThreadID,TList<IMatcher>>;
        FLock     : TObject;
   protected
     class constructor Create;
@@ -95,7 +95,7 @@ end;
 
 class constructor TMatcherFactory.Create;
 begin
-  FMatchers := TDictionary<TThreadID,TList<IMatcher>>.Create;
+  FMatchers := TObjectDictionary<TThreadID,TList<IMatcher>>.Create([doOwnsValues]);
   FLock     := TObject.Create;
 end;
 
