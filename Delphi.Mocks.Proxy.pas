@@ -622,6 +622,8 @@ var
   methodData : IMethodData;
   pInfo : PTypeInfo;
 begin
+  pInfo := TypeInfo(T);
+
   methodData := GetMethodData(AMethodName,pInfo.NameStr);
   Assert(methodData <> nil);
   methodData.Once;

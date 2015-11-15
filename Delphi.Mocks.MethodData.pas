@@ -283,7 +283,7 @@ begin
         result := TValue.From<IProxy>(mock);
 
         //Add a behaviour to return the value next time.
-        behavior := TBehavior.CreateWillReturnWhen(Args, Result, []);
+        behavior := TBehavior.CreateWillReturnWhen(Args, Result, TArray<IMatcher>.Create());
         FBehaviors.Add(behavior);
       end
     else
