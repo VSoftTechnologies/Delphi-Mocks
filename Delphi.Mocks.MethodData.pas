@@ -264,6 +264,9 @@ procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const
 var
   behavior : IBehavior;
   mock : IProxy;
+{$IFDEF DELPHI_XE4}
+  matchers: TArray<Delphi.Mocks.ParamMatcher.IMatcher>;
+{$ENDIF}  
 begin
   Result := TValue.Empty;
 
@@ -283,7 +286,10 @@ begin
         result := TValue.From<IProxy>(mock);
 
         //Add a behaviour to return the value next time.
-        behavior := TBehavior.CreateWillReturnWhen(Args, Result, []);
+        {$IFDEF DELPHI_XE4}
+        SetLength(matchers, 0);
+        {$ENDIF}
+        behavior := TBehavior.CreateWillReturnWhen(Args, Result, {$IFDEF DELPHI_XE4}matchers{$ELSE}[]{$ENDIF});
         FBehaviors.Add(behavior);
       end
     else
