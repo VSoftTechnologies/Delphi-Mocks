@@ -36,11 +36,13 @@ type
   end;
   {$M-}
 
+  {$M+}
   TAutoMockTests = class
   published
     procedure AutoMock_Can_Mock_Interface;
     procedure AutoMock_Automatically_Mocks_Contained_Returned_Interface;
   end;
+  {$M-}
 
 implementation
 

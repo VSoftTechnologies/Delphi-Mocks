@@ -78,11 +78,13 @@ type
   end;
   {$M-}
 
+  {$M+}
   TExample_MockFactoryTests = class
   published
     procedure Implement_Multiple_Interfaces;
     procedure Create_T_From_TypeInfo;
   end;
+  {$M-}
 
   IFakeGeneric = interface
     ['{682057B0-E265-45F1-ABF7-12A25683AF63}']
@@ -121,6 +123,7 @@ uses
 
 function CreateFakeGeneric(const TypeInfo: PTypeInfo) : TObject;
 begin
+  result := nil;
 end;
 
 { TLogExporter }
@@ -167,6 +170,8 @@ begin
   //Write each line out with the formatting from the log.
   for iLine := 0 to logs.Count - 1 do
     fileService.WriteLineTo(fileHandle, logs.Line[iLine].FormattedLine);
+
+  result := 0;
 end;
 
 { TExample_MockFactoryTests }
@@ -186,12 +191,12 @@ begin
 end;
 
 procedure TExample_MockFactoryTests.Implement_Multiple_Interfaces;
-var
-  logExporterSUT : ILogExporter;
-
-  // mockFactory : TMockFactory;
-  mockContainer : TAutoMockContainer;
-  mockCoreService : TMock<ICoreService>;
+  //var
+  //  logExporterSUT : ILogExporter;
+  //
+  //  // mockFactory : TMockFactory;
+  //  mockContainer : TAutoMockContainer;
+  //  mockCoreService : TMock<ICoreService>;
 begin
   //CREATE - Create a mock of the CoreService which we require for the LogExporter
   //         We do this through creating a MockFactory to generate the Mock
@@ -216,7 +221,6 @@ end;
 
 constructor TFakeGeneric.Create(const ATypeInfo: PTypeInfo);
 var
-  AValue: TValue;
   ctx: TRttiContext;
   rType: TRttiType;
   AMethCreate: TRttiMethod;

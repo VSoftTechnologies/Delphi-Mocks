@@ -16,6 +16,7 @@ type
   end;
   {$M-}
 
+  {$M+}
   TTestMethodData = class
   published
     [Test, Ignore]
@@ -33,6 +34,7 @@ type
     [Test]
     procedure BehaviourMustBeDefined_IsTrue_AndBehaviourIsNotDefined_RaisesException;
   end;
+  {$M-}
 
 implementation
 

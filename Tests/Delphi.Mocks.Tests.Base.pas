@@ -64,6 +64,7 @@ type
   //--Without RTTI
 
 
+  {$M+}
   TTestMock = class
   published
     procedure CreateMock_With_Object_Which_Has_No_RTTI_Raises_No_Exception;
@@ -88,6 +89,7 @@ type
     procedure When_Proxy_With_Implemented_Interface_Returns_IProxy_From_Instance_For_Implemented_Interface;
     procedure When_Proxy_With_Implmeneted_Interface_Returns_IExpect_Of_Interface_From_Instance_For_Implemented_Interface;
   end;
+  {$M-}
 
 implementation
 

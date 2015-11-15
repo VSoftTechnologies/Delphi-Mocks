@@ -34,6 +34,7 @@ type
     procedure TestOutParam(out msg : string);virtual;abstract;
   end;
 
+  {$M+}
   TTestObjectProxy = class
   published
     [Test]
@@ -61,6 +62,7 @@ type
     [Test]
     procedure TestVarParam;
   end;
+  {$M-}
 
 implementation
 

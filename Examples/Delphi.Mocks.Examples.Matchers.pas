@@ -18,10 +18,12 @@ type
   end;
   {$M-}
 
+  {$M+}
   TExample_MatchersTests = class
   published
     procedure Match_parameter_values;
   end;
+  {$M-}
 
 
 implementation
