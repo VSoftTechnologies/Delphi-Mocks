@@ -39,8 +39,6 @@ uses
   Delphi.Mocks.WeakReference;
 
 type
-  {$M-}
-
   IWhen<T> = interface;
 
   //Records the expectations we have when our Mock is used. We can then verify
