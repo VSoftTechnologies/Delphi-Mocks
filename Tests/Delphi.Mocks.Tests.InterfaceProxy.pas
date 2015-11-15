@@ -58,6 +58,7 @@ type
   end;
   {$M-}
 
+  {$M+}
   TTestInterfaceProxy = class
   published
     procedure After_Proxy_AddImplement_ProxyProxy_Implements_Original_Interface;
@@ -73,6 +74,7 @@ type
     procedure TestOuParam;
     procedure TestVarParam;
   end;
+  {$M-}
 
 implementation
 

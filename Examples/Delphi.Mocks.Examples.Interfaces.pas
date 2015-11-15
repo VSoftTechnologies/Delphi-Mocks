@@ -28,10 +28,13 @@ type
     procedure CallsSimpleInterfaceMethod;
   end;
 
+  {$M+}
   TMockObjectTests = class
   published
     procedure Simple_Interface_Mock;
   end;
+  {$M-}
+
 
 implementation
 

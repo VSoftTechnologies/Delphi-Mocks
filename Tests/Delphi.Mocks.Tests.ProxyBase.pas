@@ -13,10 +13,12 @@ type
   TSimpleTestObject = class(TObject);
   {$M-}
 
+  {$M+}
   TTestProxyBase = class
   published
     procedure SetUp;
   end;
+  {$M-}
 
 implementation
 

@@ -10,6 +10,7 @@ uses
 
 
 type
+  {$M+}
   TTestExpectations = class
   protected
     FMatchers : TArray<IMatcher>;
@@ -64,6 +65,7 @@ type
     procedure ExpectationMet_With_Before;
     procedure ExpectationNotMet_With_Before;
   end;
+  {$M-}
 
 
 implementation

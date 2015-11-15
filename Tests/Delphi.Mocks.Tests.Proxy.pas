@@ -9,11 +9,13 @@ uses
   Delphi.Mocks;
 
 type
+  {$M+}
   TTestMock = class
   published
     [Test, Ignore]
     procedure Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
   end;
+  {$M-}
 
 implementation
 

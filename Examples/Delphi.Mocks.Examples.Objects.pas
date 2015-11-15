@@ -24,10 +24,12 @@ type
     procedure CallsSimpleMethodOnMock;virtual;
   end;
 
+  {$M+}
   TMockObjectTests = class
   published
     procedure MockObject_Can_Call_Function;virtual;
   end;
+  {$M-}
 
 implementation
 

@@ -25,6 +25,7 @@ type
   end;
   {$M-}
 
+  {$M+}
   TSafeCallTest = class
   published
     [Test]
@@ -36,6 +37,7 @@ type
     [Test]
     procedure CanMockProcedureWithVariantParam;
   end;
+  {$M-}
 
 
 implementation

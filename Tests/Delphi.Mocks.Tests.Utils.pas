@@ -8,6 +8,7 @@ uses
 
 type
   //Testing TValue helper methods in TValueHelper
+  {$M+}
   TTestTValue = class
   published
     procedure Test_TValue_Equals_Interfaces;
@@ -19,6 +20,7 @@ type
     procedure Test_TValue_Equals_DifferentGuid_Instance;
     procedure Test_TValue_NotEquals_Guid;
   end;
+  {$M-}
 
 implementation
 

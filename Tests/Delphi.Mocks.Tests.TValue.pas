@@ -6,9 +6,10 @@ uses
   DUnitX.TestFramework;
 
 type
+  {$M+}
   TValueTests = class
-  published
   end;
+  {$M-}
 
 implementation
 
