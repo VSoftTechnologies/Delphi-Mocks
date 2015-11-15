@@ -93,7 +93,14 @@ type
     procedure SetAllowRedefineBehaviorDefinitions(const value : boolean);
 
     //set the return value for a method when called with the parameters specified on the When
-    function WillReturn(const value : TValue) : IWhen<T>;
+    function WillReturn(const value : TValue) : IWhen<T>; overload;
+
+    //set the return value for a method when called with the parameters specified on the When
+    //AllowNil flag allow to define: returning nil value is allowed or not.
+    function WillReturn(const value : TValue; const AllowNil: Boolean) : IWhen<T>; overload;
+
+    //set the nil as return value for a method when called with the parameters specified on the When
+    function WillReturnNil : IWhen<T>;
 
     //Will exedute the func when called with the specified parameters
     function WillExecute(const func : TExecuteFunc) : IWhen<T>;overload;
