@@ -164,7 +164,7 @@ type
     function Setup : IStubSetup<T>;
     function Instance : T;
     function InstanceAsValue : TValue;
-    class function Create: TStub<T>; static;
+    class function Create(const ACreateObjectFunc: TFunc<T> = nil): TStub<T>; static;
     // explicit cleanup. Not sure if we really need this.
     procedure Free;
   end;
@@ -180,7 +180,7 @@ type
 
     procedure CheckCreated;
 
-    class function Create(const AAutoMock : IAutoMock): TMock<T>; overload; static;
+    class function Create(const AAutoMock: IAutoMock; const ACreateObjectFunc: TFunc<T>): TMock<T>; overload; static;
   public
     class operator Implicit(const Value: TMock<T>): T;
 
@@ -199,6 +199,7 @@ type
     function InstanceAsValue : TValue;
 
     class function Create: TMock<T>; overload; static;
+    class function Create(const ACreateObjectFunc: TFunc<T>): TMock<T>; overload; static;
 
     //Explicit cleanup. Not sure if we really need this.
     procedure Free;
@@ -306,7 +307,13 @@ begin
   Result := Create(nil);
 end;
 
-class function TMock<T>.Create(const AAutoMock : IAutoMock): TMock<T>;
+class function TMock<T>.Create(const ACreateObjectFunc: TFunc<T>): TMock<T>;
+begin
+  Result := Create(nil, ACreateObjectFunc);
+end;
+
+
+class function TMock<T>.Create(const AAutoMock: IAutoMock; const ACreateObjectFunc: TFunc<T>): TMock<T>;
 var
   proxy : IInterface;
   pInfo : PTypeInfo;
@@ -324,7 +331,7 @@ begin
 
   case pInfo.Kind of
     //Create our proxy object, which will implement our object T
-    tkClass : proxy := TObjectProxy<T>.Create(Result.FAutomocker, false);
+    tkClass : proxy := TObjectProxy<T>.Create(Result.FAutomocker, false, ACreateObjectFunc);
     //Create our proxy interface object, which will implement our interface T
     tkInterface : proxy := TProxy<T>.Create(Result.FAutomocker, false);
   end;
@@ -500,7 +507,7 @@ end;
 
 { TStub<T> }
 
-class function TStub<T>.Create: TStub<T>;
+class function TStub<T>.Create(const ACreateObjectFunc: TFunc<T> = nil): TStub<T>;
 var
   proxy : IInterface;
   pInfo : PTypeInfo;
@@ -526,7 +533,7 @@ begin
           raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
-      proxy := TObjectProxy<T>.Create(Result.FAutomocker, true);
+      proxy := TObjectProxy<T>.Create(Result.FAutomocker, true, ACreateObjectFunc);
     end;
     tkInterface :
     begin
@@ -604,7 +611,7 @@ var
 begin
   pInfo := TypeInfo(T);
 
-  mock := TMock<T>.Create(FAutoMocker);
+  mock := TMock<T>.Create(FAutoMocker, nil);
   FAutoMocker.Add(pInfo.NameStr, mock.FProxy);
 
   result := mock;
