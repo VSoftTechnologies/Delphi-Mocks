@@ -47,12 +47,19 @@ interface
 
 type
   /// Implemented by our weak referenced object base class
+  {$IFOPT M+}
+    {$M-}
+    {$DEFINE ENABLED_M+}
+  {$ENDIF}
   IWeakReferenceableObject = interface
     ['{3D7F9CB5-27F2-41BF-8C5F-F6195C578755}']
     procedure AddWeakRef(value : Pointer);
     procedure RemoveWeakRef(value : Pointer);
     function GetRefCount : integer;
   end;
+  {$IFDEF ENABLED_M+}
+    {$M+}
+  {$ENDIF}
 
   ///  This is our base class for any object that can have a weak reference to
   ///  it. It implements IInterface so the object can also be used just like
