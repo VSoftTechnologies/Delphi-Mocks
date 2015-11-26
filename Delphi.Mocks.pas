@@ -139,6 +139,10 @@ type
     function Proxy : T;
   end;
 
+  {$IFOPT M+}
+    {$M-}
+    {$DEFINE ENABLED_M+}
+  {$ENDIF}
   IProxy = interface(IWeakReferenceableObject)
     ['{C97DC7E8-BE99-46FE-8488-4B356DD4AE29}']
     function ProxyInterface : IInterface;
@@ -147,6 +151,9 @@ type
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     procedure SetParentProxy(const AProxy : IProxy);
   end;
+  {$IFDEF ENABLED_M+}
+    {$M+}
+  {$ENDIF}
 
   //used by the mock - need to find another place to put this.. circular references
   //problem means we need it here for now.

@@ -42,12 +42,19 @@ type
 
   TSetupMode = (None, Behavior, Expectation);
 
+  {$IFOPT M+}
+    {$M-}
+    {$DEFINE ENABLED_M+}
+  {$ENDIF}
   IProxyVirtualInterface = interface
     ['{A0394EB0-245E-4AE6-AD71-3BC9815CD173}']
     function QueryProxy(const IID: TGUID; out Obj : IProxy) : HRESULT;
     function QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner : Boolean): HRESULT; overload;
     function QueryInterfaceWithOwner(const IID: TGUID; const ACheckOwner : Boolean): HRESULT; overload;
   end;
+  {$IFDEF ENABLED_M+}
+    {$M+}
+  {$ENDIF}
 
   TProxy<T> = class(TWeakReferencedObject, IWeakReferenceableObject, IInterface, IProxy, IProxy<T>, IStubProxy<T>, IMockSetup<T>, IStubSetup<T>, IExpect<T>, IVerify)
   private
