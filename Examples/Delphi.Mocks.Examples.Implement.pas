@@ -40,7 +40,7 @@ var
 begin
   //Test that when we visit a project, and its dirty, we save.
 
-  //CREATE - The viistor system under test.
+  //CREATE - The visitor system under test.
   visitorSUT := TProjectSaveCheck.Create;
 
   //CREATE - Element mock we require.
@@ -82,7 +82,7 @@ var
 begin
   //Test that when we visit a project, and its dirty, we save.
 
-  //CREATE - The viistor system under test.
+  //CREATE - The visitor system under test.
   visitorSUT := TProjectSaveCheck.Create;
 
   //CREATE - Element mock we require.
@@ -116,7 +116,7 @@ var
 begin
   //Test that when we visit a project, and its dirty, we save.
 
-  //CREATE - The viistor system under test.
+  //CREATE - The visitor system under test.
   visitorSUT := TProjectSaveCheck.Create;
 
   //CREATE - Element mock we require.
