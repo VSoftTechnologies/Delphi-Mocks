@@ -62,8 +62,8 @@ begin
   mockInterface := mock.Instance.FuncToReturnInterface;
   mockObject := mock.Instance.FuncToReturnClass;
 
-  Assert.IsNotNull(mockInterface, 'Expected the interface off the mock to be auotmatically created and the instance returned.');
-  Assert.IsNotNull(mockObject, 'Expected the object off the mock to be auotmatically created and the instance returned.');
+  Assert.IsNotNull(mockInterface, 'Expected the interface off the mock to be automatically created and the instance returned.');
+  Assert.IsNotNull(mockObject, 'Expected the object off the mock to be automatically created and the instance returned.');
 end;
 
 procedure TAutoMockTests.AutoMock_Can_Mock_Interface;
