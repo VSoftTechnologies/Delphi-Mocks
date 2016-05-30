@@ -578,21 +578,31 @@ begin
 
   FQueryingInternalInterface := True;
   try
+    Result := FVirtualInterface.QueryInterface(IID, obj);
+    if Result = S_OK then
+      Exit;
+
     //Otherwise look in the list of interface proxies that might have been implemented
     if (FInterfaceProxies.ContainsKey(IID)) then
     begin
       virtualProxy := FInterfaceProxies.Items[IID];
       Result := virtualProxy.ProxyInterface.QueryInterface(IID, Obj);
 
-      if result = S_OK then
+      if Result = S_OK then
         Exit;
     end;
 
-    {$Message 'TODO: Need to query the parent, but exclude outselves and any other children which have already been called.'}
+    { $Message 'TODO: Need to query the parent, but exclude outselves and any other children which have already been called.'}
 
     //Call the parent.
     if FParentProxy <> nil then
+    begin
       Result := FParentProxy.Data.QueryInterface(IID, obj);
+      if Result = S_OK then
+        Exit;
+
+      Result := FParentProxy.Data.QueryImplementedInterface(IID, obj);
+    end;
   finally
     FQueryingInternalInterface := False;
   end;
