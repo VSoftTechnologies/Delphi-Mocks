@@ -73,6 +73,7 @@ type
     TProxyVirtualInterface = class(TVirtualInterface, IInterface, IProxyVirtualInterface)
     private
       FProxy : IWeakReference<IProxy>;
+      function SupportsIInterface: Boolean;
     protected
       //IProxyVirtualInterface
       function QueryProxy(const IID: TGUID; out Obj : IProxy) : HRESULT;
@@ -89,6 +90,7 @@ type
 
   protected
     procedure SetParentProxy(const AProxy : IProxy);
+    function SupportsIInterface: Boolean;
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
@@ -550,6 +552,11 @@ begin
   FParentProxy := TWeakReference<IProxy>.Create(AProxy);
 end;
 
+function TProxy.SupportsIInterface: Boolean;
+begin
+  Result := (FParentProxy = nil);
+end;
+
 function TProxy.ProxyFromType(const ATypeInfo: PTypeInfo): IProxy;
 var
   interfaceID : TGUID;
@@ -706,7 +713,10 @@ end;
 function TProxy.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner: Boolean): HRESULT;
 begin
   //See if we support the passed in interface.
-  Result := inherited QueryInterface(IID, Obj);
+  if IsEqualGUID(IID, IInterface) and not SupportsIInterface then
+    Result := E_NOINTERFACE
+  else
+    Result := inherited QueryInterface(IID, Obj);
 
   //If we don't support the interface, then we need to look to our owner to see
   //who does implement it. This allows for a single proxy to implement multiple
@@ -733,6 +743,14 @@ begin
   //interface, return the proxy who owns us.
   if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
     Result := FProxy.QueryInterface(IProxy, Obj);
+end;
+
+function TProxy.TProxyVirtualInterface.SupportsIInterface: Boolean;
+begin
+  if FProxy <> nil then
+    Result := FProxy.Data.SupportsIInterface
+  else
+    Result := True;
 end;
 
 function TProxy.TProxyVirtualInterface._AddRef: Integer;

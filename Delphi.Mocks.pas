@@ -150,6 +150,7 @@ type
     procedure AddImplement(const AProxy : IProxy; const ATypeInfo : PTypeInfo);
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     procedure SetParentProxy(const AProxy : IProxy);
+    function SupportsIInterface: Boolean;
   end;
   {$IFDEF ENABLED_M+}
     {$M+}
@@ -194,9 +195,9 @@ type
 
     procedure CheckCreated;
 
-    class function Create(const AAutoMock: IAutoMock; const ACreateObjectFunc: TFunc<T>): TMock<T>; overload; static;
   public
     class operator Implicit(const Value: TMock<T>): T;
+    class function Create(const AAutoMock: IAutoMock; const ACreateObjectFunc: TFunc<T>): TMock<T>; overload; static;
 
     function Setup : IMockSetup<T>; overload;
     function Setup<I : IInterface> : IMockSetup<I>; overload;

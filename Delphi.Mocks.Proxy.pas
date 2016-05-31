@@ -91,6 +91,7 @@ type
     TProxyVirtualInterface = class(TVirtualInterface, IInterface, IProxyVirtualInterface)
     private
       FProxy : IWeakReference<IProxy<T>>;
+      function SupportsIInterface: Boolean;
     protected
       //IProxyVirtualInterface
       function QueryProxy(const IID: TGUID; out Obj : IProxy) : HRESULT;
@@ -104,6 +105,7 @@ type
 
   protected
     procedure SetParentProxy(const AProxy : IProxy);
+    function SupportsIInterface: Boolean;
 
     function QueryImplementedInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; virtual; stdcall;
@@ -578,13 +580,17 @@ begin
 
   FQueryingInternalInterface := True;
   try
+    Result := FVirtualInterface.QueryInterface(IID, obj);
+    if Result = S_OK then
+      Exit;
+
     //Otherwise look in the list of interface proxies that might have been implemented
     if (FInterfaceProxies.ContainsKey(IID)) then
     begin
       virtualProxy := FInterfaceProxies.Items[IID];
       Result := virtualProxy.ProxyInterface.QueryInterface(IID, Obj);
 
-      if result = S_OK then
+      if Result = S_OK then
         Exit;
     end;
 
@@ -592,7 +598,13 @@ begin
 
     //Call the parent.
     if FParentProxy <> nil then
+    begin
       Result := FParentProxy.Data.QueryInterface(IID, obj);
+      if Result = S_OK then
+        Exit;
+
+      Result := FParentProxy.Data.QueryImplementedInterface(IID, obj);
+    end;
   finally
     FQueryingInternalInterface := False;
   end;
@@ -653,9 +665,6 @@ begin
 end;
 
 function TProxy<T>.QueryInterface(const IID: TGUID; out Obj): HRESULT;
-var
-  virtualProxy : IInterface;
-  s : string;
 begin
   Result := E_NOINTERFACE;
 
@@ -666,7 +675,8 @@ begin
   FQueryingInterface := True;
   try
     //The interface requested might be one of this classes interfaces. E.g. IProxy
-    Result := inherited QueryInterface(IID, Obj);
+    if not (IID = IInterface) then
+      Result := inherited QueryInterface(IID, Obj);
 
     //If we have found the interface then return it.
     if Result = S_OK then
@@ -728,6 +738,11 @@ end;
 function TProxy<T>.StubSetup: IStubSetup<T>;
 begin
   result := Self;
+end;
+
+function TProxy<T>.SupportsIInterface: Boolean;
+begin
+  Result := (FParentProxy = nil);
 end;
 
 function TProxy<T>.MockSetup: IMockSetup<T>;
@@ -876,7 +891,11 @@ end;
 function TProxy<T>.TProxyVirtualInterface.QueryInterfaceWithOwner(const IID: TGUID; out Obj; const ACheckOwner: Boolean): HRESULT;
 begin
   //See if we support the passed in interface.
-  Result := inherited QueryInterface(IID, Obj);
+
+  if IsEqualGUID(IID, IInterface) and not SupportsIInterface then
+    Result := E_NOINTERFACE
+  else
+    Result := inherited QueryInterface(IID, Obj);
 
   //If we don't support the interface, then we need to look to our owner to see
   //who does implement it. This allows for a single proxy to implement multiple
@@ -902,6 +921,14 @@ begin
   //interface, return the proxy who owns us.
   if QueryInterfaceWithOwner(IID, Obj, False) <> 0 then
     Result := FProxy.QueryInterface(IProxy, Obj);
+end;
+
+function TProxy<T>.TProxyVirtualInterface.SupportsIInterface: Boolean;
+begin
+  if FProxy <> nil then
+    Result := FProxy.Data.SupportsIInterface
+  else
+    Result := True;
 end;
 
 procedure TProxy<T>.VerifyAll(const message: string);
