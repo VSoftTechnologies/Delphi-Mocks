@@ -59,6 +59,7 @@ type
   {$M-}
 
   {$M+}
+  [TestFixture]
   TTestInterfaceProxy = class
   published
     procedure After_Proxy_AddImplement_ProxyProxy_Implements_Original_Interface;
@@ -145,6 +146,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtLeastWhen;
@@ -157,6 +159,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingAtMostBetweenWhen;
@@ -168,6 +171,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingExactlyWhen;
@@ -179,6 +183,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingNeverWhen;
@@ -189,6 +194,7 @@ begin
   mock.Setup.Expect.Never.When.Execute;
 
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingOnce;
@@ -199,6 +205,7 @@ begin
   mock.Setup.Expect.Once('Execute');
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.MockNoArgProcedureUsingOnceWhen;
@@ -209,6 +216,7 @@ begin
   mock.Setup.Expect.Once.When.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.TestOuParam;
@@ -235,6 +243,7 @@ begin
   Assert.AreEqual(RETURN_MSG, msg);
 
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestInterfaceProxy.TestVarParam;
@@ -261,6 +270,7 @@ begin
   Assert.AreEqual(RETURN_MSG, msg);
 
   mock.Verify;
+  Assert.Pass;
 end;
 
 

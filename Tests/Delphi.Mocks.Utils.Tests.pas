@@ -5,6 +5,7 @@ uses
   DUnitX.TestFramework;
 type
   {$M+}
+  [TestFixture]
   TUtilsTests = class
   published
     procedure CheckInterfaceHasRTTIWithoutRTTI;

@@ -13,6 +13,7 @@ type
   ETestBehaviourException = class(Exception);
 
   {$M+}
+  [TestFixture]
   TTestBehaviors = class
   private
     FContext : TRttiContext;
@@ -230,7 +231,7 @@ end;
 
 procedure TTestBehaviors.CreateWillRaise_Behavior_Type_Set_To_WillAlwaysRaise;
 begin
-
+  Assert.Pass;
 end;
 
 procedure TTestBehaviors.CreateWillRaise_Execute_Raises_Exception_Message_Of_Our_Choice;
@@ -292,7 +293,7 @@ end;
 
 procedure TTestBehaviors.CreateWillReturnWhen_Behavior_Type_Set_To_WillReturn;
 begin
-
+  Assert.Pass;
 end;
 
 

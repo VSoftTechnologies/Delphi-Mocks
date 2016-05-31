@@ -7,6 +7,7 @@ uses
 
 type
   {$M+}
+  [TestFixture]
   TestIOpenArray = class
   published
     procedure TestMyMethodDynamicArray;

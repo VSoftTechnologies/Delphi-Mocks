@@ -14,8 +14,10 @@ type
   {$M-}
 
   {$M+}
+  [TestFixture]
   TTestProxyBase = class
   published
+    [Setup]
     procedure SetUp;
   end;
   {$M-}

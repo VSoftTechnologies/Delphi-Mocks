@@ -10,6 +10,7 @@ uses
 
 type
   {$M+}
+  [TestFixture]
   TTestMock = class
   published
     [Test, Ignore]

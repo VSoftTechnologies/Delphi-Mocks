@@ -85,9 +85,11 @@ type
 
 
   {$M+}
+  [TestFixture]
   TTestMock = class
   published
     procedure CreateMock_With_Object_Which_Has_No_RTTI_Raises_No_Exception;
+    [Test, Ignore]
     procedure CreateMock_With_Object_Which_Has_RTTI_But_No_Exposed_Functions_Raises_Exception;
 
     procedure CreateMock_With_Interface_Which_Has_No_RTTI_Raises_Exception;
@@ -99,6 +101,8 @@ type
     procedure CreateMock_With_Interfaces_We_Can_Query_All_Interfaces_From_Interface;
     procedure CreateMock_With_Interfaces_We_Get_SamePointers;
     procedure CreateMock_With_Inherited_Interfaces_We_Get_SamePointers;
+    [Test]
+    procedure CreateMock_With_Inherited_Interfaces_We_Get_SamePointers_BaseLine;
 
     procedure CreateMock_With_Record_Structure_Raises_Exception;
 
@@ -106,7 +110,6 @@ type
     procedure After_AddImplement_ProxyFromType_Returns_Proxy_Which_Implements_Passed_Interface;
     procedure After_AddImplement_And_ExpectT_For_New_Type_VerifyT_Succeeds;
     procedure After_AddImplement_And_Expects_Both_Interfaces_VerifyAll_Succeeds;
-
 
     procedure Proxy_Should_Not_Support_IProxy;
 
@@ -293,6 +296,70 @@ begin
   Assert.AreSame(IntfOne, IntfOneBack, 'IntfOne = IntfOneBack');
 end;
 
+type
+  TBaseTestObject = class(TInterfacedObject, IBaseInterface)
+    procedure Method;
+  end;
+
+  TSecondTestObject = class(TBaseTestObject, ISecondInterface)
+    procedure MethodTwo;
+  end;
+
+  TThirdTestObject = class(TSecondTestObject, IThirdInterface)
+    procedure MethodThree;
+  end;
+
+procedure TBaseTestObject.Method;
+begin
+end;
+
+procedure TSecondTestObject.MethodTwo;
+begin
+end;
+
+procedure TThirdTestObject.MethodThree;
+begin
+end;
+
+
+procedure TTestMock.CreateMock_With_Inherited_Interfaces_We_Get_SamePointers_BaseLine;
+var
+  Obj : TThirdTestObject;
+  IntfOne: IThirdInterface;
+  Intf1: IInterface;
+  IntfTwo: ISecondInterface;
+  Intf2: IInterface;
+  IntfThree: IBaseInterface;
+  Intf3: IInterface;
+  IntfOneBack: IThirdInterface;
+begin
+  Obj := TThirdTestObject.Create;
+
+  Assert.WillNotRaiseAny(procedure
+  begin
+    IntfOne := Obj;
+    Intf1 := IntfOne as IInterface;
+    IntfTwo := Intf1 as ISecondInterface;
+    Intf2 := IntfTwo as IInterface;
+    IntfThree := Intf2 as IBaseInterface;
+    Intf3 := IntfThree as IInterface;
+    IntfOneBack := Intf3 as IThirdInterface;
+  end);
+
+  Assert.IsNotNull(IntfOne);
+  Assert.IsNotNull(IntfTwo);
+  Assert.IsNotNull(IntfThree);
+  Assert.IsNotNull(Intf1);
+  Assert.IsNotNull(Intf2);
+  Assert.IsNotNull(Intf3);
+  Assert.IsNotNull(IntfOneBack);
+
+  Assert.AreSame(Intf1, Intf2, 'Intf1 = Intf2');
+  Assert.AreSame(Intf2, Intf3, 'Intf2 = Intf3');
+  Assert.AreSame(Intf3, Intf1, 'Intf3 = Intf1');
+  Assert.AreSame(IntfOne, IntfOneBack, 'IntfOne = IntfOneBack');
+end;
+
 procedure TTestMock.CreateMock_With_Interface_Which_Has_No_RTTI_Raises_Exception;
 var
   mock : TMock<ISimpleTestInterface_WithoutRTTI>;
@@ -371,6 +438,7 @@ begin
   mock.Instance<IInterfaceTwo>.MethodTwo;
 
   mock.VerifyAll('Mock should have expectations for both Interfaces.');
+  Assert.Pass;
 end;
 
 procedure TTestMock.After_AddImplement_And_ExpectT_For_New_Type_VerifyT_Succeeds;
@@ -389,6 +457,7 @@ begin
   interfaceTwo.MethodTwo;
 
   mock.Verify<IInterfaceTwo>('Mock Expect<IInterfaceTwo> should add expectations for verify to check.');
+  Assert.Pass;
 end;
 
 procedure TTestMock.After_AddImplement_ProxyFromType_Returns_Proxy_Which_Implements_Passed_Interface;
@@ -510,5 +579,4 @@ end;
 
 initialization
   TDUnitX.RegisterTestFixture(TTestMock);
-
 end.
