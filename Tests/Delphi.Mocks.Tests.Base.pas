@@ -21,6 +21,26 @@ type
     procedure MethodTwo;
   end;
 
+  IInterfaceThree = interface
+    ['{AD09ED2F-7DEF-4B5E-90BB-CD1BF1385533}']
+    procedure MethodThree;
+  end;
+
+  IBaseInterface = interface(IInterface)
+    ['{BB7AD100-6288-419A-B2E0-CB42E38593DA}']
+    procedure Method;
+  end;
+
+  ISecondInterface = interface(IBaseInterface)
+    ['{76C4FB65-C8F2-4B38-9C61-CAE16C5F9144}']
+    procedure MethodTwo;
+  end;
+
+  IThirdInterface = interface(ISecondInterface)
+    ['{8D925311-D764-46F9-A701-7E941BDDB58B}']
+    procedure MethodThree;
+  end;
+
   ISimpleTestInterface_WithRTTI = interface
     ['{42D4CEDF-5982-4427-9F1F-D58E1F82FB82}']
     procedure Dud;
@@ -74,6 +94,11 @@ type
     procedure CreateMock_With_Interface_Which_Has_RTTI_Raises_No_Exception;
     procedure CreateMock_With_Interface_Which_Has_RTTI_But_No_Exposed_Functions_Raises_Exception;
     procedure CreateMock_With_Interface_We_Get_Valid_Proxy;
+
+    procedure CreateMock_With_Interfaces_We_Can_Query_All_Interfaces_From_Mock;
+    procedure CreateMock_With_Interfaces_We_Can_Query_All_Interfaces_From_Interface;
+    procedure CreateMock_With_Interfaces_We_Get_SamePointers;
+    procedure CreateMock_With_Inherited_Interfaces_We_Get_SamePointers;
 
     procedure CreateMock_With_Record_Structure_Raises_Exception;
 
@@ -130,6 +155,142 @@ begin
   mock := TMock<ISimpleTestInterface_WithRTTI>.Create;
 
   Assert.IsNotNull(mock.Instance);
+end;
+
+procedure TTestMock.CreateMock_With_Interfaces_We_Can_Query_All_Interfaces_From_Mock;
+var
+  mock : TMock<IInterfaceOne>;
+  IntfOne: IInterfaceOne;
+  IntfTwo: IInterfaceTwo;
+  IntfThree: IInterfaceThree;
+  Intf: IInterface;
+begin
+  mock := TMock<IInterfaceOne>.Create;
+  mock.Implement<IInterfaceTwo>;
+  mock.Implement<IInterfaceThree>;
+
+  Assert.WillNotRaiseAny(procedure
+  begin
+    IntfOne := mock;
+    IntfTwo := IntfOne as IInterfaceTwo;
+    IntfThree := IntfOne as IInterfaceThree;
+    Intf := IntfOne as IInterface;
+  end);
+
+  Assert.IsNotNull(IntfOne);
+  Assert.IsNotNull(IntfTwo);
+  Assert.IsNotNull(IntfThree);
+  Assert.IsNotNull(Intf);
+end;
+
+procedure TTestMock.CreateMock_With_Interfaces_We_Can_Query_All_Interfaces_From_Interface;
+var
+  mock : TMock<IInterfaceOne>;
+  IntfOne: IInterfaceOne;
+  IntfTwo: IInterfaceTwo;
+  IntfThree: IInterfaceThree;
+  Intf: IInterface;
+  IntfOneBack: IInterfaceOne;
+begin
+  mock := TMock<IInterfaceOne>.Create;
+  mock.Implement<IInterfaceTwo>;
+  mock.Implement<IInterfaceThree>;
+
+  Assert.WillNotRaiseAny(procedure
+  begin
+    IntfOne := mock;
+    IntfTwo := IntfOne as IInterfaceTwo;
+    IntfThree := IntfTwo as IInterfaceThree;
+    Intf := IntfThree as IInterface;
+    IntfOneBack := Intf as IInterfaceOne;
+  end);
+
+  Assert.IsNotNull(IntfOne);
+  Assert.IsNotNull(IntfTwo);
+  Assert.IsNotNull(IntfThree);
+  Assert.IsNotNull(Intf);
+  Assert.IsNotNull(IntfOneBack);
+  Assert.AreSame(IntfOne, IntfOneBack, 'IntfOne = IntfOneBack');
+end;
+
+procedure TTestMock.CreateMock_With_Interfaces_We_Get_SamePointers;
+var
+  mock : TMock<IInterfaceOne>;
+  IntfOne: IInterfaceOne;
+  Intf1: IInterface;
+  IntfTwo: IInterfaceTwo;
+  Intf2: IInterface;
+  IntfThree: IInterfaceThree;
+  Intf3: IInterface;
+  IntfOneBack: IInterfaceOne;
+begin
+  mock := TMock<IInterfaceOne>.Create;
+  mock.Implement<IInterfaceTwo>;
+  mock.Implement<IInterfaceThree>;
+
+  Assert.WillNotRaiseAny(procedure
+  begin
+    IntfOne := mock;
+    Intf1 := IntfOne as IInterface;
+    IntfTwo := Intf1 as IInterfaceTwo;
+    Intf2 := IntfTwo as IInterface;
+    IntfThree := Intf2 as IInterfaceThree;
+    Intf3 := IntfThree as IInterface;
+    IntfOneBack := Intf3 as IInterfaceOne;
+  end);
+
+  Assert.IsNotNull(IntfOne);
+  Assert.IsNotNull(IntfTwo);
+  Assert.IsNotNull(IntfThree);
+  Assert.IsNotNull(Intf1);
+  Assert.IsNotNull(Intf2);
+  Assert.IsNotNull(Intf3);
+  Assert.IsNotNull(IntfOneBack);
+
+  Assert.AreSame(Intf1, Intf2, 'Intf1 = Intf2');
+  Assert.AreSame(Intf2, Intf3, 'Intf2 = Intf3');
+  Assert.AreSame(Intf3, Intf1, 'Intf3 = Intf1');
+  Assert.AreSame(IntfOne, IntfOneBack, 'IntfOne = IntfOneBack');
+end;
+
+procedure TTestMock.CreateMock_With_Inherited_Interfaces_We_Get_SamePointers;
+var
+  mock : TMock<IThirdInterface>;
+  IntfOne: IThirdInterface;
+  Intf1: IInterface;
+  IntfTwo: ISecondInterface;
+  Intf2: IInterface;
+  IntfThree: IBaseInterface;
+  Intf3: IInterface;
+  IntfOneBack: IThirdInterface;
+begin
+  mock := TMock<IThirdInterface>.Create;
+  mock.Implement<ISecondInterface>;
+  mock.Implement<IBaseInterface>;
+
+  Assert.WillNotRaiseAny(procedure
+  begin
+    IntfOne := mock;
+    Intf1 := IntfOne as IInterface;
+    IntfTwo := Intf1 as ISecondInterface;
+    Intf2 := IntfTwo as IInterface;
+    IntfThree := Intf2 as IBaseInterface;
+    Intf3 := IntfThree as IInterface;
+    IntfOneBack := Intf3 as IThirdInterface;
+  end);
+
+  Assert.IsNotNull(IntfOne);
+  Assert.IsNotNull(IntfTwo);
+  Assert.IsNotNull(IntfThree);
+  Assert.IsNotNull(Intf1);
+  Assert.IsNotNull(Intf2);
+  Assert.IsNotNull(Intf3);
+  Assert.IsNotNull(IntfOneBack);
+
+  Assert.AreSame(Intf1, Intf2, 'Intf1 = Intf2');
+  Assert.AreSame(Intf2, Intf3, 'Intf2 = Intf3');
+  Assert.AreSame(Intf3, Intf1, 'Intf3 = Intf1');
+  Assert.AreSame(IntfOne, IntfOneBack, 'IntfOne = IntfOneBack');
 end;
 
 procedure TTestMock.CreateMock_With_Interface_Which_Has_No_RTTI_Raises_Exception;
