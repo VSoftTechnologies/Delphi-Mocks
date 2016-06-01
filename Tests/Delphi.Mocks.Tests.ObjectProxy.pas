@@ -35,6 +35,7 @@ type
   end;
 
   {$M+}
+  [TestFixture]
   TTestObjectProxy = class
   published
     [Test]
@@ -116,6 +117,7 @@ begin
   Assert.AreEqual(RETURN_MSG, msg);
 
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.TestVarParam;
@@ -142,6 +144,7 @@ begin
   Assert.AreEqual(RETURN_MSG, msg);
 
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingAtLeastOnceWhen;
@@ -153,6 +156,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingAtLeastWhen;
@@ -165,6 +169,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingAtMostBetweenWhen;
@@ -176,6 +181,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingExactlyWhen;
@@ -187,6 +193,7 @@ begin
   mock.Instance.Execute;
   mock.Instance.Execute;
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingNeverWhen;
@@ -209,7 +216,7 @@ begin
   mock := TMock<TCommand>.Create;
   mock.Setup.Expect.Once('Execute');
   mock.Instance.Execute;
-  mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingOnceWhen;

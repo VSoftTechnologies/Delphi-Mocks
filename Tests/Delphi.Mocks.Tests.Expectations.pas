@@ -11,6 +11,7 @@ uses
 
 type
   {$M+}
+  [TestFixture]
   TTestExpectations = class
   protected
     FMatchers : TArray<IMatcher>;
@@ -59,10 +60,14 @@ type
     procedure ExpectationMet_With_Exactly2_CalledNever;
     procedure ExpectationMet_With_Exactly2_CalledOnceAnd3Times;
 
+    [Test, Ignore]
     procedure ExpectationMet_With_After;
+    [Test, Ignore]
     procedure ExpectationNotMet_With_After;
 
+    [Test, Ignore]
     procedure ExpectationMet_With_Before;
+    [Test, Ignore]
     procedure ExpectationNotMet_With_Before;
   end;
   {$M-}

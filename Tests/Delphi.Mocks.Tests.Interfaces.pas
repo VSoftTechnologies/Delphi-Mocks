@@ -49,6 +49,7 @@ type
   {$M-}
 
   {$M+}
+  [TestFixture]
   TSafeCallTest = class
   published
     [Test]
@@ -92,6 +93,7 @@ begin
 
   mock.Instance.VariantParam(Null);
   mock.Verify;
+  Assert.Pass;
 end;
 
 procedure TSafeCallTest.CanMockSafecallFunction;

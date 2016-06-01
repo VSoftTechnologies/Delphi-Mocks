@@ -17,6 +17,7 @@ type
   {$M-}
 
   {$M+}
+  [TestFixture]
   TTestMethodData = class
   published
     [Test, Ignore]
