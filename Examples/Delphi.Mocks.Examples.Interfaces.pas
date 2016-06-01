@@ -32,7 +32,6 @@ type
   TMockObjectTests = class
   published
     procedure Simple_Interface_Mock;
-    procedure Multiple_Interface_Mock;
   end;
   {$M-}
 
