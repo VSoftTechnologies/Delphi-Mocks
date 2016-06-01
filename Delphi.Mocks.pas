@@ -249,6 +249,16 @@ type
     {$IFDEF SUPPORTS_REGEX} //XE2 or later
     function IsRegex(const regex : string; const options : TRegExOptions = []) : string;
     {$ENDIF}
+    function AreSamePropertiesThat<T>(const Value: T): T;
+    function AreSameFieldsThat<T>(const Value: T): T;
+    function AreSameFieldsAndPropertiedThat<T>(const Value: T): T;
+  end;
+
+  TComparer = class
+  public
+    class function CompareFields<T>(Param1, Param2: T): Boolean;
+    class function CompareMembers<T: TRttiMember; T2>(Members: TArray<T>; Param1, Param2: T2): Boolean;
+    class function CompareProperties<T>(Param1, Param2: T): Boolean;
   end;
 
   //Exception Types that the mocks will raise.
@@ -286,8 +296,9 @@ uses
   Delphi.Mocks.ObjectProxy,
   Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.AutoMock,
-  Delphi.Mocks.Validation;
-
+  Delphi.Mocks.Validation,
+  Delphi.Mocks.Helpers,
+  DUnitX.Utils;
 
 procedure TMock<T>.CheckCreated;
 var
@@ -632,6 +643,40 @@ begin
 end;
 
 { It }
+
+function ItRec.AreSameFieldsAndPropertiedThat<T>(const Value: T): T;
+begin
+  Result := Default(T);
+
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(Param: T): Boolean
+    begin
+      Result := TComparer.CompareFields<T>(Param, Value) and TComparer.CompareProperties<T>(Param, Value);
+    end);
+end;
+
+function ItRec.AreSameFieldsThat<T>(const Value: T): T;
+begin
+  Result := Default(T);
+
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(Param: T): Boolean
+    begin
+      Result := TComparer.CompareFields<T>(Param, Value);
+    end);
+end;
+
+function ItRec.AreSamePropertiesThat<T>(const Value: T): T;
+begin
+  Result := Default(T);
+
+  TMatcherFactory.Create<T>(ParamIndex,
+    function(Param: T): Boolean
+    begin
+      Result := TComparer.CompareProperties<T>(Param, Value);
+    end);
+end;
+
 constructor ItRec.Create(const AParamIndex : Integer);
 begin
   ParamIndex := AParamIndex;
@@ -837,6 +882,69 @@ begin
   result := ItRec.Create(9);
 end;
 
+{ TComparer }
+
+class function TComparer.CompareFields<T>(Param1, Param2: T): Boolean;
+var
+  RTTI: TRttiContext;
+
+begin
+  RTTI := TRttiContext.Create;
+  Result := CompareMembers<TRttiField, T>(RTTI.GetType(TypeInfo(T)).GetFields, Param1, Param2);
+end;
+
+class function TComparer.CompareMembers<T, T2>(Members: TArray<T>; Param1, Param2: T2): Boolean;
+var
+  PublicMember: TRttiMember;
+
+  Instance1, Instance2, MemberValue1, MemberValue2: TValue;
+
+  MemberType: TTypeKind;
+
+begin
+  Instance1 := TValue.From<T2>(Param1);
+  Instance2 := TValue.From<T2>(Param2);
+  Result := SameValue(Instance1, Instance2);
+
+  if not Result and not Instance1.IsEmpty and not Instance2.IsEmpty then
+  begin
+    Result := True;
+
+    for PublicMember in Members do
+      if PublicMember.Visibility in [mvPublic, mvPublished] then
+      begin
+        if PublicMember is TRttiProperty then
+        begin
+          MemberValue1 := TRttiProperty(PublicMember).GetValue(Instance1.AsPointer);
+          MemberValue2 := TRttiProperty(PublicMember).GetValue(Instance2.AsPointer);
+
+          MemberType := TRttiProperty(PublicMember).PropertyType.TypeKind;
+        end
+        else
+        begin
+          MemberValue1 := TRttiField(PublicMember).GetValue(Instance1.AsPointer);
+          MemberValue2 := TRttiField(PublicMember).GetValue(Instance2.AsPointer);
+
+          MemberType := TRttiField(PublicMember).FieldType.TypeKind;
+        end;
+
+        if MemberType = tkClass then
+          Result := Result and CompareMembers<TRttiField, TObject>(MemberValue1.RttiType.GetFields, MemberValue1.AsObject, MemberValue2.AsObject)
+            and CompareMembers<TRttiProperty, TObject>(MemberValue1.RttiType.GetProperties, MemberValue1.AsObject, MemberValue2.AsObject)
+        else
+          Result := Result and SameValue(MemberValue1, MemberValue2);
+      end;
+  end;
+end;
+
+class function TComparer.CompareProperties<T>(Param1, Param2: T): Boolean;
+var
+  RTTI: TRttiContext;
+
+begin
+  RTTI := TRttiContext.Create;
+  Result := CompareMembers<TRttiProperty, T>(RTTI.GetType(TypeInfo(T)).GetProperties, Param1, Param2);
+end;
 
 end.
 
