@@ -799,7 +799,7 @@ begin
       comparer : IEqualityComparer<T>;
     begin
       comparer := TEqualityComparer<T>.Default;
-      result := comparer.Equals(param,Default(T));
+      result := not comparer.Equals(param,Default(T));
     end);
 
 end;
