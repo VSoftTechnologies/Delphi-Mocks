@@ -211,8 +211,7 @@ type
     procedure Implement<I : IInterface>; overload;
     function Instance : T; overload;
     function Instance<I : IInterface> : I; overload;
-    function InstanceAsValue : TValue; overload;
-    function InstanceAsValue<I : IInterface> : TValue; overload;
+    function InstanceAsValue : TValue;
 
     class function Create: TMock<T>; overload; static;
     class function Create(const ACreateObjectFunc: TFunc<T>): TMock<T>; overload; static;
@@ -442,13 +441,6 @@ begin
   CheckCreated;
 
   result := TValue.From<T>(Self);
-end;
-
-function TMock<T>.InstanceAsValue<I>: TValue;
-begin
-  CheckCreated;
-
-  result := TValue.From<I>(Self.Instance<I>);
 end;
 
 function TMock<T>.Setup: IMockSetup<T>;
