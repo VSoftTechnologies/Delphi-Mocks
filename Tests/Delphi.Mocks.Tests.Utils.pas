@@ -9,6 +9,7 @@ uses
 type
   //Testing TValue helper methods in TValueHelper
   {$M+}
+  [TestFixture]
   TTestTValue = class
   published
     procedure Test_TValue_Equals_Interfaces;

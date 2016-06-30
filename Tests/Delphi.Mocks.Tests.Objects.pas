@@ -24,6 +24,7 @@ type
   end;
 
   {$M+}
+  [TestFixture]
   TMockObjectTests = class
   published
     procedure MockObject_Can_Call_Function;
