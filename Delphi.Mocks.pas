@@ -709,7 +709,7 @@ end;
 
 function ItRec.IsEqualTo<T>(const value : T) : T;
 begin
-  result := Default(T);
+  Result := Value;
 
   TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean

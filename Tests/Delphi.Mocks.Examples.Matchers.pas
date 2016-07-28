@@ -14,15 +14,29 @@ type
   end;
 
   ILoan = interface
+  end;
 
+  TEnumerator = (Value1, Value2, Value3);
+
+  IInterfaceToTestWithEnumerator = interface
+    ['{45799970-833E-4419-A683-24E07AD742C2}']
+    function AnyFuntionWithEnumerator(Enumerator: TEnumerator): Integer;
+    function AnyFuntionWithInteger(Value: Integer): Integer;
   end;
   {$M-}
 
+  {$M+}
+  [TestFixture]
   TExample_MatchersTests = class
   published
+    [Test]
     procedure Match_parameter_values;
+    [Test]
+    procedure Match_parameter_with_enumerators;
+    [Test]
+    procedure Match_parameter_with_diferent_values;
   end;
-
+  {$M-}
 
 implementation
 
@@ -58,7 +72,42 @@ end;
 
 { TScorer }
 
+procedure TExample_MatchersTests.Match_parameter_with_diferent_values;
+var
+  Mock: TMock<IInterfaceToTestWithEnumerator>;
+
+begin
+  Mock := TMock<IInterfaceToTestWithEnumerator>.Create;
+
+  Mock.Setup.WillReturn(-1).When.AnyFuntionWithInteger(It0.IsEqualTo(0));
+  Mock.Setup.WillReturn(10).When.AnyFuntionWithInteger(It0.IsEqualTo(1));
+  Mock.Setup.WillReturn(20).When.AnyFuntionWithInteger(It0.IsEqualTo(2));
+  Mock.Setup.WillReturn(30).When.AnyFuntionWithInteger(It0.IsEqualTo(3));
+
+  Assert.AreEqual(-1, Mock.Instance.AnyFuntionWithInteger(0));
+  Assert.AreEqual(10, Mock.Instance.AnyFuntionWithInteger(1));
+  Assert.AreEqual(20, Mock.Instance.AnyFuntionWithInteger(2));
+  Assert.AreEqual(30, Mock.Instance.AnyFuntionWithInteger(3));
+end;
+
+procedure TExample_MatchersTests.Match_parameter_with_enumerators;
+var
+  Mock: TMock<IInterfaceToTestWithEnumerator>;
+
+begin
+  Mock := TMock<IInterfaceToTestWithEnumerator>.Create;
+
+  Mock.Setup.WillReturn(10).When.AnyFuntionWithEnumerator(It0.IsEqualTo(Value1));
+  Mock.Setup.WillReturn(20).When.AnyFuntionWithEnumerator(It0.IsEqualTo(Value2));
+  Mock.Setup.WillReturn(30).When.AnyFuntionWithEnumerator(It0.IsEqualTo(Value3));
+
+  Assert.AreEqual(10, Mock.Instance.AnyFuntionWithEnumerator(Value1));
+  Assert.AreEqual(20, Mock.Instance.AnyFuntionWithEnumerator(Value2));
+  Assert.AreEqual(30, Mock.Instance.AnyFuntionWithEnumerator(Value3));
+end;
+
 initialization
   TDUnitX.RegisterTestFixture(TExample_MatchersTests);
 
 end.
+
