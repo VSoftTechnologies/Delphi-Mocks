@@ -661,7 +661,7 @@ end;
 
 function ItRec.AreSameFieldsAndPropertiedThat<T>(const Value: T): T;
 begin
-  Result := Default(T);
+  Result := Value;
 
   TMatcherFactory.Create<T>(ParamIndex,
     function(Param: T): Boolean
@@ -672,7 +672,7 @@ end;
 
 function ItRec.AreSameFieldsThat<T>(const Value: T): T;
 begin
-  Result := Default(T);
+  Result := Value;
 
   TMatcherFactory.Create<T>(ParamIndex,
     function(Param: T): Boolean
@@ -683,7 +683,7 @@ end;
 
 function ItRec.AreSamePropertiesThat<T>(const Value: T): T;
 begin
-  Result := Default(T);
+  Result := Value;
 
   TMatcherFactory.Create<T>(ParamIndex,
     function(Param: T): Boolean

@@ -6,6 +6,15 @@ uses
   DUnitX.TestFramework;
 
 type
+  TObjectToTest = class
+  private
+    FPropertyToTest: Integer;
+  public
+    FieldToTest: Integer;
+
+    property PropertyToTest: Integer read FPropertyToTest write FPropertyToTest;
+  end;
+
   {$M+}
   IInterfaceToTest = interface
     ['{2AB032A9-ED5B-4FDC-904B-E3F1B2C78978}']
@@ -23,6 +32,11 @@ type
     function AnyFuntionWithEnumerator(Enumerator: TEnumerator): Integer;
     function AnyFuntionWithInteger(Value: Integer): Integer;
   end;
+
+  IInterfaceToTestWithObjects = interface
+    ['{45799970-833E-4419-A683-24E07AD742C2}']
+    function AnyFuntionWithObject(AObject: TObjectToTest): Integer;
+  end;
   {$M-}
 
   {$M+}
@@ -35,6 +49,8 @@ type
     procedure Match_parameter_with_enumerators;
     [Test]
     procedure Match_parameter_with_diferent_values;
+    [Test]
+    procedure Match_parameter_with_objects;
   end;
   {$M-}
 
@@ -104,6 +120,49 @@ begin
   Assert.AreEqual(10, Mock.Instance.AnyFuntionWithEnumerator(Value1));
   Assert.AreEqual(20, Mock.Instance.AnyFuntionWithEnumerator(Value2));
   Assert.AreEqual(30, Mock.Instance.AnyFuntionWithEnumerator(Value3));
+end;
+
+procedure TExample_MatchersTests.Match_parameter_with_objects;
+var
+  Mock: TMock<IInterfaceToTestWithObjects>;
+
+  Object1,
+  Object2,
+  Object3,
+  ObjectToCompare1,
+  ObjectToCompare2,
+  ObjectToCompare3: TObjectToTest;
+
+begin
+  Mock := TMock<IInterfaceToTestWithObjects>.Create;
+  Object1 := TObjectToTest.Create;
+  Object1.FieldToTest := 10;
+  Object1.PropertyToTest := 20;
+  Object2 := TObjectToTest.Create;
+  Object2.FieldToTest := 30;
+  Object2.PropertyToTest := 40;
+  Object3 := TObjectToTest.Create;
+  Object3.FieldToTest := 50;
+  Object3.PropertyToTest := 60;
+  ObjectToCompare1 := TObjectToTest.Create;
+  ObjectToCompare1.FieldToTest := 10;
+  ObjectToCompare1.PropertyToTest := 20;
+  ObjectToCompare2 := TObjectToTest.Create;
+  ObjectToCompare2.FieldToTest := 30;
+  ObjectToCompare2.PropertyToTest := 40;
+  ObjectToCompare3 := TObjectToTest.Create;
+  ObjectToCompare3.FieldToTest := 50;
+  ObjectToCompare3.PropertyToTest := 60;
+
+  Mock.Setup.WillReturn(10).When.AnyFuntionWithObject(It0.AreSameFieldsThat<TObjectToTest>(nil));
+  Mock.Setup.WillReturn(20).When.AnyFuntionWithObject(It0.AreSameFieldsThat(Object1));
+  Mock.Setup.WillReturn(30).When.AnyFuntionWithObject(It0.AreSamePropertiesThat(Object2));
+  Mock.Setup.WillReturn(40).When.AnyFuntionWithObject(It0.AreSameFieldsAndPropertiedThat(Object3));
+
+  Assert.AreEqual(10, Mock.Instance.AnyFuntionWithObject(nil));
+  Assert.AreEqual(20, Mock.Instance.AnyFuntionWithObject(ObjectToCompare1));
+  Assert.AreEqual(30, Mock.Instance.AnyFuntionWithObject(ObjectToCompare2));
+  Assert.AreEqual(40, Mock.Instance.AnyFuntionWithObject(ObjectToCompare3));
 end;
 
 initialization
