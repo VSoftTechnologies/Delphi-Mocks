@@ -3,8 +3,7 @@ unit Delphi.Mocks.Examples.Implement;
 interface
 
 uses
-  Delphi.Mocks.Example.ProjectSaveCheckVisitor,
-  DUnitX.TestFramework;
+  Delphi.Mocks.Example.ProjectSaveCheckVisitor;
 
 type
   {$M+}
@@ -69,9 +68,9 @@ begin
     //by the mocking library.
 
     //Didn't use CheckException to simpilfy this test.
-    Assert.Fail;
+    //Assert.Fail;
   except
-    Assert.Pass;
+    //Assert.Pass;
   end;
 end;
 

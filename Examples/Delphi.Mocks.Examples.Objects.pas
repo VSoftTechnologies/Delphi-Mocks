@@ -4,7 +4,7 @@ interface
 
 uses
   SysUtils,
-  DUnitX.TestFramework,
+  //DUnitX.TestFramework,
   Delphi.Mocks;
 
 type
@@ -51,10 +51,10 @@ begin
 
   systemUnderTest := TSystemUnderTest.Create(mock.Instance);
   try
-    Assert.WillRaise(procedure
+    {Assert.WillRaise(procedure
     begin
       systemUnderTest.CallsSimpleMethodOnMock;
-    end, ESimpleException);
+    end, ESimpleException);}
   finally
    systemUnderTest.Free;
   end;

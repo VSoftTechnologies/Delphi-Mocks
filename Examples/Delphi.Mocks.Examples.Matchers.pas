@@ -2,8 +2,8 @@ unit Delphi.Mocks.Examples.Matchers;
 
 interface
 
-uses
-  DUnitX.TestFramework;
+//uses
+  //DUnitX.TestFramework;
 
 type
   {$M+}
@@ -50,17 +50,17 @@ begin
 
   mockCredit.Setup.WillReturn(1).When.TakesFourParams(It0.IsAny<string>(), It1.IsEqualTo<boolean>(false), It2.IsEqualTo<integer>(1), It3.IsEqualTo<string>('hello'));
 
-  Assert.AreEqual(6, mockCredit.Instance.TakesTwoParams(1, true));
+  {Assert.AreEqual(6, mockCredit.Instance.TakesTwoParams(1, true));
   Assert.AreEqual(12, mockCredit.Instance.TakesTwoParams(2, true));
   Assert.AreEqual(8, mockCredit.Instance.TakesTwoParams(1, false));
 
   Assert.AreEqual(1, mockCredit.Instance.TakesFourParams('asdfasfasdf', false, 1, 'hello'));
-  Assert.AreEqual(1, mockCredit.Instance.TakesFourParams('asdfjkljklsdfjf', false, 1, 'hello'));
+  Assert.AreEqual(1, mockCredit.Instance.TakesFourParams('asdfjkljklsdfjf', false, 1, 'hello')); }
 end;
 
 { TScorer }
 
 initialization
-  TDUnitX.RegisterTestFixture(TExample_MatchersTests);
+  //TDUnitX.RegisterTestFixture(TExample_MatchersTests);
 
 end.

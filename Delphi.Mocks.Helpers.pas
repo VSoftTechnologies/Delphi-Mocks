@@ -38,6 +38,9 @@ uses
 type
   //TValue really needs to have an Equals operator overload!
   TValueHelper = record helper for TValue
+    private
+    function GetRttiType: TRttiType;
+  public
     function Equals(const value : TValue) : boolean;
     function IsFloat: Boolean;
     function IsNumeric: Boolean;
@@ -59,11 +62,12 @@ type
     function IsUInt64: Boolean;
     function IsVariant: Boolean;
     function IsWord: Boolean;
-	function IsGuid: Boolean;
+  	function IsGuid: Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
     function AsPointer: Pointer;
+    property RttiType: TRttiType read GetRttiType;
   end;
 
 
@@ -71,6 +75,7 @@ type
     function TryGetMethod(const AName: string; out AMethod: TRttiMethod): Boolean;
     function FindConstructor : TRttiMethod;
   end;
+
 
 function CompareValue(const Left, Right: TValue): Integer;
 function SameValue(const Left, Right: TValue): Boolean;
@@ -82,6 +87,9 @@ uses
   SysUtils,
   Math,
   TypInfo;
+
+var
+  Context : TRttiContext;
 
 function CompareValue(const Left, Right: TValue): Integer;
 begin
@@ -243,6 +251,12 @@ begin
   result := SameValue(Self, value);
 end;
 
+function TValueHelper.GetRttiType: TRttiType;
+begin
+   Result := Context.GetType(TypeInfo);
+
+end;
+
 function TValueHelper.IsBoolean: Boolean;
 begin
   Result := TypeInfo = System.TypeInfo(Boolean);
@@ -342,6 +356,7 @@ function TValueHelper.IsWord: Boolean;
 begin
   Result := TypeInfo = System.TypeInfo(Word);
 end;
+
 
 function TValueHelper.IsGuid: Boolean;
 begin

@@ -32,7 +32,7 @@ interface
 uses
   TypInfo,
   Rtti,
-  sysutils,
+  Sysutils,
   {$IFDEF SUPPORTS_REGEX}
   System.RegularExpressions,
   {$ENDIF}
@@ -179,7 +179,8 @@ type
     function Setup : IStubSetup<T>;
     function Instance : T;
     function InstanceAsValue : TValue;
-    class function Create(const ACreateObjectFunc: TFunc<T> = nil): TStub<T>; static;
+    class function Create: TStub<T>; overload; static;
+    class function Create(const ACreateObjectFunc: TFunc<T>): TStub<T>; overload; static;
     // explicit cleanup. Not sure if we really need this.
     procedure Free;
   end;
@@ -299,8 +300,7 @@ uses
   Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.AutoMock,
   Delphi.Mocks.Validation,
-  Delphi.Mocks.Helpers,
-  DUnitX.Utils;
+  Delphi.Mocks.Helpers;
 
 procedure TMock<T>.CheckCreated;
 var
@@ -358,7 +358,7 @@ begin
 
   case pInfo.Kind of
     //Create our proxy object, which will implement our object T
-    tkClass : proxy := TObjectProxy<T>.Create(Result.FAutomocker, false, ACreateObjectFunc);
+    tkClass : proxy := TObjectProxy<T>.Create(ACreateObjectFunc, Result.FAutomocker, false);
     //Create our proxy interface object, which will implement our interface T
     tkInterface : proxy := TProxy<T>.Create(Result.FAutomocker, false);
   end;
@@ -541,7 +541,13 @@ end;
 
 { TStub<T> }
 
-class function TStub<T>.Create(const ACreateObjectFunc: TFunc<T> = nil): TStub<T>;
+class function TStub<T>.Create(): TStub<T>;
+begin
+  result := TStub<T>.Create(nil);
+end;
+
+
+class function TStub<T>.Create(const ACreateObjectFunc: TFunc<T>): TStub<T>;
 var
   proxy : IInterface;
   pInfo : PTypeInfo;
@@ -567,7 +573,7 @@ begin
           raise EMockNoRTTIException.Create(pInfo.NameStr + ' does not have RTTI, specify {$M+} for the object to enabled RTTI');
 
       //Create our proxy object, which will implement our object T
-      proxy := TObjectProxy<T>.Create(Result.FAutomocker, true, ACreateObjectFunc);
+      proxy := TObjectProxy<T>.Create(ACreateObjectFunc, Result.FAutomocker, true);
     end;
     tkInterface :
     begin
