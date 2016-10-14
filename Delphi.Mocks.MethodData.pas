@@ -205,6 +205,10 @@ begin
   if Result <> nil then
     exit;
 
+  result := FindBehavior(TBehaviorType.WillRaise, Args);
+  if Result <> nil then
+    exit;
+
   //then find an always execute
   result := FindBehavior(TBehaviorType.WillExecute);
   if Result <> nil then

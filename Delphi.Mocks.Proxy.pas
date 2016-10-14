@@ -144,6 +144,8 @@ type
     function WillRaise(const exceptionClass : ExceptClass; const message : string = '') : IWhen<T>; overload;
     procedure WillRaise(const AMethodName : string; const exceptionClass : ExceptClass; const message : string = ''); overload;
 
+    function WillRaiseWhen(const exceptionClass : ExceptClass; const message : string = '') : IWhen<T>;
+
     function WillExecute(const func : TExecuteFunc) : IWhen<T>; overload;
     procedure WillExecute(const AMethodName : string; const func : TExecuteFunc); overload;
 
@@ -477,6 +479,10 @@ begin
           end;
           TBehaviorType.WillRaise:
           begin
+            methodData.WillRaiseWhen(FExceptClass, FExceptionMessage, Args, matchers);
+          end;
+          TBehaviorType.WillRaiseAlways:
+          begin
             methodData.WillRaiseAlways(FExceptClass,FExceptionMessage);
           end;
           TBehaviorType.WillExecuteWhen :
@@ -798,7 +804,7 @@ end;
 function TProxy<T>.WillRaise(const exceptionClass: ExceptClass;const message : string): IWhen<T>;
 begin
   FSetupMode := TSetupMode.Behavior;
-  FNextBehavior := TBehaviorType.WillRaise;
+  FNextBehavior := TBehaviorType.WillRaiseAlways;
   FExceptClass := exceptionClass;
   FExceptionMessage := message;
   result := TWhen<T>.Create(Self.Proxy);
@@ -815,6 +821,15 @@ begin
   Assert(methodData <> nil);
   methodData.WillRaiseAlways(exceptionClass,message);
   ClearSetupState;
+end;
+
+function TProxy<T>.WillRaiseWhen(const exceptionClass: ExceptClass; const message: string): IWhen<T>;
+begin
+  FSetupMode := TSetupMode.Behavior;
+  FNextBehavior := TBehaviorType.WillRaise;
+  FExceptClass := exceptionClass;
+  FExceptionMessage := message;
+  result := TWhen<T>.Create(Self.Proxy);
 end;
 
 function TProxy<T>.WillReturn(const value: TValue): IWhen<T>;

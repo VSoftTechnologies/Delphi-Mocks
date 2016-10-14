@@ -118,6 +118,9 @@ type
     //This method will always raise an exception.. this behavior will trump any other defined behaviors
     procedure WillRaise(const AMethodName : string; const exceptionClass : ExceptClass; const message : string = '');overload;
 
+    //set the Exception class that will be raised when the method is called with the parmeters specified
+    function WillRaiseWhen(const exceptionClass: ExceptClass; const message: string = ''): IWhen<T>;
+
     //If true, calls to methods for which we have not defined a behavior will cause verify to fail.
     property BehaviorMustBeDefined : boolean read GetBehaviorMustBeDefined write SetBehaviorMustBeDefined;
 
