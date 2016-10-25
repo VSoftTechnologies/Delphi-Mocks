@@ -46,7 +46,7 @@ type
     procedure DoBefore(Instance: TObject; Method: TRttiMethod; const Args: TArray<TValue>; out DoInvoke: Boolean; out Result: TValue);
     function Proxy : T; override;
   public
-    constructor Create( const ACreateFunc: TFunc<T>; const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); reintroduce;
+    constructor Create( const ACreateFunc: TFunc<T> = nil; const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); reintroduce;
     destructor Destroy; override;
   end;
 
