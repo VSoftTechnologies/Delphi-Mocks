@@ -220,7 +220,7 @@ begin
         raise FExceptClass.Create('Raised by Mock');
     end;
     WillRaiseAlways : result := True;
-    WillExecuteWhen :  result := MatchArgs;
+    WillExecuteWhen : result := MatchArgs;
     WillExecute     : result := True;
   end;
 end;
