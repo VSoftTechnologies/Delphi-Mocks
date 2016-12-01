@@ -59,7 +59,7 @@ type
     [Test]
     procedure MockNoArgProcedureUsingExactlyWhen;
     [Test]
-    procedure TestOuParam;
+    procedure TestOutParam;
     [Test]
     procedure TestVarParam;
   end;
@@ -93,7 +93,7 @@ begin
   Assert.AreEqual(objectProxy.Proxy.CreateCalled, G_CREATE_CALLED_UNIQUE_ID);
 end;
 
-procedure TTestObjectProxy.TestOuParam;
+procedure TTestObjectProxy.TestOutParam;
 const
   RETURN_MSG = 'hello Delphi Mocks! - With out Param';
 var
