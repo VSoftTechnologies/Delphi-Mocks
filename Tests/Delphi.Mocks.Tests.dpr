@@ -62,7 +62,8 @@ uses
   Delphi.Mocks.Tests.ProxyBase in 'Delphi.Mocks.Tests.ProxyBase.pas',
   Delphi.Mocks.Tests.TValue in 'Delphi.Mocks.Tests.TValue.pas',
   Delphi.Mocks.Tests.Utils in 'Delphi.Mocks.Tests.Utils.pas',
-  Delphi.Mocks.Utils.Tests in 'Delphi.Mocks.Utils.Tests.pas';
+  Delphi.Mocks.Utils.Tests in 'Delphi.Mocks.Utils.Tests.pas',
+  Delphi.Mocks.Examples.Matchers in 'Delphi.Mocks.Examples.Matchers.pas';
 
 {$R *.RES}
 
