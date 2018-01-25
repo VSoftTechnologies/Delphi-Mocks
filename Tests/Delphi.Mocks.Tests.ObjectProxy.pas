@@ -79,7 +79,7 @@ procedure TTestObjectProxy.ProxyObject_Calls_The_Create_Of_The_Object_Type;
 var
   objectProxy: IProxy<TSimpleObject>;
 begin
-  objectProxy := TObjectProxy<TSimpleObject>.Create;
+  objectProxy := TObjectProxy<TSimpleObject>.Create(nil);
 
   Assert.AreEqual(objectProxy.Proxy.CreateCalled, G_CREATE_CALLED_UNIQUE_ID);
 end;
@@ -88,7 +88,7 @@ procedure TTestObjectProxy.ProxyObject_MultipleConstructor;
 var
   objectProxy: IProxy<TMultipleConstructor>;
 begin
-  objectProxy := TObjectProxy<TMultipleConstructor>.Create;
+  objectProxy := TObjectProxy<TMultipleConstructor>.Create(nil);
 
   Assert.AreEqual(objectProxy.Proxy.CreateCalled, G_CREATE_CALLED_UNIQUE_ID);
 end;

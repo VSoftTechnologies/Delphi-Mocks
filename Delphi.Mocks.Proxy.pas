@@ -203,8 +203,7 @@ uses
   Delphi.Mocks.Utils,
   Delphi.Mocks.When,
   Delphi.Mocks.MethodData,
-  Delphi.Mocks.ParamMatcher,
-  Windows;
+  Delphi.Mocks.ParamMatcher;
 
 function Supports(const Instance: IProxyVirtualInterface; const IID: TGUID; out Intf; const ACheckOwner: Boolean): Boolean;
 begin
