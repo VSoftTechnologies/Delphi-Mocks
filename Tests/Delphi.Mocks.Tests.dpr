@@ -121,55 +121,46 @@ var
   nunitLogger : ITestLogger;
 begin
 {$IFDEF TESTINSIGHT}
-  try
-    //note - text logger not implemented yet
-    TestInsight.DUnitX.RunRegisteredTests;
-  except
-    on e : Exception do
-    begin
-      Writeln(e.Message);
-      ReadLn;
-    end;
-  end;
+  TestInsight.DUnitX.RunRegisteredTests;
   exit;
 {$ENDIF}
   try
-    try
-      //Create the runner
-      TDUnitX.CheckCommandLine;
-      runner := TDUnitX.CreateRunner;
-      runner.UseRTTI := True;
-      runner.FailsOnNoAsserts := true;
-      //tell the runner how we will log things
-      logger := TDUnitXConsoleLogger.Create(false);
-      runner.AddLogger(logger);
+    //Check command line options, will exit if invalid
+    TDUnitX.CheckCommandLine;
+    //Create the test runner
+    runner := TDUnitX.CreateRunner;
+    //Tell the runner to use RTTI to find Fixtures
+    runner.UseRTTI := True;
+    //tell the runner how we will log things
+    //Log to the console window
+    logger := TDUnitXConsoleLogger.Create(true);
+    runner.AddLogger(logger);
+    //Generate an NUnit compatible XML File
+    if (TDUnitX.Options.XMLOutputFile <> '') then
+    begin
       nunitLogger := TDUnitXXMLNUnitFileLogger.Create(TDUnitX.Options.XMLOutputFile);
       runner.AddLogger(nunitLogger);
-
-      //Run tests
-      results := runner.Execute;
-      //Let the CI Server know that something failed.
-      if results.AllPassed then
-        System.ExitCode := 0
-      else
-        System.ExitCode := EXIT_ERRORS;
-
-      System.Writeln;
-    except
-      on E: Exception do
-        Writeln(E.ClassName, ': ', E.Message);
     end;
+    runner.FailsOnNoAsserts := False; //When true, Assertions must be made during tests;
 
-  finally
+    //Run tests
+    results := runner.Execute;
+    if not results.AllPassed then
+      System.ExitCode := EXIT_ERRORS;
+
     {$IFNDEF CI}
-    //We don;t want this happening when running under CI.
+    //We don't want this happening when running under CI.
     if TDUnitX.Options.ExitBehavior = TDUnitXExitBehavior.Pause then
     begin
       System.Write('Done.. press <Enter> key to quit.');
       System.Readln;
     end;
     {$ENDIF}
+  except
+    on E: Exception do
+      System.Writeln(E.ClassName, ': ', E.Message);
   end;
+
 
 
 end.
