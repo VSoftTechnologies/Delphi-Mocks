@@ -104,7 +104,6 @@ type
 implementation
 
 uses
-  windows,
   TypInfo,
   classes,
   sysutils;

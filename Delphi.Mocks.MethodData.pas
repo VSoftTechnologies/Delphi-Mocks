@@ -108,7 +108,6 @@ type
 implementation
 
 uses
-  Windows,
   System.TypInfo,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,

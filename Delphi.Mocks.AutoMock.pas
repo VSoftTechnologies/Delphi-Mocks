@@ -24,7 +24,6 @@ type
 implementation
 
 uses
-  Windows,
   Delphi.Mocks.Validation,
   Delphi.Mocks.Proxy.TypeInfo;
 
