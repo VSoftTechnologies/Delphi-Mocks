@@ -3,7 +3,7 @@ unit Delphi.Mocks.Validation;
 interface
 
 uses
-  typInfo;
+  System.TypInfo;
 
 type
   TMocksValidation = class(TObject)

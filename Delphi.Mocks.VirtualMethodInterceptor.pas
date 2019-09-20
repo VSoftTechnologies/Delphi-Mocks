@@ -4,10 +4,10 @@ interface
 {$I 'Delphi.Mocks.inc'}
 
 uses
-  Rtti,
-  TypInfo,
-  Generics.Collections,
-  SysUtils;
+  System.Rtti,
+  System.TypInfo,
+  System.Generics.Collections,
+  System.SysUtils;
   {$IFDEF DELPHI_XE_UP} //TVirtualMethodInterceptor introduced in DelphiXE
 type
   TVirtualMethodInterceptor = System.Rtti.TVirtualMethodInterceptor;

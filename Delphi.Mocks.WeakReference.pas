@@ -104,9 +104,9 @@ type
 implementation
 
 uses
-  TypInfo,
-  classes,
-  sysutils;
+  System.TypInfo,
+  System.Classes,
+  System.SysUtils;
 
 {$IFDEF CPUX86}
 

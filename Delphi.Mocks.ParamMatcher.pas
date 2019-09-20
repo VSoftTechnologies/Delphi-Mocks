@@ -28,10 +28,10 @@ unit Delphi.Mocks.ParamMatcher;
 interface
 
 uses
-  Generics.Collections,
-  SysUtils,
-  TypInfo,
-  Rtti;
+  System.Generics.Collections,
+  System.SysUtils,
+  System.TypInfo,
+  System.Rtti;
 
 
 type
@@ -67,8 +67,8 @@ type
 implementation
 
 uses
-  Classes,
-  SyncObjs;
+  System.Classes,
+  System.SyncObjs;
 
 
 { TMatcherFactory }

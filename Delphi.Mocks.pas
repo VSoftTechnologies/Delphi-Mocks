@@ -30,9 +30,9 @@ interface
 {$I 'Delphi.Mocks.inc'}
 
 uses
-  TypInfo,
-  Rtti,
-  Sysutils,
+  System.TypInfo,
+  System.Rtti,
+  System.SysUtils,
   {$IFDEF SUPPORTS_REGEX}
   System.RegularExpressions,
   {$ENDIF}
@@ -294,8 +294,8 @@ type
 implementation
 
 uses
-  Classes,
-  Generics.Defaults,
+  System.Classes,
+  System.Generics.Defaults,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,

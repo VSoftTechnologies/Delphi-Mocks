@@ -28,8 +28,8 @@ unit Delphi.Mocks.Behavior;
 interface
 
 uses
-  Rtti,
-  SysUtils,
+  System.Rtti,
+  System.SysUtils,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.ParamMatcher;

@@ -28,12 +28,12 @@ unit Delphi.Mocks.Interfaces;
 interface
 
 uses
-  SysUtils,
-  TypInfo,
-  Generics.Collections,
+  System.SysUtils,
+  System.TypInfo,
+  System.Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.ParamMatcher,
-  Rtti;
+  System.Rtti;
 
 type
   TBehaviorType = (WillReturn,ReturnDefault,WillRaise,WillRaiseAlways,WillExecute,WillExecuteWhen);
