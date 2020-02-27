@@ -7,7 +7,7 @@
 
 Delphi Mocks is a mocking framework that allows to replace class dependencies with a light implementation of it. This light objects are called test doubles and they are used in unit testing.
 
-Automated testing is mandatory this days and usually technical debt is measured with unit tests coverage. High test coverage allows to apply advanced refactorings and improve even very old code. However in object oriented world writing high quality unit test is challenging, because of composition. Object composition is the most popular way of building complex systems. It increases code reusability, but also makes automated testing much more difficult. Why? Because we are not able to run methods of such composed object without its dependencies. Delphi Mocks framework enables you to create dynamically substitutes this dependency and easier cover code with the unit tests.
+Automated testing is mandatory this days and usually technical debt is measured with unit tests coverage. High test coverage allows to apply advanced refactorings and improve even very old code. However in object-oriented world, writing high quality unit test is challenging because of the composition. Object composition is the most popular way of building complex systems. It increases code reusability, but also makes automated testing much more difficult. Why? Because methods of such composed object can not be executed without its dependencies. Delphi Mocks framework enables dynamic substitution of this dependency and provides the opportunity to improve code test coverage.
 
 ## Coding to the interfaces
 
