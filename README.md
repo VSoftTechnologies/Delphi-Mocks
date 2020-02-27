@@ -17,11 +17,11 @@ Delphi Mocks requires an interface to build test double and if you are not using
 
 ## Why Delphi Mocks?
 
-The main purpose of using this framework is to work faster. Manually writing fake classes for each dependency is a laborious work. Using Delphi Mocks is can be done much more faster and in a much dynamic way. 
+The main purpose of using this framework is to work faster. Manually writing fake classes for each dependency is a laborious work. Using Delphi Mocks this task be done much faster and in a much dynamic way. 
 
-The ultimate goal of this framework is to write unit tests faster and create better test harness. Which leads to higher system quality and greater developer satisfaction.
+The ultimate goal of this framework is to write unit tests faster, ensure better test coverage and allow you to build more solid test harness. Using Delphi Mocks leads to higher system quality and greater developer satisfaction.
 
-## How Delphi Mocks can help?
+## What Delphi Mocks gives you?
 
 Delphi Mocks can:
 
