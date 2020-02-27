@@ -11,7 +11,9 @@ Automated testing is mandatory this days and usually technical debt is measured 
 
 ## Coding to the interfaces
 
-Known also as Interface Based Programming is a technique to write classes based on an interface and create composed classes from interfaces - usually using dependency injection. Delphi Mocks requires an interface to build test double and if you are not using interfaces too much you should start from it and then try this framework. To refactor existing code to interface based approach is not that much difficult, of course it requires some experience, but can be easily adopted. This can be done with low risk refactoring, even without any test coverage.
+Known also as interface-based programming is a technique for writing interface-based classes and creating composed classes from interfaces - usually uses dependency injection to provide these dependent interfaces to encapsulated private fields of the class.
+
+Delphi Mocks requires an interface to build test double and if you are not using interfaces too much you should start from changeing your coding style and then try this framework. Coding to the interfaces in Delphi is not difficult one and is just a matter of habit. To refactor existing code to interface-based approach is not that much difficult, of course it requires some experience, but can be easily adopted. This can be done with low risk refactoring, even without any test coverage.
 
 ## Why Delphi Mocks?
 
