@@ -11,15 +11,15 @@ Automated testing is mandatory this days and usually technical debt is measured 
 
 ## Coding to the interfaces
 
-Known also as interface-based programming is a technique for writing interface-based classes and creating composed classes from interfaces - usually uses dependency injection to provide these dependent interfaces to encapsulated private fields of the class.
+Known also as interface-based programming is a technique for writing interface-based classes and creating composed classes from interfaces. Using this technique in Delphi is not difficult and is just a matter of habit. At the beggining select any class which you want to test and isolate its external dependencies by replacing a references to class with a references to interface. You do not have to isolate all the dependencies and internal structures still can be assesed through class.
 
-Delphi Mocks requires an interface to build test double and if you are not using interfaces too much you should start from changeing your coding style and then try this framework. Coding to the interfaces in Delphi is not difficult one and is just a matter of habit. To refactor existing code to interface-based approach is not that much difficult, of course it requires some experience, but can be easily adopted. This can be done with low risk refactoring, even without any test coverage.
+Delphi Mocks requires an interface to build test double and if you are not using interfaces too much you should start with a change in your coding style and then try this framework.  To refactor existing code to interface-based approach is not that much difficult, of course it requires some experience, but can be easily adopted. This refactoring can be done with a low risk and can be used even without any test coverage.
 
 ## Why Delphi Mocks?
 
-The main purpose of using this framework is to work faster. Manually writing fake classes for each dependency is a laborious work. Using Delphi Mocks this task be done much faster and in a much dynamic way. 
+The main purpose of using this framework is to isolate class, dynamiclly build test doubles and enable to execute class under test. Manually writing fake classes for each dependency is a laborious work and not much fun. Using Delphi Mocks this goal can be done much faster and in a much dynamic way. 
 
-The ultimate goal of this framework is to write unit tests faster, ensure better test coverage and allow you to build more solid test harness. Using Delphi Mocks leads to higher system quality and greater developer satisfaction.
+The ultimate goal of this framework is to create unit tests faster, ensure better test coverage and allow you to build more solid test harness. Indirectly using Delphi Mocks leads to higher system quality and greater developer satisfaction.
 
 ## What Delphi Mocks gives you?
 
