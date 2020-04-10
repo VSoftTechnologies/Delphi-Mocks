@@ -33,9 +33,20 @@ unit Delphi.Mocks.Helpers;
 interface
 
 uses
-  Rtti;
+  System.Generics.Collections,
+  System.Rtti;
 
 type
+  //Allow custom comparisons
+  TCustomValueComparer = reference to function(const a, b: TValue): Integer;
+  TCustomValueComparerStore = record
+  private
+    class var CustomComparers: TDictionary<Pointer, TCustomValueComparer>;
+  public
+    class procedure RegisterCustomComparer<T>(const AComparer: TCustomValueComparer); static;
+    class procedure UnRegisterCustomComparer<T>; static;
+  end;
+
   //TValue really needs to have an Equals operator overload!
   TValueHelper = record helper for TValue
     private
@@ -64,6 +75,7 @@ type
     function IsWord: Boolean;
   	function IsGuid: Boolean;
     function IsInterface : Boolean;
+    function IsRecord: Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -101,11 +113,14 @@ const
   EmptyResults: array[Boolean, Boolean] of Integer = ((0, -1), (1, 0));
 var
   leftIsEmpty, rightIsEmpty: Boolean;
+  CustomComparer: TCustomValueComparer;
 begin
   leftIsEmpty := left.IsEmpty;
   rightIsEmpty := right.IsEmpty;
   if leftIsEmpty or rightIsEmpty then
     Result := EmptyResults[leftIsEmpty, rightIsEmpty]
+  else if (Left.TypeInfo = Right.TypeInfo) and TCustomValueComparerStore.CustomComparers.TryGetValue(Left.TypeInfo, CustomComparer) then
+    Result := CustomComparer(Left, Right)
   else if left.IsOrdinal and right.IsOrdinal then
     Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
   else if left.IsFloat and right.IsFloat then
@@ -116,6 +131,8 @@ begin
     Result := NativeInt(left.AsObject) - NativeInt(right.AsObject) // TODO: instance comparer
   else if Left.IsInterface and Right.IsInterface then
     Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
+  else if Left.IsRecord and Right.IsRecord then
+    raise Exception.Create('Use Delphi.Mocks.Helpers.TCustomValueComparerStore.RegisterCustomComparer<T> to add a method to compare records.')
   else if left.IsVariant and right.IsVariant then
   begin
     case VarCompareValue(left.AsVariant, right.AsVariant) of
@@ -236,6 +253,11 @@ begin
   Result := Kind = tkPointer;
 end;
 
+function TValueHelper.IsRecord: Boolean;
+begin
+  Result := Kind = tkRecord;
+end;
+
 function TValueHelper.IsShortInt: Boolean;
 begin
   Result := TypeInfo = System.TypeInfo(ShortInt);
@@ -306,5 +328,27 @@ begin
   AMethod := GetMethod(AName);
   Result := Assigned(AMethod);
 end;
+
+
+
+{ TCustomValueComparerStore }
+
+class procedure TCustomValueComparerStore.RegisterCustomComparer<T>(const AComparer: TCustomValueComparer);
+begin
+  CustomComparers.Add(System.TypeInfo(T), AComparer);
+end;
+
+class procedure TCustomValueComparerStore.UnRegisterCustomComparer<T>;
+begin
+  CustomComparers.Remove(System.TypeInfo(T));
+end;
+
+
+
+initialization
+  TCustomValueComparerStore.CustomComparers := TDictionary<Pointer, TCustomValueComparer>.Create;
+
+finalization
+  TCustomValueComparerStore.CustomComparers.Free;
 
 end.
