@@ -114,6 +114,9 @@ const
 var
   leftIsEmpty, rightIsEmpty: Boolean;
   CustomComparer: TCustomValueComparer;
+const
+  ErrorStr: String =  'Unable to compare %s. Use Delphi.Mocks.Helpers.TCustomValueComparerStore.RegisterCustomComparer<T> to add a ' +
+                      'method to compare records.';
 begin
   leftIsEmpty := left.IsEmpty;
   rightIsEmpty := right.IsEmpty;
@@ -132,7 +135,7 @@ begin
   else if Left.IsInterface and Right.IsInterface then
     Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
   else if Left.IsRecord and Right.IsRecord then
-    raise Exception.Create('Use Delphi.Mocks.Helpers.TCustomValueComparerStore.RegisterCustomComparer<T> to add a method to compare records.')
+    raise Exception.Create(Format(ErrorStr ,[Left.TypeInfo.Name]))
   else if left.IsVariant and right.IsVariant then
   begin
     case VarCompareValue(left.AsVariant, right.AsVariant) of
