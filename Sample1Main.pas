@@ -108,7 +108,7 @@ begin
   //we expect the TestMe method to never be called
   mock.Setup.Expect.Never.When.TestMe;
 
-  //we expecte Bar to be called at lease once with a param value of 1
+  //we expect Bar to be called at lease once with a param value of 1
   mock.Setup.Expect.AtLeastOnce.When.Bar(1);
 
   mock.Setup.Expect.AtLeastOnce.When.Bar(99);
@@ -129,7 +129,7 @@ begin
 
   WriteLn('Calling Bar(1) : ' + mock.Instance.Bar(1));
   WriteLn('Calling Bar(2) : ' + mock.Instance.Bar(2));
-  WriteLn('Calling Bar(2,sdfsd) : ' + mock.Instance.Bar(999,'sdfsd'));
+  WriteLn('Calling Bar(999,sdfsd) : ' + mock.Instance.Bar(999,'sdfsd'));
   WriteLn('Calling Bar(2,sdfsd) : ' + mock.Instance.Bar(2,'sdfsd'));
   WriteLn('Calling Bar(200) : ' + mock.Instance.Bar(200));
 
