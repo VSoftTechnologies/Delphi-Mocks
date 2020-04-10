@@ -63,6 +63,7 @@ type
     function IsVariant: Boolean;
     function IsWord: Boolean;
   	function IsGuid: Boolean;
+    function IsInterface : Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -86,142 +87,55 @@ implementation
 uses
   SysUtils,
   Math,
-  TypInfo;
+  TypInfo,
+  Variants,
+  StrUtils;
 
 var
   Context : TRttiContext;
 
+//adapted from Spring4D
+
 function CompareValue(const Left, Right: TValue): Integer;
+const
+  EmptyResults: array[Boolean, Boolean] of Integer = ((0, -1), (1, 0));
+var
+  leftIsEmpty, rightIsEmpty: Boolean;
 begin
-  if Left.IsOrdinal and Right.IsOrdinal then
+  leftIsEmpty := left.IsEmpty;
+  rightIsEmpty := right.IsEmpty;
+  if leftIsEmpty or rightIsEmpty then
+    Result := EmptyResults[leftIsEmpty, rightIsEmpty]
+  else if left.IsOrdinal and right.IsOrdinal then
+    Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
+  else if left.IsFloat and right.IsFloat then
+    Result := Math.CompareValue(left.AsExtended, right.AsExtended)
+  else if left.IsString and right.IsString then
+    Result := SysUtils.AnsiCompareStr(left.AsString, right.AsString)
+  else if left.IsObject and right.IsObject then
+    Result := NativeInt(left.AsObject) - NativeInt(right.AsObject) // TODO: instance comparer
+  else if Left.IsInterface and Right.IsInterface then
+    Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
+  else if left.IsVariant and right.IsVariant then
   begin
-    Result := Math.CompareValue(Left.AsOrdinal, Right.AsOrdinal);
+    case VarCompareValue(left.AsVariant, right.AsVariant) of
+      vrEqual: Result := 0;
+      vrLessThan: Result := -1;
+      vrGreaterThan: Result := 1;
+      vrNotEqual: Result := -1;
+    else
+      Result := 0;
+    end;
   end else
-  if Left.IsFloat and Right.IsFloat then
-  begin
-    Result := Math.CompareValue(Left.AsFloat, Right.AsFloat);
-  end else
-  if Left.IsString and Right.IsString then
-  begin
-    Result := SysUtils.CompareStr(Left.AsString, Right.AsString);
-  end else
-  begin
     Result := 0;
-  end;
 end;
 
 function SameValue(const Left, Right: TValue): Boolean;
 begin
-  if Left.IsNumeric and Right.IsNumeric then
-  begin
-    if Left.IsOrdinal then
-    begin
-      if Right.IsOrdinal then
-      begin
-        Result := Left.AsOrdinal = Right.AsOrdinal;
-      end else
-      if Right.IsSingle then
-      begin
-        Result := Math.SameValue(Left.AsOrdinal, Right.AsSingle);
-      end else
-      if Right.IsDouble then
-      begin
-        Result := Math.SameValue(Left.AsOrdinal, Right.AsDouble);
-      end
-      else
-      begin
-        Result := Math.SameValue(Left.AsOrdinal, Right.AsExtended);
-      end;
-    end else
-    if Left.IsSingle then
-    begin
-      if Right.IsOrdinal then
-      begin
-        Result := Math.SameValue(Left.AsSingle, Right.AsOrdinal);
-      end else
-      if Right.IsSingle then
-      begin
-        Result := Math.SameValue(Left.AsSingle, Right.AsSingle);
-      end else
-      if Right.IsDouble then
-      begin
-        Result := Math.SameValue(Left.AsSingle, Right.AsDouble);
-      end
-      else
-      begin
-        Result := Math.SameValue(Left.AsSingle, Right.AsExtended);
-      end;
-    end else
-    if Left.IsDouble then
-    begin
-      if Right.IsOrdinal then
-      begin
-        Result := Math.SameValue(Left.AsDouble, Right.AsOrdinal);
-      end else
-      if Right.IsSingle then
-      begin
-        Result := Math.SameValue(Left.AsDouble, Right.AsSingle);
-      end else
-      if Right.IsDouble then
-      begin
-        Result := Math.SameValue(Left.AsDouble, Right.AsDouble);
-      end
-      else
-      begin
-        Result := Math.SameValue(Left.AsDouble, Right.AsExtended);
-      end;
-    end
-    else
-    begin
-      if Right.IsOrdinal then
-      begin
-        Result := Math.SameValue(Left.AsExtended, Right.AsOrdinal);
-      end else
-      if Right.IsSingle then
-      begin
-        Result := Math.SameValue(Left.AsExtended, Right.AsSingle);
-      end else
-      if Right.IsDouble then
-      begin
-        Result := Math.SameValue(Left.AsExtended, Right.AsDouble);
-      end
-      else
-      begin
-        Result := Math.SameValue(Left.AsExtended, Right.AsExtended);
-      end;
-    end;
-  end else
-  if Left.IsString and Right.IsString then
-  begin
-    Result := Left.AsString = Right.AsString;
-  end else
-  if Left.IsClass and Right.IsClass then
-  begin
-    Result := Left.AsClass = Right.AsClass;
-  end else
-  if Left.IsObject and Right.IsObject then
-  begin
-    Result := Left.AsObject = Right.AsObject;
-  end else
-  if Left.IsPointer and Right.IsPointer then
-  begin
-    Result := Left.AsPointer = Right.AsPointer;
-  end else
-  if Left.IsVariant and Right.IsVariant then
-  begin
-    Result := Left.AsVariant = Right.AsVariant;
-  end else
   if Left.IsGuid and Right.IsGuid then
-  begin
-    Result := IsEqualGuid( Left.AsType<TGUID>, Right.AsType<TGUID> );
-  end else
-  if Left.TypeInfo = Right.TypeInfo then
-  begin
-    Result := Left.AsPointer = Right.AsPointer;
-  end else
-  begin
-    Result := False;
-  end;
+    Result := IsEqualGuid( Left.AsType<TGUID>, Right.AsType<TGUID> )
+  else
+    result := CompareValue(left, right) = 0;
 end;
 
 { TValueHelper }
@@ -305,6 +219,11 @@ end;
 function TValueHelper.IsInteger: Boolean;
 begin
   Result := TypeInfo = System.TypeInfo(Integer);
+end;
+
+function TValueHelper.IsInterface: Boolean;
+begin
+  Result := Kind = tkInterface;
 end;
 
 function TValueHelper.IsNumeric: Boolean;
