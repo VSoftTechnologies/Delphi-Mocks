@@ -439,7 +439,11 @@ begin
     exit;
 
   setupParams := TSetupMethodDataParameters.Create(FIsStubOnly, FBehaviorMustBeDefined, FAllowRedefineBehaviorDefinitions);
+{$IFNDEF NEXTGEN}
   Result := TMethodData.Create(string(FTypeInfo.Name), AMethodName, setupParams, FAutoMocker);
+{$ELSE}
+  Result := TMethodData.Create(FTypeInfo.NameFld.ToString, AMethodName, setupParams, FAutoMocker);
+{$ENDIF}
   FMethodData.Add(methodName,Result);
 end;
 
