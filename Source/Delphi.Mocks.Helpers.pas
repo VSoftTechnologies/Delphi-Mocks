@@ -338,7 +338,7 @@ end;
 
 class procedure TCustomValueComparerStore.RegisterCustomComparer<T>(const AComparer: TCustomValueComparer);
 begin
-  CustomComparers.Add(System.TypeInfo(T), AComparer);
+  CustomComparers.AddOrSetValue(System.TypeInfo(T), AComparer);
 end;
 
 class procedure TCustomValueComparerStore.UnRegisterCustomComparer<T>;
