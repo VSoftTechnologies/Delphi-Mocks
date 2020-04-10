@@ -54,7 +54,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_UnitSearchPath>$(DUNITX);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<SanitizedProjectName>Sample1</SanitizedProjectName>
 			<DCC_DUPLICATE_CTOR_DTOR>false</DCC_DUPLICATE_CTOR_DTOR>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.2.3.4;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0</VerInfo_Keys>
@@ -125,29 +125,11 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="Delphi.Mocks.AutoMock.pas"/>
-			<DCCReference Include="Delphi.Mocks.Behavior.pas"/>
-			<DCCReference Include="Delphi.Mocks.Expectation.pas"/>
-			<DCCReference Include="Delphi.Mocks.Helpers.pas"/>
-			<DCCReference Include="Delphi.Mocks.Interfaces.pas"/>
-			<DCCReference Include="Delphi.Mocks.MethodData.pas"/>
-			<DCCReference Include="Delphi.Mocks.ObjectProxy.pas"/>
-			<DCCReference Include="Delphi.Mocks.ParamMatcher.pas"/>
-			<DCCReference Include="Delphi.Mocks.pas"/>
-			<DCCReference Include="Delphi.Mocks.Proxy.pas"/>
-			<DCCReference Include="Delphi.Mocks.Proxy.TypeInfo.pas"/>
-			<DCCReference Include="Delphi.Mocks.ReturnTypePatch.pas"/>
-			<DCCReference Include="Delphi.Mocks.Utils.pas"/>
-			<DCCReference Include="Delphi.Mocks.Validation.pas"/>
-			<DCCReference Include="Delphi.Mocks.VirtualInterface.pas"/>
-			<DCCReference Include="Delphi.Mocks.VirtualMethodInterceptor.pas"/>
-			<DCCReference Include="Delphi.Mocks.WeakReference.pas"/>
-			<DCCReference Include="Delphi.Mocks.When.pas"/>
 			<DCCReference Include="Sample1Main.pas"/>
-			<DCCReference Include="Examples\Delphi.Mocks.Example.ProjectSaveCheckVisitor.pas"/>
-			<DCCReference Include="Examples\Delphi.Mocks.Examples.Factory.pas"/>
-			<DCCReference Include="Examples\Delphi.Mocks.Examples.Implement.pas"/>
-			<DCCReference Include="Examples\Delphi.Mocks.Examples.Interfaces.pas"/>
+			<DCCReference Include="Delphi.Mocks.Example.ProjectSaveCheckVisitor.pas"/>
+			<DCCReference Include="Delphi.Mocks.Examples.Factory.pas"/>
+			<DCCReference Include="Delphi.Mocks.Examples.Implement.pas"/>
+			<DCCReference Include="Delphi.Mocks.Examples.Interfaces.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -201,20 +183,28 @@
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
 					</Parameters>
-					<Excluded_Packages/>
+					<Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madBasic\BDS9\win32\madBasic_.bpl">madBasic 1.2.7  -  www.madshi.net</Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madBasic\BDS9\win32\madHelp_.bpl">madHelp 1.1.1  -  www.madshi.net</Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madDisAsm\BDS9\win32\madDisAsm_.bpl">madDisAsm 2.2.6  -  www.madshi.net</Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptIde_.bpl">madExceptIde 1.1.0  -  www.madshi.net</Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExcept_.bpl">madExcept 5.0.0  -  www.madshi.net</Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptVcl_.bpl">madExceptVcl 2.1.0  -  www.madshi.net</Excluded_Packages>
+						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptWizard_.bpl">madExceptWizard 3.1.8  -  www.madshi.net</Excluded_Packages>
+					</Excluded_Packages>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile LocalName="Win32\Debug\Sample1.exe" Configuration="Debug" Class="ProjectOutput">
+					<DeployFile Class="ProjectOutput" Configuration="Debug" LocalName="Win32\Debug\Sample1.exe">
 						<Platform Name="Win32">
 							<RemoteName>Sample1.exe</RemoteName>
 						</Platform>
 					</DeployFile>
-					<DeployFile LocalName="Win32\Debug\Sample1.rsm" Configuration="Debug" Class="DebugSymbols">
+					<DeployFile Class="DebugSymbols" Configuration="Debug" LocalName="Win32\Debug\Sample1.rsm">
 						<Platform Name="Win32">
 							<RemoteName>Sample1.rsm</RemoteName>
 						</Platform>
 					</DeployFile>
-					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+					<DeployFile Class="DependencyModule" LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib">
 						<Platform Name="OSX32"/>
 						<Platform Name="iOSSimulator"/>
 					</DeployFile>

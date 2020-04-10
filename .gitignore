@@ -23,6 +23,10 @@
 ###################
 /Win32
 /Win64
+/Tests/Win32
+/Tests/Win64
+/Examples/Win32
+/Examples/Win64
 
 Build/TestAndBuild.fb7lck
 *.fbl7
