@@ -37,6 +37,8 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Behavior;
 
+  {$I 'Delphi.Mocks.inc'}
+
 type
   TProxyBaseInvokeEvent = procedure (Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue) of object;
 
@@ -599,7 +601,7 @@ begin
         Exit;
     end;
 
-    { $Message 'TODO: Need to query the parent, but exclude outselves and any other children which have already been called.'}
+    { $Message 'TODO: Need to query the parent, but exclude ourselves and any other children which have already been called.'}
 
     //Call the parent.
     if FParentProxy <> nil then

@@ -151,7 +151,7 @@ var
   iLine: Integer;
 begin
   //Very simplistic ExportLog function which uses a number of other services to
-  //set its job done. The logic is simplistic, but the implementation over uses
+  //get its job done. The logic is simplistic, but the implementation over uses
   //services to show the power of AutoMocking, and the Factory.
 
   fileService := FApplication.FileService;
