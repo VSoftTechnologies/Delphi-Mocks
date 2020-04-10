@@ -26,9 +26,6 @@ uses
   DUnitX.Windows.Console,
   DUnitX.Loggers.XML.NUnit,
   SysUtils,
-  {$IFDEF TESTINSIGHT}
-  TestInsight.DUnitX,
-  {$ENDIF }
   Delphi.Mocks.AutoMock in '..\Delphi.Mocks.AutoMock.pas',
   Delphi.Mocks.Behavior in '..\Delphi.Mocks.Behavior.pas',
   Delphi.Mocks.Expectation in '..\Delphi.Mocks.Expectation.pas',
@@ -63,7 +60,8 @@ uses
   Delphi.Mocks.Tests.TValue in 'Delphi.Mocks.Tests.TValue.pas',
   Delphi.Mocks.Tests.Utils in 'Delphi.Mocks.Tests.Utils.pas',
   Delphi.Mocks.Utils.Tests in 'Delphi.Mocks.Utils.Tests.pas',
-  Delphi.Mocks.Examples.Matchers in 'Delphi.Mocks.Examples.Matchers.pas';
+  Delphi.Mocks.Examples.Matchers in 'Delphi.Mocks.Examples.Matchers.pas',
+  Delphi.Mocks.Tests.Stubs in 'Delphi.Mocks.Tests.Stubs.pas';
 
 {$R *.RES}
 
