@@ -35,10 +35,8 @@ uses
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Utils;
 
-
-//disable warnings about c++ compatibility, since we don't intend to support it.
-{$WARN DUPLICATE_CTOR_DTOR OFF}
-//for some reason this doesn't work.. this should override the project settings.
+//NOTE : To disable warnings about c++ compatibility Add the following to your dpr
+//{$WARN DUPLICATE_CTOR_DTOR OFF}
 
 type
   TExpectation = class(TInterfacedObject,IExpectation)
