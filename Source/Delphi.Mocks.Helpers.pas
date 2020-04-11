@@ -34,14 +34,14 @@ interface
 
 uses
   System.Generics.Collections,
-  System.Rtti;
+  System.Rtti, System.TypInfo;
 
 type
   //Allow custom comparisons
   TCustomValueComparer = reference to function(const a, b: TValue): Integer;
   TCustomValueComparerStore = record
   private
-    class var CustomComparers: TDictionary<Pointer, TCustomValueComparer>;
+    class var CustomComparers: TDictionary<PTypeInfo, TCustomValueComparer>;
   public
     class procedure RegisterCustomComparer<T>(const AComparer: TCustomValueComparer); static;
     class procedure UnRegisterCustomComparer<T>; static;
@@ -99,7 +99,6 @@ implementation
 uses
   SysUtils,
   Math,
-  TypInfo,
   Variants,
   StrUtils;
 
@@ -349,7 +348,7 @@ end;
 
 
 initialization
-  TCustomValueComparerStore.CustomComparers := TDictionary<Pointer, TCustomValueComparer>.Create;
+  TCustomValueComparerStore.CustomComparers := TDictionary<PTypeInfo, TCustomValueComparer>.Create;
 
 finalization
   TCustomValueComparerStore.CustomComparers.Free;
