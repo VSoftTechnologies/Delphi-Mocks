@@ -38,12 +38,22 @@ uses
 
 type
   //Allow custom comparisons
-  TCustomValueComparer = reference to function(const a, b: TValue): Integer;
+  {$IFOPT M+}
+    {$M-}
+    {$DEFINE ENABLED_M+}
+  {$ENDIF}
+  TCustomValueComparer = reference to function(const a, b): Integer;
+  {$IFDEF ENABLED_M+}
+    {$M+}
+    {$UNDEF ENABLED_M+}
+  {$ENDIF}
+
+  TCustomValueComparer<T> = reference to function(const a, b: T): Integer;
   TCustomValueComparerStore = record
   private
     class var CustomComparers: TDictionary<PTypeInfo, TCustomValueComparer>;
   public
-    class procedure RegisterCustomComparer<T>(const AComparer: TCustomValueComparer); static;
+    class procedure RegisterCustomComparer<T>(const AComparer: TCustomValueComparer<T>); static;
     class procedure UnRegisterCustomComparer<T>; static;
   end;
 
@@ -122,7 +132,7 @@ begin
   if leftIsEmpty or rightIsEmpty then
     Result := EmptyResults[leftIsEmpty, rightIsEmpty]
   else if (Left.TypeInfo = Right.TypeInfo) and TCustomValueComparerStore.CustomComparers.TryGetValue(Left.TypeInfo, CustomComparer) then
-    Result := CustomComparer(Left, Right)
+    Result := CustomComparer(Left.GetReferenceToRawData^, Right.GetReferenceToRawData^)
   else if left.IsOrdinal and right.IsOrdinal then
     Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
   else if left.IsFloat and right.IsFloat then
@@ -335,9 +345,9 @@ end;
 
 { TCustomValueComparerStore }
 
-class procedure TCustomValueComparerStore.RegisterCustomComparer<T>(const AComparer: TCustomValueComparer);
+class procedure TCustomValueComparerStore.RegisterCustomComparer<T>(const AComparer: TCustomValueComparer<T>);
 begin
-  CustomComparers.AddOrSetValue(System.TypeInfo(T), AComparer);
+  CustomComparers.AddOrSetValue(System.TypeInfo(T), TCustomValueComparer(AComparer));
 end;
 
 class procedure TCustomValueComparerStore.UnRegisterCustomComparer<T>;
