@@ -49,7 +49,7 @@ type
     procedure RemoveWeakRef(value : Pointer);
     function GetRefCount : integer;
   end;
-  {$IFOPT M+}
+  {$IFDEF ENABLED_M+}
     {$M+}
     {$UNDEF ENABLED_M+}
   {$ENDIF}
