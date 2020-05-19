@@ -27,7 +27,7 @@ begin
         compileridl = true
         configname = Debug
         debugversionnumbers = false
-        delphiversion = DelphiXE2
+        delphiversion = DelphiXE7
         enabletimeout = false
         eurekalogverboselogging = false
         frameworktype = VCL
@@ -148,7 +148,7 @@ begin
         compileridl = true
         configname = Debug
         debugversionnumbers = false
-        delphiversion = DelphiXE2
+        delphiversion = DelphiXE7
         enabletimeout = false
         eurekalogverboselogging = false
         frameworktype = VCL
@@ -202,8 +202,8 @@ begin
         delphi.compileroptions
         begin
           alwaysuseconditionalsfromdof = false
-          alwaysusedelphilibrarypath = true
-          alwaysusedofsearchpath = false
+          alwaysusedelphilibrarypath = false
+          alwaysusedofsearchpath = true
           assertions = true
           assignableconst = false
           booleval = false
@@ -234,14 +234,14 @@ begin
           namespaceprefixes = System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;
           openstrings = true
           optimisation = false
-          outputdir = %FBPROJECTDIR%\\..\\Tests
+          outputdir = .\\
           overflowchecking = false
           packages = bindcompfmx;dsnap;fmx;rtl;indysystem;indycore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;indyprotocols;fmxdae;bindengine;soaprtl;bindcompvcl;vclie;vcltouch;websnap;vcldbx;vclsmp;vcl;inetdbbde;dsnapcon;vclx;svnui;webdsnap;svn;vclimg;fmi;bdertl;vclactnband;vcldb;vcldsnap
           rangechecking = false
           recordfieldalign = fa8
           referenceinfo = true
           safedivide = false
-          searchpath = "C:\\Program Files (x86)\\madCollection\\madBasic\\Sources;C:\\Program Files (x86)\\madCollection\\madDisAsm\\Sources;C:\\Program Files (x86)\\madCollection\\madExcept\\Sources"
+          searchpath = ..\\Source
           showhints = true
           showwarnings = true
           stackframes = true
