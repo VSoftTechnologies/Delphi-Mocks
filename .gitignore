@@ -46,3 +46,4 @@ __history/**
 *.fbpbrk
 Tests/Delphi.Mocks.Tests.res
 Tests/Delphi.Mocks.Tests.res
+*.rsm

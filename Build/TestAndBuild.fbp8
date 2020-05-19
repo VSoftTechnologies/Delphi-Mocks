@@ -61,7 +61,7 @@ begin
         updateversioninfokeys = false
         useeurekalogcompiler = false
         usefastdcccompiler = false
-        useprojectsettings = [usPackages,usCompiler,usLinker,usDirectories,usVersionInfo]
+        useprojectsettings = [usPackages,usCompiler,usLinker,usVersionInfo]
         usepropertyset = false
         useversionfromdof = false
         verboseoutput = false
@@ -114,7 +114,7 @@ begin
           namespaceprefixes = System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;
           openstrings = true
           optimisation = false
-          outputdir = .\\$(Platform)\\$(Config)
+          outputdir = .\\
           overflowchecking = false
           packages = bindcompfmx;dsnap;fmx;rtl;indysystem;indycore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;indyprotocols;fmxdae;bindengine;soaprtl
           rangechecking = false
@@ -128,7 +128,7 @@ begin
           stringchecks = true
           typedpointers = false
           unitaliases = WinTypes\=Windows;WinProcs\=Windows;DbiTypes\=BDE;DbiProcs\=BDE;DbiErrs\=BDE
-          unitoutputdir = .\\$(Platform)\\$(Config)
+          unitoutputdir = .\\
           usedebugdcu = false
           usepackages = false
           varstringchecks = true
