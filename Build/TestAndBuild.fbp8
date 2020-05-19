@@ -1,0 +1,284 @@
+﻿project
+begin
+  projectid = {3FDFAB70-D747-4DF3-AD2B-DCB6F10E1709}
+  target
+  begin
+    name = Default
+    targetid = {C5B223F5-6BA1-42F6-AF42-F12E5359C450}
+    rootaction
+    begin
+      action.comment
+      begin
+        actiontextcolor = 16711680
+        description = "Delphi XE2 Build"
+        id = {D5112915-F21F-4942-84AC-9E8D9BE9C448}
+      end
+      action.delphi.build
+      begin
+        allowimplicitimport = true
+        alwaysuseconditionalsfromdof = true
+        autoincbuild = false
+        autoupdatefileversion = true
+        autoupdateproductversion = false
+        buildall = true
+        buildversion = 9
+        codepage = 1252
+        compileprojectresources = false
+        compileridl = true
+        configname = Debug
+        debugversionnumbers = false
+        delphiversion = DelphiXE2
+        enabletimeout = false
+        eurekalogverboselogging = false
+        frameworktype = VCL
+        hintsaserror = false
+        iconfile = $(BDS)\\bin\\delphi_PROJECTICON.ico
+        id = {F74BFF74-A517-423C-B2BD-C7ABC8B344BC}
+        includecompiledate = false
+        includemanifest = false
+        includeverinfo = true
+        isdebug = false
+        isdll = false
+        isprerelease = false
+        isprivate = false
+        isspecial = false
+        keepcfg = false
+        linkproductversiontofileversion = true
+        locale = 3081
+        majorversion = 12
+        minorversion = 11
+        platform = Win32
+        platformsdktype = ProjectSDK
+        projectfile = %FBPROJECTDIR%\\..\\Examples\\Sample1.dpr
+        regenerateresource = true
+        releaseversion = 10
+        resourcecompilertype = rcBorland
+        ridloutputsamefolder = true
+        startingdir = %FBPROJECTDIR%\\..\\Examples
+        timeoutlength = 1
+        updatedoffile = false
+        updatepackagesource = false
+        updateversioninfokeys = false
+        useeurekalogcompiler = false
+        usefastdcccompiler = false
+        useprojectsettings = [usPackages,usCompiler,usLinker,usDirectories,usVersionInfo]
+        usepropertyset = false
+        useversionfromdof = false
+        verboseoutput = false
+        versioninfokeys = "CompanyName\=VincentX64" +
+                          "FileDescription\=was" +
+                          "FileVersion\=12.11.10.9" +
+                          "InternalName\=here" +
+                          "LegalCopyright\=blah" +
+                          "LegalTrademarks\=blah2" +
+                          "OriginalFilename\=blah3" +
+                          "ProductName\=Sample1 of course" +
+                          "ProductVersion\=1.0.0.0" +
+                          ""
+        warningsaserror = false
+        workaroundd5bug = false
+        delphi.compileroptions
+        begin
+          alwaysuseconditionalsfromdof = true
+          alwaysusedelphilibrarypath = true
+          alwaysusedofsearchpath = true
+          assertions = true
+          assignableconst = false
+          booleval = false
+          compilerwarnings = "-w-DUPLICATE_CTOR_DTOR\=0" +
+                             ""
+          conditionals = DEBUG
+          consoleapp = false
+          debuginfo = true
+          definitionsonly = true
+          emitruntimetypeinformation = false
+          exportallsymbols = false
+          extendedsyntax = true
+          externaltd32 = false
+          frameworktype = None
+          generatedocumentation = false
+          generatehpp = false
+          hugestrings = true
+          imagebase = 4194304
+          includenamespaces = false
+          includeremotesymbols = true
+          includetd32 = true
+          inlining = inOn
+          iochecking = true
+          librarypath = "$(BDSLIB)\\$(Platform)\\release;$(BDSUSERDIR)\\Imports;$(BDS)\\Imports;$(BDSCOMMONDIR)\\Dcp;$(BDS)\\include;C:\\Program Files (x86)\\madCollection\\madBasic\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madDisAsm\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madExcept\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madExcept\\..\\Plugins;C:\\Program Files (x86)\\madCollection\\madRemote\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madKernel\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madCodeHook\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madSecurity\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madShell\\BDS9\\win32;I:\\OpenSource\\GitHub\\DUnitX;I:\\OpenSource\\GitHub\\Delphi-Mocks;C:\\Program Files (x86)\\EurekaLab\\EurekaLog 7\\Lib\\Common\\;C:\\Program Files (x86)\\EurekaLab\\EurekaLog 7\\Lib\\Win32\\Release\\Delphi16\\;C:\\Program Files (x86)\\EurekaLab\\EurekaLog 7\\Source\\Extras"
+          linkeroutput = 0
+          localsymbols = true
+          mapfile = 0
+          maxstacksize = 1048576
+          minstacksize = 16384
+          namespaceprefixes = System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;
+          openstrings = true
+          optimisation = false
+          outputdir = .\\$(Platform)\\$(Config)
+          overflowchecking = false
+          packages = bindcompfmx;dsnap;fmx;rtl;indysystem;indycore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;indyprotocols;fmxdae;bindengine;soaprtl
+          rangechecking = false
+          recordfieldalign = fa8
+          referenceinfo = true
+          safedivide = false
+          searchpath = ..\\Source
+          showhints = true
+          showwarnings = true
+          stackframes = true
+          stringchecks = true
+          typedpointers = false
+          unitaliases = WinTypes\=Windows;WinProcs\=Windows;DbiTypes\=BDE;DbiProcs\=BDE;DbiErrs\=BDE
+          unitoutputdir = .\\$(Platform)\\$(Config)
+          usedebugdcu = false
+          usepackages = false
+          varstringchecks = true
+        end
+      end
+      action.delphi.build
+      begin
+        allowimplicitimport = true
+        alwaysuseconditionalsfromdof = false
+        autoincbuild = false
+        autoupdatefileversion = true
+        autoupdateproductversion = false
+        buildall = true
+        buildversion = 0
+        codepage = 1252
+        compileprojectresources = false
+        compileridl = true
+        configname = Debug
+        debugversionnumbers = false
+        delphiversion = DelphiXE2
+        enabletimeout = false
+        eurekalogverboselogging = false
+        frameworktype = VCL
+        hintsaserror = false
+        iconfile = $(BDS)\\bin\\delphi_PROJECTICON.ico
+        id = {732C4807-18FB-441D-B0A7-46CC4F09ED65}
+        includecompiledate = false
+        includemanifest = false
+        includeverinfo = true
+        isdebug = false
+        isdll = false
+        isprerelease = false
+        isprivate = false
+        isspecial = false
+        keepcfg = false
+        linkproductversiontofileversion = true
+        locale = 1033
+        majorversion = 1
+        minorversion = 0
+        platform = Win32
+        platformsdktype = ProjectSDK
+        projectfile = %FBPROJECTDIR%\\..\\Tests\\Delphi.Mocks.Tests.dpr
+        regenerateresource = true
+        releaseversion = 0
+        resourcecompilertype = rcBorland
+        ridloutputsamefolder = true
+        startingdir = %FBPROJECTDIR%\\..\\Tests
+        timeoutlength = 1
+        updatedoffile = false
+        updatepackagesource = false
+        updateversioninfokeys = false
+        useeurekalogcompiler = false
+        usefastdcccompiler = false
+        useprojectsettings = [usPackages,usCompiler,usLinker,usVersionInfo]
+        usepropertyset = false
+        useversionfromdof = false
+        verboseoutput = false
+        versioninfokeys = "CompanyName\=" +
+                          "FileDescription\=" +
+                          "FileVersion\=1.0.0.0" +
+                          "InternalName\=" +
+                          "LegalCopyright\=" +
+                          "LegalTrademarks\=" +
+                          "OriginalFilename\=" +
+                          "ProductName\=" +
+                          "ProductVersion\=1.0.0.0" +
+                          "Comments\=" +
+                          ""
+        warningsaserror = false
+        workaroundd5bug = false
+        delphi.compileroptions
+        begin
+          alwaysuseconditionalsfromdof = false
+          alwaysusedelphilibrarypath = true
+          alwaysusedofsearchpath = false
+          assertions = true
+          assignableconst = false
+          booleval = false
+          conditionals = XMLOUTPUT;ISCONSOLE;DEBUG
+          consoleapp = true
+          debuginfo = true
+          definitionsonly = true
+          emitruntimetypeinformation = false
+          exportallsymbols = false
+          extendedsyntax = true
+          externaltd32 = false
+          frameworktype = VCL
+          generatedocumentation = false
+          generatehpp = false
+          hugestrings = true
+          imagebase = 4194304
+          includenamespaces = false
+          includeremotesymbols = false
+          includetd32 = true
+          inlining = inOn
+          iochecking = true
+          librarypath = "$(BDSLIB)\\$(Platform)\\release;$(BDSUSERDIR)\\Imports;$(BDS)\\Imports;$(BDSCOMMONDIR)\\Dcp;$(BDS)\\include;C:\\Program Files (x86)\\madCollection\\madBasic\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madDisAsm\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madExcept\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madExcept\\..\\Plugins;C:\\Program Files (x86)\\madCollection\\madRemote\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madKernel\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madCodeHook\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madSecurity\\BDS9\\win32;C:\\Program Files (x86)\\madCollection\\madShell\\BDS9\\win32;I:\\OpenSource\\GitHub\\DUnitX;I:\\OpenSource\\GitHub\\Delphi-Mocks;C:\\Program Files (x86)\\EurekaLab\\EurekaLog 7\\Lib\\Common\\;C:\\Program Files (x86)\\EurekaLab\\EurekaLog 7\\Lib\\Win32\\Release\\Delphi16\\;C:\\Program Files (x86)\\EurekaLab\\EurekaLog 7\\Source\\Extras"
+          linkeroutput = 0
+          localsymbols = true
+          mapfile = 3
+          maxstacksize = 1048576
+          minstacksize = 16384
+          namespaceprefixes = System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;
+          openstrings = true
+          optimisation = false
+          outputdir = %FBPROJECTDIR%\\..\\Tests
+          overflowchecking = false
+          packages = bindcompfmx;dsnap;fmx;rtl;indysystem;indycore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;indyprotocols;fmxdae;bindengine;soaprtl;bindcompvcl;vclie;vcltouch;websnap;vcldbx;vclsmp;vcl;inetdbbde;dsnapcon;vclx;svnui;webdsnap;svn;vclimg;fmi;bdertl;vclactnband;vcldb;vcldsnap
+          rangechecking = false
+          recordfieldalign = fa8
+          referenceinfo = true
+          safedivide = false
+          searchpath = "C:\\Program Files (x86)\\madCollection\\madBasic\\Sources;C:\\Program Files (x86)\\madCollection\\madDisAsm\\Sources;C:\\Program Files (x86)\\madCollection\\madExcept\\Sources"
+          showhints = true
+          showwarnings = true
+          stackframes = true
+          stringchecks = true
+          typedpointers = false
+          unitaliases = WinTypes\=Windows;WinProcs\=Windows;DbiTypes\=BDE;DbiProcs\=BDE;DbiErrs\=BDE
+          usedebugdcu = true
+          usepackages = false
+          varstringchecks = true
+        end
+      end
+      action.process.execute
+      begin
+        captureoutput = true
+        enabled = false
+        enablelivecapture = true
+        enablereturncodecheck = true
+        enabletimeout = false
+        expandimpersonationtoken = false
+        hidewindow = true
+        id = {0E0BE982-97C7-41ED-804F-5E799F460312}
+        impersonateusenetcredonly = false
+        impersonateuser = false
+        logoutput = true
+        logprocessparameters = true
+        processoraffinity = 0
+        processpriority = tpNormal
+        programname = %FBPROJECTDIR%\\..\\Tests\\Delphi.Mocks.Tests.exe
+        redirectstderr = true
+        returncodecomparator = rcEqualTo
+        returncodetocheck = 0
+        startindir = %FBPROJECTDIR%\\..\\Tests\\
+        terminateontimeout = false
+        timeoutlength = 1
+        useerrordialogmonitor = false
+        waitforcompletion = true
+      end
+    end
+  end
+end

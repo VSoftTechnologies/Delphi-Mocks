@@ -41,3 +41,8 @@ __history/**
 *.local
 *.identcache
 *.xml
+*.fb8lck
+*.fbl8
+*.fbpbrk
+Tests/Delphi.Mocks.Tests.res
+Tests/Delphi.Mocks.Tests.res
