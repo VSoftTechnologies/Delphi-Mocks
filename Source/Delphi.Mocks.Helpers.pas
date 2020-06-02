@@ -33,9 +33,36 @@ unit Delphi.Mocks.Helpers;
 interface
 
 uses
-  Rtti;
+  System.Generics.Collections,
+  System.Rtti, System.TypInfo;
 
 type
+  // Need to define a common 'non-generic' version and using interface gives bonus of reference counting for clean-up
+  ICustomValueComparer = Interface
+  ['{AA4E862E-F83E-4438-B8E3-BAE2BD0E9475}']
+    function Compare(const ALeft, ARight: TValue): Integer;
+  End;
+
+  TCustomValueComparerFunction<T> = reference to function(const a, b: T): Integer;
+  TCustomValueComparer<T> = class(TInterfacedObject, ICustomValueComparer)
+  private
+    FComparer: TCustomValueComparerFunction<T>;
+  public
+    constructor Create(const ACustomComparer: TCustomValueComparerFunction<T>);
+
+    {$REGION 'ICustomValueComparer'}
+    function Compare(const ALeft, ARight: TValue): Integer;
+    {$ENDREGION}
+  end;
+
+  TCustomValueComparerStore = record
+  private
+    class var CustomComparers: TDictionary<PTypeInfo, ICustomValueComparer>;
+  public
+    class procedure RegisterCustomComparer<T>(const AComparer: TCustomValueComparerFunction<T>); static;
+    class procedure UnRegisterCustomComparer<T>; static;
+  end;
+
   //TValue really needs to have an Equals operator overload!
   TValueHelper = record helper for TValue
     private
@@ -64,6 +91,7 @@ type
     function IsWord: Boolean;
   	function IsGuid: Boolean;
     function IsInterface : Boolean;
+    function IsRecord: Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -87,7 +115,6 @@ implementation
 uses
   SysUtils,
   Math,
-  TypInfo,
   Variants,
   StrUtils;
 
@@ -101,11 +128,17 @@ const
   EmptyResults: array[Boolean, Boolean] of Integer = ((0, -1), (1, 0));
 var
   leftIsEmpty, rightIsEmpty: Boolean;
+  CustomComparer: ICustomValueComparer;
+const
+  ErrorStr: String =  'Unable to compare %s. Use Delphi.Mocks.Helpers.TCustomValueComparerStore.RegisterCustomComparer<T> to add a ' +
+                      'method to compare records.';
 begin
   leftIsEmpty := left.IsEmpty;
   rightIsEmpty := right.IsEmpty;
   if leftIsEmpty or rightIsEmpty then
     Result := EmptyResults[leftIsEmpty, rightIsEmpty]
+  else if (Left.TypeInfo = Right.TypeInfo) and TCustomValueComparerStore.CustomComparers.TryGetValue(Left.TypeInfo, CustomComparer) then
+    Result := CustomComparer.Compare(Left, Right)
   else if left.IsOrdinal and right.IsOrdinal then
     Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
   else if left.IsFloat and right.IsFloat then
@@ -116,6 +149,8 @@ begin
     Result := NativeInt(left.AsObject) - NativeInt(right.AsObject) // TODO: instance comparer
   else if Left.IsInterface and Right.IsInterface then
     Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
+  else if Left.IsRecord and Right.IsRecord then
+    raise Exception.Create(Format(ErrorStr ,[Left.TypeInfo.Name]))
   else if left.IsVariant and right.IsVariant then
   begin
     case VarCompareValue(left.AsVariant, right.AsVariant) of
@@ -236,6 +271,11 @@ begin
   Result := Kind = tkPointer;
 end;
 
+function TValueHelper.IsRecord: Boolean;
+begin
+  Result := Kind = tkRecord;
+end;
+
 function TValueHelper.IsShortInt: Boolean;
 begin
   Result := TypeInfo = System.TypeInfo(ShortInt);
@@ -306,5 +346,43 @@ begin
   AMethod := GetMethod(AName);
   Result := Assigned(AMethod);
 end;
+
+{ TCustomValueComparer<T> }
+
+function TCustomValueComparer<T>.Compare(const ALeft, ARight: TValue): Integer;
+var
+  Left, Right: T;
+begin
+  Left := ALeft.AsType<T>;
+  Right := ARight.AsType<T>;
+
+  Result := FComparer(Left, Right);
+end;
+
+constructor TCustomValueComparer<T>.Create(const ACustomComparer: TCustomValueComparerFunction<T>);
+begin
+  inherited Create;
+
+  FComparer := ACustomComparer;
+end;
+
+{ TCustomValueComparerStore }
+
+class procedure TCustomValueComparerStore.RegisterCustomComparer<T>(const AComparer: TCustomValueComparerFunction<T>);
+begin
+  CustomComparers.AddOrSetValue(TypeInfo(T), TCustomValueComparer<T>.Create(AComparer))
+end;
+
+class procedure TCustomValueComparerStore.UnRegisterCustomComparer<T>;
+begin
+  CustomComparers.Remove(System.TypeInfo(T));
+end;
+
+
+initialization
+  TCustomValueComparerStore.CustomComparers := TDictionary<PTypeInfo, ICustomValueComparer>.Create;
+
+finalization
+  TCustomValueComparerStore.CustomComparers.Free;
 
 end.
