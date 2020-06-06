@@ -1,8 +1,36 @@
 # Delphi Mocks
 
-Delphi Mocks is a simple mocking framework for Delphi XE2 or later. It makes use of RTTI features that are only available in Delphi XE2, however I do hope to be able to get it working with earlier versions of Delphi (2010 or later) at some stage.
+![ Delphi Support ](https://img.shields.io/badge/Delphi%20Support-%20XE2%20...%2010.3%20Rio-blue.svg)
+![ version ](https://img.shields.io/badge/version-%2010.0-a040ff.svg)
 
-# Example
+## Overview
+
+Delphi Mocks is a mocking framework that allows to replace class dependencies with a light implementation of it. This light objects are called test doubles and they are used in unit testing.
+
+Automated testing is mandatory this days and usually technical debt is measured with unit tests coverage. High test coverage allows to apply advanced refactorings and improve even very old code. However in object-oriented world, writing high quality unit test is challenging because of the composition. Object composition is the most popular way of building complex systems. It increases code reusability, but also makes automated testing much more difficult. Why? Because methods of such composed object can not be executed without its dependencies. Delphi Mocks framework enables dynamic substitution of this dependency and provides the opportunity to improve code test coverage.
+
+## Coding to the interfaces
+
+Known also as interface-based programming is a technique for writing interface-based classes and creating composed classes from interfaces. Using this technique in Delphi is not difficult and is just a matter of habit. At the beggining select any class which you want to test and isolate its external dependencies by replacing a references to class with a references to interface. You do not have to isolate all the dependencies and internal structures still can be assesed through class.
+
+Delphi Mocks requires an interface to build test double and if you are not using interfaces too much you should start with a change in your coding style and then try this framework.  To refactor existing code to interface-based approach is not that much difficult, of course it requires some experience, but can be easily adopted. This refactoring can be done with a low risk and can be used even without any test coverage.
+
+## Why Delphi Mocks?
+
+The main purpose of using this framework is to isolate class, dynamiclly build test doubles and enable to execute class under test. Manually writing fake classes for each dependency is a laborious work and not much fun. Using Delphi Mocks this goal can be done much faster and in a much dynamic way. 
+
+The ultimate goal of this framework is to create unit tests faster, ensure better test coverage and allow you to build more solid test harness. Indirectly using Delphi Mocks leads to higher system quality and greater developer satisfaction.
+
+## What Delphi Mocks gives you?
+
+Delphi Mocks can:
+
+1) Creates an empty interface implementation with null methods that return predefined values only.
+2) Creates the interface implementation with methods that have some logic - this is useful in legacy projects where the code is more complex and tightly coupled.
+3) Verifies the behavior of the mocked interface - it means: how many times a particular method was called or what parameter values were given in the method call.
+4) Mix all three above implementations in the one mock class.
+
+# Original Example
 
 ```Pascal
 unit Delphi.Mocks.Examples.Interfaces;
