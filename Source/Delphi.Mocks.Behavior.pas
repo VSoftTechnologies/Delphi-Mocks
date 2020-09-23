@@ -173,7 +173,7 @@ end;
 
 function TBehavior.Match(const Args: TArray<TValue>): Boolean;
 
-  function MatchArgs : boolean;
+  function MatchArgsOrWithMatchers: Boolean;
   var
     i : integer;
   begin
@@ -182,21 +182,14 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
       exit;
     for i := 0 to Length(args) -1 do
     begin
-      if not FArgs[i].Equals(args[i]) then
-        exit;
-    end;
-    result := True;
-  end;
-
-  function MatchWithMatchers: Boolean;
-  var
-    i : integer;
-  begin
-    result := False;
-    for i := 0 to High(FMatchers) do
-    begin
-      if not FMatchers[i].Match(Args[i+1]) then
-        exit;
+      if ((i > 0) and (i-1 < Length(FMatchers))) and Assigned(FMatchers[i-1]) then
+      begin
+        if not FMatchers[i-1].Match(Args[i]) then
+          exit
+      end
+      else
+        if not FArgs[i].Equals(args[i]) then
+          exit;
     end;
     result := True;
   end;
@@ -204,23 +197,17 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
 begin
   result := False;
 
-  if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers) + 1)) then
-  begin
-    result := MatchWithMatchers;
-    exit;
-  end;
-
   case FBehaviorType of
-    WillReturn      : result := MatchArgs;
+    WillReturn      : result := MatchArgsOrWithMatchers;
     ReturnDefault   : result := True;
     WillRaise       :
     begin
-      result := MatchArgs;
+      result := MatchArgsOrWithMatchers;
       if FExceptClass <> nil then
         raise FExceptClass.Create('Raised by Mock');
     end;
     WillRaiseAlways : result := True;
-    WillExecuteWhen : result := MatchArgs;
+    WillExecuteWhen : result := MatchArgsOrWithMatchers;
     WillExecute     : result := True;
   end;
 end;

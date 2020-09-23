@@ -280,7 +280,7 @@ end;
 
 function TExpectation.Match(const Args: TArray<TValue>): boolean;
 
-  function MatchArgs : boolean;
+  function MatchArgsOrWithMatchers: Boolean;
   var
     i : integer;
   begin
@@ -290,24 +290,18 @@ function TExpectation.Match(const Args: TArray<TValue>): boolean;
     //start at 1 as we don't care about matching the first arg (self)
     for i := 1 to Length(args) -1 do
     begin
-      if not FArgs[i -1].Equals(args[i]) then
-        exit;
+      if (i-1 < Length(FMatchers)) and Assigned(FMatchers[i-1]) then
+      begin
+        if not FMatchers[i-1].Match(Args[i]) then
+          exit
+      end
+      else
+        if not FArgs[i -1].Equals(args[i]) then
+          exit;
     end;
     result := True;
   end;
 
-  function MatchWithMatchers: Boolean;
-  var
-    i : integer;
-  begin
-    result := False;
-    for i := 0 to High(FMatchers) do
-    begin
-      if not FMatchers[i].Match(Args[i+1]) then
-        exit;
-    end;
-    result := True;
-  end;
 begin
   result := False;
   case FExpectationType of
@@ -332,12 +326,7 @@ begin
     ExactlyWhen,
     BeforeWhen,
     AfterWhen:
-    begin
-      if Length(FMatchers) > 0 then
-        result := MatchWithMatchers
-      else
-        result := MatchArgs;
-    end;
+    result := MatchArgsOrWithMatchers;
   end;
 end;
 
