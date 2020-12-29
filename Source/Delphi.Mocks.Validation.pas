@@ -2,8 +2,14 @@ unit Delphi.Mocks.Validation;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.TypInfo;
+  {$ELSE}
   typInfo;
+  {$ENDIF}
 
 type
   TMocksValidation = class(TObject)

@@ -28,9 +28,16 @@ unit Delphi.Mocks.Utils;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.TypInfo,
+  System.RTTI;
+  {$ELSE}
   TypInfo,
   RTTI;
+  {$ENDIF}
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 
@@ -45,8 +52,13 @@ function ArgsToString(const Args: TArray<TValue>; OffSet: Integer = 0): string;
 implementation
 
 uses
+  {$IFDEF USE_NS}
+  System.Variants,
+  System.SysUtils;
+  {$ELSE}
   Variants,
   SysUtils;
+  {$ENDIF}
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 var

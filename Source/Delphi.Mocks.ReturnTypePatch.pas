@@ -53,9 +53,16 @@ unit Delphi.Mocks.ReturnTypePatch;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  System.TypInfo;
+  {$ELSE}
   Rtti,
   TypInfo;
+  {$ENDIF}
 
 type
   ReturnTypePatchAttribute = class(TCustomAttribute)
@@ -72,7 +79,11 @@ procedure PatchMethodReturnType(AMethod: TRttiMethod; AReturnType: PTypeInfo); o
 implementation
 
 uses
+  {$IFDEF USE_NS}
+  Winapi.Windows;
+  {$ELSE}
   Windows;
+  {$ENDIF}
 
 type
   TRttiIntfMethod = class(TRttiMethod)

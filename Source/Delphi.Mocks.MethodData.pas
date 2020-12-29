@@ -31,9 +31,15 @@ unit Delphi.Mocks.MethodData;
 interface
 
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  System.SysUtils,
+  System.Generics.Collections,
+  {$ELSE}
   Rtti,
   SysUtils,
   Generics.Collections,
+  {$ENDIF}
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.ParamMatcher;
@@ -108,7 +114,11 @@ type
 implementation
 
 uses
+  {$IFDEF USE_NS}
   System.TypInfo,
+  {$ELSE}
+  TypInfo,
+  {$ENDIF}
   Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,
   Delphi.Mocks.Expectation;

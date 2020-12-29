@@ -43,8 +43,14 @@ type
 
 implementation
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.SysUtils;
+  {$ELSE}
   SysUtils;
+  {$ENDIF}
 
 { TWhen<T> }
 

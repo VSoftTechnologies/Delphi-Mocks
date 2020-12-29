@@ -27,11 +27,20 @@ unit Delphi.Mocks.ParamMatcher;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.Generics.Collections,
+  System.SysUtils,
+  System.TypInfo,
+  System.Rtti;
+  {$ELSE}
   Generics.Collections,
   SysUtils,
   TypInfo,
   Rtti;
+  {$ENDIF}
 
 
 type
@@ -67,8 +76,13 @@ type
 implementation
 
 uses
+  {$IFDEF USE_NS}
+  System.Classes,
+  System.SyncObjs;
+  {$ELSE}
   Classes,
   SyncObjs;
+  {$ENDIF}
 
 
 { TMatcherFactory }

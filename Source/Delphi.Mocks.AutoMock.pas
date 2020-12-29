@@ -2,8 +2,14 @@ unit Delphi.Mocks.AutoMock;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.TypInfo,
+  {$ELSE}
   TypInfo,
+  {$ENDIF}
   System.Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.WeakReference;

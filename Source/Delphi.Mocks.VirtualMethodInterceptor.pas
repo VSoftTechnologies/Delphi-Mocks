@@ -1,13 +1,22 @@
 unit Delphi.Mocks.VirtualMethodInterceptor;
 
 interface
+
 {$I 'Delphi.Mocks.inc'}
 
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  System.TypInfo,
+  System.Generics.Collections,
+  System.SysUtils;
+  {$ELSE}
   Rtti,
   TypInfo,
   Generics.Collections,
   SysUtils;
+  {$ENDIF}
+
   {$IFDEF DELPHI_XE_UP} //TVirtualMethodInterceptor introduced in DelphiXE
 type
   TVirtualMethodInterceptor = System.Rtti.TVirtualMethodInterceptor;

@@ -27,11 +27,20 @@ unit Delphi.Mocks.ObjectProxy;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  System.SysUtils,
+  System.TypInfo,
+  System.Generics.Collections,
+  {$ELSE}
   Rtti,
   SysUtils,
   TypInfo,
   Generics.Collections,
+  {$ENDIF}
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Proxy,

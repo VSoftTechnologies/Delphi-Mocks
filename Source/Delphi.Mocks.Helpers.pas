@@ -32,8 +32,14 @@ unit Delphi.Mocks.Helpers;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.Rtti;
+  {$ELSE}
   Rtti;
+  {$ENDIF}
 
 type
   //TValue really needs to have an Equals operator overload!
@@ -85,11 +91,19 @@ function SameValue(const Left, Right: TValue): Boolean;
 implementation
 
 uses
+  {$IFDEF USE_NS}
+  System.SysUtils,
+  System.Math,
+  System.TypInfo,
+  System.Variants,
+  System.StrUtils;
+  {$ELSE}
   SysUtils,
   Math,
   TypInfo,
   Variants,
   StrUtils;
+  {$ENDIF}
 
 var
   Context : TRttiContext;
@@ -107,11 +121,29 @@ begin
   if leftIsEmpty or rightIsEmpty then
     Result := EmptyResults[leftIsEmpty, rightIsEmpty]
   else if left.IsOrdinal and right.IsOrdinal then
-    Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
+  begin
+    {$IFDEF USE_NS}
+    Result := System.Math.CompareValue(left.AsOrdinal, right.AsOrdinal);
+    {$ELSE}
+    Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal);
+    {$ENDIF}
+  end
   else if left.IsFloat and right.IsFloat then
-    Result := Math.CompareValue(left.AsExtended, right.AsExtended)
+  begin
+    {$IFDEF USE_NS}
+    Result := System.Math.CompareValue(left.AsExtended, right.AsExtended);
+    {$ELSE}
+    Result := Math.CompareValue(left.AsExtended, right.AsExtended);
+    {$ENDIF}
+  end
   else if left.IsString and right.IsString then
-    Result := SysUtils.AnsiCompareStr(left.AsString, right.AsString)
+  begin
+    {$IFDEF USE_NS}
+    Result := System.SysUtils.AnsiCompareStr(left.AsString, right.AsString);
+    {$ELSE}
+    Result := SysUtils.AnsiCompareStr(left.AsString, right.AsString);
+    {$ENDIF}
+  end
   else if left.IsObject and right.IsObject then
     Result := NativeInt(left.AsObject) - NativeInt(right.AsObject) // TODO: instance comparer
   else if Left.IsInterface and Right.IsInterface then

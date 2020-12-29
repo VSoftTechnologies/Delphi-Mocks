@@ -27,17 +27,24 @@ unit Delphi.Mocks.Proxy;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  System.SysUtils,
+  System.TypInfo,
+  System.Generics.Collections,
+  {$ELSE}
   Rtti,
   SysUtils,
   TypInfo,
   Generics.Collections,
+  {$ENDIF}
   Delphi.Mocks,
   Delphi.Mocks.WeakReference,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.Behavior;
-
-  {$I 'Delphi.Mocks.inc'}
 
 type
   TProxyBaseInvokeEvent = procedure (Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue) of object;

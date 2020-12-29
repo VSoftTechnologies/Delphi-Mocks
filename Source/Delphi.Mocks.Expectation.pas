@@ -27,9 +27,14 @@ unit Delphi.Mocks.Expectation;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
 
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  {$ELSE}
   Rtti,
+  {$ENDIF}
   Delphi.Mocks,
   Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.Interfaces,
@@ -96,7 +101,11 @@ type
 implementation
 
 uses
+  {$IFDEF USE_NS}
+  System.SysUtils,
+  {$ELSE}
   SysUtils,
+  {$ENDIF}
   Delphi.Mocks.Helpers;
 
 { TExpectation }

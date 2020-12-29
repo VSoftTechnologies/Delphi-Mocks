@@ -30,9 +30,15 @@ interface
 
 
 uses
+  {$IFDEF USE_NS}
+  System.TypInfo,
+  System.Rtti,
+  System.Generics.Collections;
+  {$ELSE}
   TypInfo,
   Rtti,
   Generics.Collections;
+  {$ENDIF}
 
 type
   {$IFDEF DELPHI_XE2_UP}
@@ -46,8 +52,14 @@ type
 implementation
 
 uses
-  RTLConsts,
-  SysUtils
+  {$IFDEF USE_NS}
+    System.RTLConsts,
+    System.SysUtils
+  {$ELSE}
+    RTLConsts,
+    SysUtils
+  {$ENDIF}
+
   {$IFDEF DELPHI_XE2_UP}
    ;
   {$ELSE}

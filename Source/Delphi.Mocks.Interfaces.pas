@@ -27,13 +27,22 @@ unit Delphi.Mocks.Interfaces;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.SysUtils,
+  System.TypInfo,
+  System.Generics.Collections,
+  System.Rtti,
+  {$ELSE}
   SysUtils,
   TypInfo,
   Generics.Collections,
+  Rtti,
+  {$ENDIF}
   Delphi.Mocks,
-  Delphi.Mocks.ParamMatcher,
-  Rtti;
+  Delphi.Mocks.ParamMatcher;
 
 type
   TBehaviorType = (WillReturn,ReturnDefault,WillRaise,WillRaiseAlways,WillExecute,WillExecuteWhen);

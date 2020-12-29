@@ -27,9 +27,16 @@ unit Delphi.Mocks.Behavior;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
+  {$IFDEF USE_NS}
+  System.Rtti,
+  System.SysUtils,
+  {$ELSE}
   Rtti,
   SysUtils,
+  {$ENDIF}
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.ParamMatcher;
