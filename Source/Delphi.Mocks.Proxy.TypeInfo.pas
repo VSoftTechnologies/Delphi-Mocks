@@ -333,7 +333,7 @@ begin
       //record actual behavior
       methodData := GetMethodData(method.Name,pInfo.NameStr);
       Assert(methodData <> nil);
-      methodData.RecordHit(Args,Method.ReturnType,Result);
+      methodData.RecordHit(Args,Method.ReturnType,Method,Result);
     end;
     TSetupMode.Behavior:
     begin

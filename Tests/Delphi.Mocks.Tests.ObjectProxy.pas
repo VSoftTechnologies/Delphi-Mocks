@@ -32,6 +32,7 @@ type
     procedure Run(value: Integer);virtual;abstract;
     procedure TestVarParam(var msg : string);virtual;abstract;
     procedure TestOutParam(out msg : string);virtual;abstract;
+    function VirtualMethod: Integer; virtual;
   end;
 
   {$M+}
@@ -62,6 +63,8 @@ type
     procedure TestOutParam;
     [Test]
     procedure TestVarParam;
+    [Test]
+    procedure MockNoBehaviorDefined;
   end;
   {$M-}
 
@@ -236,6 +239,16 @@ begin
   Assert.Pass;
 end;
 
+procedure TTestObjectProxy.MockNoBehaviorDefined;
+var
+  mock : TMock<TCommand>;
+begin
+  mock := TMock<TCommand>.Create;
+  mock.Setup.Expect.Once.When.VirtualMethod;
+  Assert.AreEqual(1, mock.Instance.VirtualMethod);
+  mock.Verify;
+end;
+
 procedure TTestObjectProxy.MockWithArgProcedureUsingOnce;
 var
   mock : TMock<TCommand>;
@@ -266,6 +279,13 @@ begin
   FCreateCalled := G_CREATE_CALLED_UNIQUE_ID;
 end;
 
+
+{ TCommand }
+
+function TCommand.VirtualMethod: Integer;
+begin
+  Result := 1;
+end;
 
 initialization
   TDUnitX.RegisterTestFixture(TTestObjectProxy);

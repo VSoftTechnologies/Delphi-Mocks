@@ -77,6 +77,10 @@ type
     function FindConstructor : TRttiMethod;
   end;
 
+  TRttiMethodHelper = class helper for TRttiMethod
+    function IsAbstract: Boolean;
+  end;
+
 
 function CompareValue(const Left, Right: TValue): Integer;
 function SameValue(const Left, Right: TValue): Boolean;
@@ -305,6 +309,16 @@ function TRttiTypeHelper.TryGetMethod(const AName: string; out AMethod: TRttiMet
 begin
   AMethod := GetMethod(AName);
   Result := Assigned(AMethod);
+end;
+
+{ TRttiMethodHelper }
+
+function TRttiMethodHelper.IsAbstract: Boolean;
+begin
+  if Self = nil then
+    Result := True
+  else
+    Result := PVmtMethodExEntry(Handle).Flags and (1 shl 7) <> 0;
 end;
 
 end.

@@ -98,11 +98,20 @@ procedure TObjectProxy<T>.DoBefore(Instance: TObject; Method: TRttiMethod; const
 var
   vArgs: TArray<TValue>;
   i, l: Integer;
+  methodData : IMethodData;
+  pInfo : PTypeInfo;
 begin
   //don't intercept the TObject methods like BeforeDestruction etc.
   if Method.Parent.AsInstance.MetaclassType <> TObject then
   begin
-    DoInvoke := False; //don't call the actual method.
+    pInfo := TypeInfo(T);
+    methodData := GetMethodData(method.Name,pInfo.NameStr);
+
+    //Call the original (virtual) method if:
+    //-we are not a stub
+    //-we have not defined any behavior (of course we count hits)
+    //-the actual method is not an abstract method
+    DoInvoke := not (FIsStubOnly or methodData.BehaviorDefined or Method.IsAbstract);
 
     //Included instance as first argument because TExpectation.Match
     //deduces that the first argument is the object instance.
