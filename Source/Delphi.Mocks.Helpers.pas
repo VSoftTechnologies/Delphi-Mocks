@@ -33,7 +33,7 @@ unit Delphi.Mocks.Helpers;
 interface
 
 uses
-  Rtti;
+  System.Rtti;
 
 type
   //TValue really needs to have an Equals operator overload!
@@ -85,11 +85,11 @@ function SameValue(const Left, Right: TValue): Boolean;
 implementation
 
 uses
-  SysUtils,
-  Math,
-  TypInfo,
-  Variants,
-  StrUtils;
+  System.SysUtils,
+  System.Math,
+  System.TypInfo,
+  System.Variants,
+  System.StrUtils;
 
 var
   Context : TRttiContext;
@@ -107,11 +107,11 @@ begin
   if leftIsEmpty or rightIsEmpty then
     Result := EmptyResults[leftIsEmpty, rightIsEmpty]
   else if left.IsOrdinal and right.IsOrdinal then
-    Result := Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
+    Result := System.Math.CompareValue(left.AsOrdinal, right.AsOrdinal)
   else if left.IsFloat and right.IsFloat then
-    Result := Math.CompareValue(left.AsExtended, right.AsExtended)
+    Result := System.Math.CompareValue(left.AsExtended, right.AsExtended)
   else if left.IsString and right.IsString then
-    Result := SysUtils.AnsiCompareStr(left.AsString, right.AsString)
+    Result := System.SysUtils.AnsiCompareStr(left.AsString, right.AsString)
   else if left.IsObject and right.IsObject then
     Result := NativeInt(left.AsObject) - NativeInt(right.AsObject) // TODO: instance comparer
   else if Left.IsInterface and Right.IsInterface then

@@ -30,12 +30,10 @@ interface
 {$I 'Delphi.Mocks.inc'}
 
 uses
-  TypInfo,
-  Rtti,
-  Sysutils,
-  {$IFDEF SUPPORTS_REGEX}
+  System.TypInfo,
+  System.Rtti,
+  System.Sysutils,
   System.RegularExpressions,
-  {$ENDIF}
   Delphi.Mocks.WeakReference;
 
 type
@@ -252,9 +250,7 @@ type
     function IsIn<T>(const values : IEnumerable<T>) : T; overload;
     function IsNotIn<T>(const values : TArray<T>) : T; overload;
     function IsNotIn<T>(const values : IEnumerable<T>) : T; overload;
-    {$IFDEF SUPPORTS_REGEX} //XE2 or later
     function IsRegex(const regex : string; const options : TRegExOptions = []) : string;
-    {$ENDIF}
     function AreSamePropertiesThat<T>(const Value: T): T;
     function AreSameFieldsThat<T>(const Value: T): T;
     function AreSameFieldsAndPropertiedThat<T>(const Value: T): T;
@@ -294,7 +290,7 @@ type
 implementation
 
 uses
-  Classes,
+  System.Classes,
   Generics.Defaults,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Interfaces,
@@ -833,7 +829,6 @@ end;
 //  result := 0;
 //end;
 
-{$IFDEF SUPPORTS_REGEX} //XE2 or later
 function ItRec.IsRegex(const regex : string; const options : TRegExOptions) : string;
 begin
   result := '';
@@ -843,7 +838,6 @@ begin
       result := TRegEx.IsMatch(param,regex,options)
     end);
 end;
-{$ENDIF}
 
 function It(const AParamIndx : Integer) : ItRec;
 begin

@@ -31,9 +31,9 @@ unit Delphi.Mocks.MethodData;
 interface
 
 uses
-  Rtti,
-  SysUtils,
-  Generics.Collections,
+  System.Rtti,
+  System.SysUtils,
+  System.Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
   Delphi.Mocks.ParamMatcher;

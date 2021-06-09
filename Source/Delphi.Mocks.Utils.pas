@@ -29,8 +29,8 @@ unit Delphi.Mocks.Utils;
 interface
 
 uses
-  TypInfo,
-  RTTI;
+  System.TypInfo,
+  System.Rtti;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 
@@ -45,8 +45,8 @@ function ArgsToString(const Args: TArray<TValue>; OffSet: Integer = 0): string;
 implementation
 
 uses
-  Variants,
-  SysUtils;
+  System.Variants,
+  System.SysUtils;
 
 function CheckInterfaceHasRTTI(const info : PTypeInfo) : boolean;
 var

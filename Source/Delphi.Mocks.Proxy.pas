@@ -28,10 +28,10 @@ unit Delphi.Mocks.Proxy;
 interface
 
 uses
-  Rtti,
-  SysUtils,
-  TypInfo,
-  Generics.Collections,
+  System.Rtti,
+  System.SysUtils,
+  System.TypInfo,
+  System.Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.WeakReference,
   Delphi.Mocks.Interfaces,

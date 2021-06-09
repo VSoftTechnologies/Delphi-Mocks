@@ -29,7 +29,7 @@ interface
 
 
 uses
-  Rtti,
+  System.Rtti,
   Delphi.Mocks,
   Delphi.Mocks.ParamMatcher,
   Delphi.Mocks.Interfaces,
@@ -96,7 +96,7 @@ type
 implementation
 
 uses
-  SysUtils,
+  System.SysUtils,
   Delphi.Mocks.Helpers;
 
 { TExpectation }

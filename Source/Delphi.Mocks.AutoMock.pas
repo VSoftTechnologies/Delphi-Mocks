@@ -3,7 +3,7 @@ unit Delphi.Mocks.AutoMock;
 interface
 
 uses
-  TypInfo,
+  System.TypInfo,
   System.Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.WeakReference;

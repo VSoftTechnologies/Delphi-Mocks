@@ -54,8 +54,8 @@ unit Delphi.Mocks.ReturnTypePatch;
 interface
 
 uses
-  Rtti,
-  TypInfo;
+  System.Rtti,
+  System.TypInfo;
 
 type
   ReturnTypePatchAttribute = class(TCustomAttribute)

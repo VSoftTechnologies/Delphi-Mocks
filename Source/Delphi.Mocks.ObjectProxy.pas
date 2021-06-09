@@ -28,14 +28,13 @@ unit Delphi.Mocks.ObjectProxy;
 interface
 
 uses
-  Rtti,
-  SysUtils,
-  TypInfo,
-  Generics.Collections,
+  System.Rtti,
+  System.SysUtils,
+  System.TypInfo,
+  System.Generics.Collections,
   Delphi.Mocks,
   Delphi.Mocks.Interfaces,
-  Delphi.Mocks.Proxy,
-  Delphi.Mocks.VirtualMethodInterceptor;
+  Delphi.Mocks.Proxy;
 
 type
   TObjectProxy<T> = class(TProxy<T>)

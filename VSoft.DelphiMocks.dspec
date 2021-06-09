@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "VSoft.DelphiMocks",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "Simple mocking framework for Delphi XE2 or later.",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/Delphi-Mocks",
@@ -28,47 +28,47 @@
     {
       "compiler": "XE5",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "XE6",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "XE7",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "XE8",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "10.0",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "10.1",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "10.2",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "10.3",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "XE5+"
     },
     {
       "compiler": "10.4",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "10.4+"
     }
   ],
   "templates": [
@@ -82,13 +82,95 @@
         {
           "src": "Source\\*.inc",
           "dest": "src"
+        },
+        {
+          "src": "Source\\DelphiMocks.dpk",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\DelphiMocks.dproj",
+          "dest": "src"
         }
+        
       ],
       "searchPaths": [
         {
           "path": "src"
         }
+      ],
+      "build": [
+        {
+          "id": "DelphiMocks",
+          "project": ".\\src\\DelphiMocks.dproj"
+        }
+      ]
+    },
+    {
+      "name": "XE5+",
+      "source": [
+        {
+          "src": "Source\\*.pas",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\*.inc",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\DelphiMocksXE5.dpk",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\DelphiMocksXE5.dproj",
+          "dest": "src"
+        }
+        
+      ],
+      "searchPaths": [
+        {
+          "path": "src"
+        }
+      ],
+      "build": [
+        {
+          "id": "DelphiMocks",
+          "project": ".\\src\\DelphiMocksXE5.dproj"
+        }
+      ]
+    },
+     {
+      "name": "10.4+",
+      "source": [
+        {
+          "src": "Source\\*.pas",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\*.inc",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\DelphiMocks104.dpk",
+          "dest": "src"
+        },
+        {
+          "src": "Source\\DelphiMocks104.dproj",
+          "dest": "src"
+        }
+        
+      ],
+      "searchPaths": [
+        {
+          "path": "src"
+        }
+      ],
+      "build": [
+        {
+          "id": "DelphiMocks",
+          "project": ".\\src\\DelphiMocks104.dproj"
+        }
       ]
     }
+    
   ]
 }
