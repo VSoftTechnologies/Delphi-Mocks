@@ -79,6 +79,7 @@ type
 
   TRttiMethodHelper = class helper for TRttiMethod
     function IsAbstract: Boolean;
+    function IsVirtual: Boolean;
   end;
 
 
@@ -315,10 +316,12 @@ end;
 
 function TRttiMethodHelper.IsAbstract: Boolean;
 begin
-  if Self = nil then
-    Result := True
-  else
-    Result := PVmtMethodExEntry(Handle).Flags and (1 shl 7) <> 0;
+  Result := PVmtMethodExEntry(Handle).Flags and (1 shl 7) <> 0;
+end;
+
+function TRttiMethodHelper.IsVirtual: Boolean;
+begin
+  Result := DispatchKind = dkVtable;
 end;
 
 end.

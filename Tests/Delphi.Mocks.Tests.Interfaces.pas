@@ -41,6 +41,7 @@ type
   ISimpleInterface = interface
     ['{35DA1428-5183-43FE-BEE8-1010C75EF4D6}']
     procedure SimpleProcedure(const value: widestring);
+    function SimpleFunction: Integer;
   end;
 
   IVariant = interface
@@ -60,6 +61,10 @@ type
     procedure CanMockSimpleProcedureCall;
     [Test]
     procedure CanMockProcedureWithVariantParam;
+    [Test]
+    procedure CanMockSimpleFunctionCallBehavior;
+    [Test]
+    procedure CanMockSimpleFunctionCallDefault;
   end;
   {$M-}
 
@@ -118,6 +123,24 @@ begin
   Assert.NotImplemented;
 end;
 
+
+procedure TSafeCallTest.CanMockSimpleFunctionCallBehavior;
+var
+  mock : TMock<ISimpleInterface>;
+begin
+  mock := TMock<ISimpleInterface>.Create;
+  mock.Setup.WillReturn(2).When.SimpleFunction;
+  Assert.AreEqual(2, mock.Instance.SimpleFunction);
+end;
+
+procedure TSafeCallTest.CanMockSimpleFunctionCallDefault;
+var
+  mock : TMock<ISimpleInterface>;
+begin
+  mock := TMock<ISimpleInterface>.Create;
+  mock.Setup.WillReturnDefault('SimpleFunction', 2);
+  Assert.AreEqual(2, mock.Instance.SimpleFunction);
+end;
 
 procedure TSafeCallTest.CanMockSimpleProcedureCall;
 var

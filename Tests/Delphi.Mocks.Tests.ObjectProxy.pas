@@ -27,13 +27,19 @@ type
   end;
 
   TCommand = class
+  private
+    FVirtualMethodCalled: Boolean;
   public
+    constructor Create;
+
     procedure Execute;virtual;abstract;
     procedure Run(value: Integer);virtual;abstract;
     procedure TestVarParam(var msg : string);virtual;abstract;
     procedure TestOutParam(out msg : string);virtual;abstract;
     function VirtualMethod: Integer; virtual;
     function NonVirtualMethod: Integer;
+
+    property VirtualMethodCalled: Boolean read FVirtualMethodCalled;
   end;
 
   {$M+}
@@ -68,6 +74,8 @@ type
     procedure MockNoBehaviorDefined;
     [Test]
     procedure WillRaiseMockNonVirtualMethod;
+    [Test]
+    procedure VirtualMethodNotCalledDuringMockSetup;
   end;
   {$M-}
 
@@ -157,6 +165,18 @@ begin
 
   mock.Verify;
   Assert.Pass;
+end;
+
+procedure TTestObjectProxy.VirtualMethodNotCalledDuringMockSetup;
+var
+  mock : TMock<TCommand>;
+begin
+  mock := TMock<TCommand>.Create;
+  mock.Setup.Expect.AtLeastOnce.When.VirtualMethod;
+  mock.Setup.WillReturn(1).When.VirtualMethod;
+  mock.Setup.WillReturnDefault('VirtualMethod', 1);
+
+  Assert.IsFalse(mock.Instance.VirtualMethodCalled);
 end;
 
 procedure TTestObjectProxy.MockNoArgProcedureUsingAtLeastOnceWhen;
@@ -294,6 +314,11 @@ end;
 
 { TCommand }
 
+constructor TCommand.Create;
+begin
+  FVirtualMethodCalled := False;
+end;
+
 function TCommand.NonVirtualMethod: Integer;
 begin
   Result := 1;
@@ -301,6 +326,7 @@ end;
 
 function TCommand.VirtualMethod: Integer;
 begin
+  FVirtualMethodCalled := True;
   Result := 1;
 end;
 
