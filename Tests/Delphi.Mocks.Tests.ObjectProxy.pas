@@ -33,6 +33,7 @@ type
     procedure TestVarParam(var msg : string);virtual;abstract;
     procedure TestOutParam(out msg : string);virtual;abstract;
     function VirtualMethod: Integer; virtual;
+    function NonVirtualMethod: Integer;
   end;
 
   {$M+}
@@ -65,6 +66,8 @@ type
     procedure TestVarParam;
     [Test]
     procedure MockNoBehaviorDefined;
+    [Test]
+    procedure WillRaiseMockNonVirtualMethod;
   end;
   {$M-}
 
@@ -249,6 +252,15 @@ begin
   mock.Verify;
 end;
 
+procedure TTestObjectProxy.WillRaiseMockNonVirtualMethod;
+var
+  mock : TMock<TCommand>;
+begin
+  mock := TMock<TCommand>.Create;
+  Assert.WillRaise(procedure begin mock.Setup.Expect.Once.When.NonVirtualMethod; end);
+  Assert.WillRaise(procedure begin mock.Setup.WillReturn(2).When.NonVirtualMethod; end);
+end;
+
 procedure TTestObjectProxy.MockWithArgProcedureUsingOnce;
 var
   mock : TMock<TCommand>;
@@ -281,6 +293,11 @@ end;
 
 
 { TCommand }
+
+function TCommand.NonVirtualMethod: Integer;
+begin
+  Result := 1;
+end;
 
 function TCommand.VirtualMethod: Integer;
 begin

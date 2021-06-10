@@ -880,6 +880,10 @@ end;
 
 function TProxy<T>._Release: Integer;
 begin
+  if FSetupMode <> TSetupMode.None then begin
+    ClearSetupState;
+    raise EMockSetupException.Create('Setup called on non-virtual method');
+  end;
   result := inherited;
 end;
 
