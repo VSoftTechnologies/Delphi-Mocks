@@ -82,7 +82,7 @@ type
 
   IMethodData = interface
   ['{640BFB71-85C2-4ED4-A863-5AF6535BD2E8}']
-    procedure RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result: TValue);
+    procedure RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; const method : TRttiMethod; out Result: TValue);
 
     //behaviors
     procedure WillReturnDefault(const returnValue : TValue);
@@ -114,6 +114,8 @@ type
 
     //Verification
     function Verify(var report : string) : boolean;
+
+    function BehaviorDefined: Boolean;
   end;
 
   IVerify = interface

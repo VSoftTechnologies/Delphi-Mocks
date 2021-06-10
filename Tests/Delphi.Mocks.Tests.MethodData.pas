@@ -115,7 +115,7 @@ begin
   methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
   methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue2, nil);
 
-  methodData.RecordHit(TArray<TValue>.Create(someValue1), TrttiContext.Create.GetType(TypeInfo(integer)), outValue);
+  methodData.RecordHit(TArray<TValue>.Create(someValue1), TrttiContext.Create.GetType(TypeInfo(integer)), nil, outValue);
 
   Assert.AreEqual(someValue2.AsInteger, outValue.AsInteger );
 end;
@@ -127,7 +127,7 @@ var
   someValue   : TValue;
 begin
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
-  methodData.RecordHit(TArray<TValue>.Create(), nil, someValue);
+  methodData.RecordHit(TArray<TValue>.Create(), nil, nil, someValue);
   // no exception should be raised
   Assert.IsTrue(True);
 end;
@@ -141,7 +141,7 @@ begin
 
   Assert.WillRaise(procedure
   begin
-  methodData.RecordHit(TArray<TValue>.Create(), TRttiContext.Create.GetType(TypeInfo(Integer)), someValue);
+  methodData.RecordHit(TArray<TValue>.Create(), TRttiContext.Create.GetType(TypeInfo(Integer)), nil, someValue);
   end, EMockException);
 end;
 

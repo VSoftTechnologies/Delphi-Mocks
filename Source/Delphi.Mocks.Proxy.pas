@@ -71,7 +71,6 @@ type
     FMethodData             : TDictionary<string, IMethodData>;
     FBehaviorMustBeDefined  : Boolean;
     FAllowRedefineBehaviorDefinitions : Boolean;
-    FSetupMode              : TSetupMode;
     //behavior setup
     FNextBehavior           : TBehaviorType;
     FReturnValue            : TValue;
@@ -83,7 +82,6 @@ type
     FNextExpectation        : TExpectationType;
     FTimes                  : Cardinal;
     FBetween                : array[0..1] of Cardinal;
-    FIsStubOnly             : boolean;
 
     FQueryingInterface      : boolean;
     FQueryingInternalInterface : boolean;
@@ -106,6 +104,9 @@ type
     end;
 
   protected
+    FSetupMode              : TSetupMode;
+    FIsStubOnly             : boolean;
+
     procedure SetParentProxy(const AProxy : IProxy);
     function SupportsIInterface: Boolean;
 
@@ -441,7 +442,7 @@ begin
       methodData := GetMethodData(method.Name,pInfo.NameStr);
       Assert(methodData <> nil);
 
-      methodData.RecordHit(Args,Method.ReturnType,Result);
+      methodData.RecordHit(Args,Method.ReturnType,Method,Result);
     end;
     TSetupMode.Behavior:
     begin

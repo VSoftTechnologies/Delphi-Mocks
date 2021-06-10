@@ -70,7 +70,7 @@ type
     function FindBehavior(const behaviorType : TBehaviorType; const Args: TArray<TValue>) : IBehavior; overload;
     function FindBehavior(const behaviorType : TBehaviorType) : IBehavior; overload;
     function FindBestBehavior(const Args: TArray<TValue>) : IBehavior;
-    procedure RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result : TValue);
+    procedure RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; const method : TRttiMethod; out Result : TValue);
 
     //Expectations
     function FindExpectation(const expectationType : TExpectationType; const Args: TArray<TValue>) : IExpectation;overload;
@@ -96,6 +96,8 @@ type
     procedure After(const AAfterMethodName : string);
 
     function Verify(var report : string) : boolean;
+
+    function BehaviorDefined: Boolean;
   public
     constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
@@ -111,7 +113,7 @@ uses
   System.TypInfo,
   Delphi.Mocks.Utils,
   Delphi.Mocks.Behavior,
-  Delphi.Mocks.Expectation;
+  Delphi.Mocks.Expectation, Delphi.Mocks.Helpers;
 
 
 
@@ -261,6 +263,11 @@ begin
       exit;
     end;
   end;
+end;
+
+function TMethodData.BehaviorDefined: Boolean;
+begin
+  Result := (FBehaviors.Count <> 0);
 end;
 
 procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
@@ -499,7 +506,7 @@ begin
 end;
 
 
-procedure TMethodData.RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; out Result: TValue);
+procedure TMethodData.RecordHit(const Args: TArray<TValue>; const returnType : TRttiType; const method : TRttiMethod; out Result: TValue);
 var
   behavior : IBehavior;
   expectation : IExpectation;
@@ -519,17 +526,16 @@ begin
   behavior := FindBestBehavior(Args);
   if behavior <> nil then
     returnValue := behavior.Execute(Args, returnType)
-  else
-  begin
+  else begin
     if FSetupParameters.IsStub then
       StubNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue)
     else
-      MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue);
+      if method.IsAbstract then
+        MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue);
   end;
 
   if returnType <> nil then
     Result := returnValue;
-
 end;
 
 procedure TMethodData.StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
