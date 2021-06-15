@@ -110,7 +110,8 @@ begin
     //-we are not a stub
     //-we have not defined any behavior (of course we count hits)
     //-the actual method is not an abstract method
-    DoInvoke := not (FIsStubOnly or methodData.BehaviorDefined or Method.IsAbstract);
+    //-we are not setting up
+    DoInvoke := not (FIsStubOnly or methodData.BehaviorDefined or Method.IsAbstract or (FSetupMode <> TSetupMode.None));
 
     //Included instance as first argument because TExpectation.Match
     //deduces that the first argument is the object instance.

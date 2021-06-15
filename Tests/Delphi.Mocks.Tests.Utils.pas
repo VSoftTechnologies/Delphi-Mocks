@@ -20,6 +20,9 @@ type
     procedure Test_TValue_Equals_SameGuid_Instance;
     procedure Test_TValue_Equals_DifferentGuid_Instance;
     procedure Test_TValue_NotEquals_Guid;
+
+    procedure Test_TRttiMethod_IsAbstract;
+    procedure Test_TRttiMethod_IsVirtual;
   end;
   {$M-}
 
@@ -28,6 +31,12 @@ implementation
 uses
   SysUtils;
 
+type
+  TMyClass = class
+    procedure NormalMethod;
+    procedure AbstractMethod; virtual; abstract;
+    procedure VirtualMethod; virtual;
+  end;
 
 { TTestTValue }
 
@@ -66,6 +75,25 @@ begin
   v1 := TValue.From<TGUID>( s1 );
   v2 := TValue.From<TGUID>( s2 );
   Assert.IsTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_TRttiMethod_IsAbstract;
+var
+  LCtx: TRttiContext;
+begin
+  Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('NormalMethod').IsAbstract);
+  Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('NormalMethod').IsVirtual);
+
+  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('AbstractMethod').IsAbstract);
+  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('AbstractMethod').IsVirtual);
+
+  Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('VirtualMethod').IsAbstract);
+  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('VirtualMethod').IsVirtual);
+end;
+
+procedure TTestTValue.Test_TRttiMethod_IsVirtual;
+begin
+
 end;
 
 procedure TTestTValue.Test_TValue_Equals_DifferentGuid_Instance;
@@ -114,6 +142,18 @@ begin
   v1 := s1;
   v2 := s2;
   Assert.IsFalse(v1.Equals(v2));
+end;
+
+{ TMyClass }
+
+procedure TMyClass.NormalMethod;
+begin
+  //No op
+end;
+
+procedure TMyClass.VirtualMethod;
+begin
+  //No op
 end;
 
 initialization

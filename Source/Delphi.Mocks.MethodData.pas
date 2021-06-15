@@ -530,7 +530,7 @@ begin
     if FSetupParameters.IsStub then
       StubNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue)
     else
-      if method.IsAbstract then
+      if (method = nil) or method.IsAbstract or (not method.IsVirtual) then
         MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue);
   end;
 

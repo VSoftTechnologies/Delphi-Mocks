@@ -13,6 +13,7 @@ type
   TSimpleMockedObject = class(TObject)
   public
     procedure SimpleMethod;
+    function VirtualAbstract: Integer; virtual; abstract;
   end;
 
   TSystemUnderTest = class(TObject)
@@ -28,6 +29,10 @@ type
   TMockObjectTests = class
   published
     procedure MockObject_Can_Call_Function;
+    [Test]
+    procedure CanMockVirtualAbstractCallBehavior;
+    [Test]
+    procedure CanMockVirtualAbstractCallDefault;
   end;
   {$M-}
 
@@ -38,6 +43,24 @@ uses
   Rtti;
 
 { TMockObjectTests }
+
+procedure TMockObjectTests.CanMockVirtualAbstractCallBehavior;
+var
+  Mock: TMock<TSimpleMockedObject>;
+begin
+  Mock := TMock<TSimpleMockedObject>.Create;
+  Mock.Setup.WillReturn(2).When.VirtualAbstract;
+  Assert.AreEqual(2, Mock.Instance.VirtualAbstract);
+end;
+
+procedure TMockObjectTests.CanMockVirtualAbstractCallDefault;
+var
+  Mock: TMock<TSimpleMockedObject>;
+begin
+  Mock := TMock<TSimpleMockedObject>.Create;
+  Mock.Setup.WillReturnDefault('VirtualAbstract', 2);
+  Assert.AreEqual(2, Mock.Instance.VirtualAbstract);
+end;
 
 procedure TMockObjectTests.MockObject_Can_Call_Function;
 var
