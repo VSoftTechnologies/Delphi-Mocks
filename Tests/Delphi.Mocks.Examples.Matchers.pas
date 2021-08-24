@@ -3,7 +3,7 @@ unit Delphi.Mocks.Examples.Matchers;
 interface
 
 uses
-  DUnitX.TestFramework;
+  DUnitX.TestFramework, System.Generics.Defaults;
 
 type
   TObjectToTest = class
@@ -13,6 +13,16 @@ type
     FieldToTest: Integer;
 
     property PropertyToTest: Integer read FPropertyToTest write FPropertyToTest;
+  end;
+
+  TRecordToTest = record
+  private
+    internalValue: String;
+  public
+    class operator Implicit(const s: String): TRecordToTest;
+    class operator Equal(mine, other: TRecordToTest): Boolean;
+
+    class function EqualityComparer: IEqualityComparer<TRecordToTest>; static;
   end;
 
   {$M+}
@@ -54,17 +64,28 @@ type
   end;
   {$M-}
 
+  [TestFixture]
+  TItRecTests = class
+    [Test]
+    procedure Record_with_equality_comparer;
+    [Test]
+    procedure Record_with_operator_overloaded_comparer;
+  end;
+
 implementation
 
 uses
   Rtti,
   SysUtils,
   TypInfo,
-  Delphi.Mocks;
+  Delphi.Mocks,
+{$IFDEF DELPHI_XE8_UP}
+  System.Hash,
+{$ENDIF}
+  Delphi.Mocks.ParamMatcher;
 
 
 { TExample_MatchersTests }
-
 
 procedure TExample_MatchersTests.Match_parameter_values;
 var
@@ -165,8 +186,83 @@ begin
   Assert.AreEqual(40, Mock.Instance.AnyFuntionWithObject(ObjectToCompare3));
 end;
 
+{ TRecordToTest }
+
+class operator TRecordToTest.Equal(mine, other: TRecordToTest): Boolean;
+begin
+  Result := mine.internalValue = other.internalValue;
+end;
+
+class function TRecordToTest.EqualityComparer: IEqualityComparer<TRecordToTest>;
+begin
+  Result := TEqualityComparer<TRecordToTest>.Construct(
+    function(const Left, Right: TRecordToTest): Boolean
+    begin
+      Result := Left = Right;
+    end,
+    function(const Value: TRecordToTest): Integer
+    begin
+{$IFDEF DELPHI_XE8_UP}
+      Result := THashBobJenkins.GetHashValue(PChar(Value.internalValue)^, SizeOf(Char) * Length(Value.internalValue), 0);
+{$ELSE}
+      Result := BobJenkinsHash(PChar(Value.internalValue)^, SizeOf(Char) * Length(Value.internalValue), 0);
+{$ENDIF}
+
+      Result := BobJenkinsHash(Value, SizeOf(Value), 0);
+    end);
+end;
+
+class operator TRecordToTest.Implicit(const s: String): TRecordToTest;
+begin
+  Result.internalValue := s;
+end;
+
+
+{ TItRecTests }
+
+procedure TItRecTests.Record_with_equality_comparer;
+var
+  LComparer: ItRec;
+  LMatchers: TArray<IMatcher>;
+begin
+  Assert.AreEqual(0, Length(LMatchers));
+
+  It(0).IsEqualTo<TRecordToTest>('test1', TRecordToTest.EqualityComparer);
+  It(1).IsIn<TRecordToTest>(['test1', 'test2'], TRecordToTest.EqualityComparer);
+  It(2).IsNotIn<TRecordToTest>(['test1', 'test3'], TRecordToTest.EqualityComparer);
+  It(3).IsNotNil<TRecordToTest>;
+
+  LMatchers := TMatcherFactory.GetMatchers();
+
+  Assert.IsTrue(LMatchers[0].Match(TValue.From<TRecordToTest>('test1')));
+  Assert.IsTrue(LMatchers[1].Match(TValue.From<TRecordToTest>('test2')));
+  Assert.IsTrue(LMatchers[2].Match(TValue.From<TRecordToTest>('test2')));
+  Assert.IsTrue(LMatchers[3].Match(TValue.From<TRecordToTest>('test3')));
+end;
+
+procedure TItRecTests.Record_with_operator_overloaded_comparer;
+var
+  LComparer: ItRec;
+  LMatchers: TArray<IMatcher>;
+begin
+  Assert.AreEqual(0, Length(LMatchers));
+
+  It(0).IsEqualTo<TRecordToTest>('test1');
+  It(1).IsIn<TRecordToTest>(['test1', 'test2']);
+  It(2).IsNotIn<TRecordToTest>(['test1', 'test3']);
+  It(3).IsNotNil<TRecordToTest>;
+
+  LMatchers := TMatcherFactory.GetMatchers();
+
+  Assert.IsTrue(LMatchers[0].Match(TValue.From<TRecordToTest>('test1')));
+  Assert.IsTrue(LMatchers[1].Match(TValue.From<TRecordToTest>('test2')));
+  Assert.IsTrue(LMatchers[2].Match(TValue.From<TRecordToTest>('test2')));
+  Assert.IsTrue(LMatchers[3].Match(TValue.From<TRecordToTest>('test3')));
+end;
+
 initialization
   TDUnitX.RegisterTestFixture(TExample_MatchersTests);
+  TDUnitX.RegisterTestFixture(TItRecTests);
 
 end.
 
