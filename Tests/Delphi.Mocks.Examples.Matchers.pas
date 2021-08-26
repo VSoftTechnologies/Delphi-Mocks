@@ -2,6 +2,8 @@ unit Delphi.Mocks.Examples.Matchers;
 
 interface
 
+{$I 'Delphi.Mocks.inc'}
+
 uses
   DUnitX.TestFramework, System.Generics.Defaults;
 
@@ -126,7 +128,7 @@ begin
   Assert.AreEqual(20, Mock.Instance.AnyFuntionWithInteger(2));
   Assert.AreEqual(30, Mock.Instance.AnyFuntionWithInteger(3));
 end;
-
+
 procedure TExample_MatchersTests.Match_parameter_with_enumerators;
 var
   Mock: TMock<IInterfaceToTestWithEnumerator>;
@@ -207,8 +209,6 @@ begin
 {$ELSE}
       Result := BobJenkinsHash(PChar(Value.internalValue)^, SizeOf(Char) * Length(Value.internalValue), 0);
 {$ENDIF}
-
-      Result := BobJenkinsHash(Value, SizeOf(Value), 0);
     end);
 end;
 
@@ -217,12 +217,10 @@ begin
   Result.internalValue := s;
 end;
 
-
 { TItRecTests }
 
 procedure TItRecTests.Record_with_equality_comparer;
 var
-  LComparer: ItRec;
   LMatchers: TArray<IMatcher>;
 begin
   Assert.AreEqual(0, Length(LMatchers));
@@ -242,7 +240,6 @@ end;
 
 procedure TItRecTests.Record_with_operator_overloaded_comparer;
 var
-  LComparer: ItRec;
   LMatchers: TArray<IMatcher>;
 begin
   Assert.AreEqual(0, Length(LMatchers));
