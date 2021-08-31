@@ -23,6 +23,10 @@ type
 
     procedure Test_TRttiMethod_IsAbstract;
     procedure Test_TRttiMethod_IsVirtual;
+
+    procedure Test_CompareValue_RecordEquals;
+    procedure Test_CompareValue_RecordNotEquals;
+    procedure Test_CompareValue_RecordNoEqualsOperator;
   end;
   {$M-}
 
@@ -36,6 +40,16 @@ type
     procedure NormalMethod;
     procedure AbstractMethod; virtual; abstract;
     procedure VirtualMethod; virtual;
+  end;
+
+  TMyRec = record
+    Value: String;
+
+    class operator Equal(a, b: TMyRec): Boolean;
+  end;
+
+  TMySimpleRec = record
+    Value: String;
   end;
 
 { TTestTValue }
@@ -77,23 +91,52 @@ begin
   Assert.IsTrue(v1.Equals(v2));
 end;
 
+procedure TTestTValue.Test_CompareValue_RecordEquals;
+var
+  r1, r2: TMyRec;
+begin
+  r1.Value := 'test';
+  r2.Value := 'test';
+
+  Assert.AreEqual(0, CompareValue(TValue.From(r1), TValue.From(r2)));
+end;
+
+procedure TTestTValue.Test_CompareValue_RecordNoEqualsOperator;
+var
+  r1, r2: TMySimpleRec;
+begin
+  r1.Value := 'test';
+  r2.Value := 'test1';
+
+  Assert.AreEqual(0, CompareValue(TValue.From(r1), TValue.From(r2)));
+end;
+
+procedure TTestTValue.Test_CompareValue_RecordNotEquals;
+var
+  r1, r2: TMyRec;
+begin
+  r1.Value := 'test';
+  r2.Value := 'test1';
+
+  Assert.AreNotEqual(0, CompareValue(TValue.From(r1), TValue.From(r2)));
+end;
+
 procedure TTestTValue.Test_TRttiMethod_IsAbstract;
 var
   LCtx: TRttiContext;
 begin
   Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('NormalMethod').IsAbstract);
-  Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('NormalMethod').IsVirtual);
-
   Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('AbstractMethod').IsAbstract);
-  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('AbstractMethod').IsVirtual);
-
   Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('VirtualMethod').IsAbstract);
-  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('VirtualMethod').IsVirtual);
 end;
 
 procedure TTestTValue.Test_TRttiMethod_IsVirtual;
+var
+  LCtx: TRttiContext;
 begin
-
+  Assert.IsFalse(LCtx.GetType(TMyClass).GetMethod('NormalMethod').IsVirtual);
+  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('AbstractMethod').IsVirtual);
+  Assert.IsTrue(LCtx.GetType(TMyClass).GetMethod('VirtualMethod').IsVirtual);
 end;
 
 procedure TTestTValue.Test_TValue_Equals_DifferentGuid_Instance;
@@ -154,6 +197,13 @@ end;
 procedure TMyClass.VirtualMethod;
 begin
   //No op
+end;
+
+{ TMyRec }
+
+class operator TMyRec.Equal(a, b: TMyRec): Boolean;
+begin
+  Result := a.Value = b.Value;
 end;
 
 initialization
