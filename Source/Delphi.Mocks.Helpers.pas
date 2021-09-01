@@ -64,6 +64,7 @@ type
     function IsWord: Boolean;
   	function IsGuid: Boolean;
     function IsInterface : Boolean;
+    function IsRecord : Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -82,7 +83,7 @@ type
     function IsVirtual: Boolean;
   end;
 
-
+function CompareValue_Record(const Left, Right: TValue): Integer;
 function CompareValue(const Left, Right: TValue): Integer;
 function SameValue(const Left, Right: TValue): Boolean;
 
@@ -121,6 +122,8 @@ begin
     Result := NativeInt(left.AsObject) - NativeInt(right.AsObject) // TODO: instance comparer
   else if Left.IsInterface and Right.IsInterface then
     Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
+  else if Left.IsRecord and Right.IsRecord then
+    Result := CompareValue_Record(Left, Right)
   else if left.IsVariant and right.IsVariant then
   begin
     case VarCompareValue(left.AsVariant, right.AsVariant) of
@@ -131,6 +134,19 @@ begin
     else
       Result := 0;
     end;
+  end else
+    Result := 0;
+end;
+
+function CompareValue_Record(const Left, Right: TValue): Integer;
+var
+  LMethod: TRttiMethod;
+begin
+  if Left.RttiType.TryGetMethod('&op_Equality', LMethod) then begin
+    if LMethod.Invoke(nil, [Left, Right]).AsBoolean then
+      Result := 0
+    else
+      Result := -1;
   end else
     Result := 0;
 end;
@@ -239,6 +255,11 @@ end;
 function TValueHelper.IsPointer: Boolean;
 begin
   Result := Kind = tkPointer;
+end;
+
+function TValueHelper.IsRecord: Boolean;
+begin
+  Result := RttiType.IsRecord;
 end;
 
 function TValueHelper.IsShortInt: Boolean;
