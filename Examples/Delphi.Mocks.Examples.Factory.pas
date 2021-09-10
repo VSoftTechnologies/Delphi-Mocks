@@ -245,7 +245,6 @@ end;
 
 destructor TFakeGeneric.Destroy;
 begin
-  FreeAndNil(FValue);
   inherited;
 end;
 
