@@ -115,7 +115,7 @@ type
     //Verification
     function Verify(var report : string) : boolean;
 
-    function BehaviorDefined: Boolean;
+    function FindBestBehavior(const Args: TArray<TValue>) : IBehavior;
   end;
 
   IVerify = interface

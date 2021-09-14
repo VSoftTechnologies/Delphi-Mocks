@@ -106,13 +106,6 @@ begin
     pInfo := TypeInfo(T);
     methodData := GetMethodData(method.Name,pInfo.NameStr);
 
-    //Call the original (virtual) method if:
-    //-we are not a stub
-    //-we have not defined any behavior (of course we count hits)
-    //-the actual method is not an abstract method
-    //-we are not setting up
-    DoInvoke := not (FIsStubOnly or methodData.BehaviorDefined or Method.IsAbstract or (FSetupMode <> TSetupMode.None));
-
     //Included instance as first argument because TExpectation.Match
     //deduces that the first argument is the object instance.
     l := Length(Args);
@@ -123,6 +116,13 @@ begin
     begin
       vArgs[i] := Args[i-1];
     end;
+
+    //Call the original (virtual) method if:
+    //-we are not a stub
+    //-we have not defined any behavior (of course we count hits)
+    //-the actual method is not an abstract method
+    //-we are not setting up
+    DoInvoke := not (FIsStubOnly or (methodData.FindBestBehavior(vArgs) <> nil) or Method.IsAbstract or (FSetupMode <> TSetupMode.None));
 
     Self.DoInvoke(Method,vArgs,Result);
 

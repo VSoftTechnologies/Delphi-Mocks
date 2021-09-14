@@ -36,7 +36,8 @@ type
     procedure Run(value: Integer);virtual;abstract;
     procedure TestVarParam(var msg : string);virtual;abstract;
     procedure TestOutParam(out msg : string);virtual;abstract;
-    function VirtualMethod: Integer; virtual;
+    function VirtualMethod: Integer; overload; virtual;
+    function VirtualMethod(const Arg: String): Integer; overload; virtual;
     function NonVirtualMethod: Integer;
 
     property VirtualMethodCalled: Boolean read FVirtualMethodCalled;
@@ -76,6 +77,12 @@ type
     procedure WillRaiseMockNonVirtualMethod;
     [Test]
     procedure VirtualMethodNotCalledDuringMockSetup;
+    [Test]
+    procedure VirtualMethodCalledIfNoBehaviorDefined;
+    [Test]
+    procedure VirtualMethodNotCalledIfBehaviorMatches;
+    [Test]
+    procedure VirtualMethodCalledIfBehaviorNotMatches;
   end;
   {$M-}
 
@@ -167,6 +174,27 @@ begin
   Assert.Pass;
 end;
 
+procedure TTestObjectProxy.VirtualMethodCalledIfBehaviorNotMatches;
+var
+  mock : TMock<TCommand>;
+begin
+  mock := TMock<TCommand>.Create;
+  mock.Setup.WillReturn(2).When.VirtualMethod('test');
+
+  Assert.AreEqual(1, mock.Instance.VirtualMethod('test2'));
+  Assert.IsTrue(mock.Instance.VirtualMethodCalled);
+end;
+
+procedure TTestObjectProxy.VirtualMethodCalledIfNoBehaviorDefined;
+var
+  mock : TMock<TCommand>;
+begin
+  mock := TMock<TCommand>.Create;
+
+  Assert.AreEqual(1, mock.Instance.VirtualMethod('test'));
+  Assert.IsTrue(mock.Instance.VirtualMethodCalled);
+end;
+
 procedure TTestObjectProxy.VirtualMethodNotCalledDuringMockSetup;
 var
   mock : TMock<TCommand>;
@@ -175,6 +203,17 @@ begin
   mock.Setup.Expect.AtLeastOnce.When.VirtualMethod;
   mock.Setup.WillReturn(1).When.VirtualMethod;
   mock.Setup.WillReturnDefault('VirtualMethod', 1);
+
+  Assert.IsFalse(mock.Instance.VirtualMethodCalled);
+end;
+
+procedure TTestObjectProxy.VirtualMethodNotCalledIfBehaviorMatches;
+var
+  mock : TMock<TCommand>;
+begin
+  mock := TMock<TCommand>.Create;
+  mock.Setup.WillReturn(2).When.VirtualMethod('test');
+  Assert.AreEqual(2, mock.Instance.VirtualMethod('test'));
 
   Assert.IsFalse(mock.Instance.VirtualMethodCalled);
 end;
@@ -321,6 +360,12 @@ end;
 
 function TCommand.NonVirtualMethod: Integer;
 begin
+  Result := 1;
+end;
+
+function TCommand.VirtualMethod(const Arg: String): Integer;
+begin
+  FVirtualMethodCalled := True;
   Result := 1;
 end;
 
