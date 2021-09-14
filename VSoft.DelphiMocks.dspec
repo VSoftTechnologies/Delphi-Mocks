@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "VSoft.DelphiMocks",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Simple mocking framework for Delphi XE2 or later.",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/Delphi-Mocks",
@@ -67,6 +67,11 @@
     },
     {
       "compiler": "10.4",
+      "platforms": "Win32, Win64",
+      "template": "10.4+"
+    },
+    {
+      "compiler": "11",
       "platforms": "Win32, Win64",
       "template": "10.4+"
     }
