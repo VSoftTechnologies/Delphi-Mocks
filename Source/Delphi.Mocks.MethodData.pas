@@ -96,8 +96,6 @@ type
     procedure After(const AAfterMethodName : string);
 
     function Verify(var report : string) : boolean;
-
-    function BehaviorDefined: Boolean;
   public
     constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
@@ -263,11 +261,6 @@ begin
       exit;
     end;
   end;
-end;
-
-function TMethodData.BehaviorDefined: Boolean;
-begin
-  Result := (FBehaviors.Count <> 0);
 end;
 
 procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
