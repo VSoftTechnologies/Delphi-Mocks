@@ -27,6 +27,9 @@ type
     procedure Test_CompareValue_RecordEquals;
     procedure Test_CompareValue_RecordNotEquals;
     procedure Test_CompareValue_RecordNoEqualsOperator;
+
+    procedure Test_CompareValue_ArrayEquals;
+    procedure Test_CompareValue_ArrayNotEquals;
   end;
   {$M-}
 
@@ -89,6 +92,40 @@ begin
   v1 := TValue.From<TGUID>( s1 );
   v2 := TValue.From<TGUID>( s2 );
   Assert.IsTrue(v1.Equals(v2));
+end;
+
+procedure TTestTValue.Test_CompareValue_ArrayEquals;
+var
+  a1, a2: TArray<string>;
+begin
+  a1 := [];
+  a2 := [];
+  Assert.AreEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
+
+  a1 := ['a', 'b'];
+  a2 := ['a', 'b'];
+  Assert.AreEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
+end;
+
+procedure TTestTValue.Test_CompareValue_ArrayNotEquals;
+var
+  a1, a2: TArray<string>;
+begin
+  a1 := ['a'];
+  a2 := ['a', 'b'];
+  Assert.AreNotEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
+
+  a1 := ['a', 'b'];
+  a2 := ['a'];
+  Assert.AreNotEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
+
+  a1 := [];
+  a2 := ['a'];
+  Assert.AreNotEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
+
+  a1 := ['a'];
+  a2 := [];
+  Assert.AreNotEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
 end;
 
 procedure TTestTValue.Test_CompareValue_RecordEquals;
