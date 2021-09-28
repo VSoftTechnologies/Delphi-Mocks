@@ -65,6 +65,7 @@ type
   	function IsGuid: Boolean;
     function IsInterface : Boolean;
     function IsRecord : Boolean;
+    function IsArray : Boolean;
     function AsDouble: Double;
     function AsFloat: Extended;
     function AsSingle: Single;
@@ -83,6 +84,7 @@ type
     function IsVirtual: Boolean;
   end;
 
+function CompareValue_Array(const Left, Right: TValue): Integer;
 function CompareValue_Record(const Left, Right: TValue): Integer;
 function CompareValue(const Left, Right: TValue): Integer;
 function SameValue(const Left, Right: TValue): Boolean;
@@ -124,6 +126,8 @@ begin
     Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
   else if Left.IsRecord and Right.IsRecord then
     Result := CompareValue_Record(Left, Right)
+  else if Left.IsArray and Right.IsArray then
+    Result := CompareValue_Array(Left, Right)
   else if left.IsVariant and right.IsVariant then
   begin
     case VarCompareValue(left.AsVariant, right.AsVariant) of
@@ -136,6 +140,22 @@ begin
     end;
   end else
     Result := 0;
+end;
+
+function CompareValue_Array(const Left, Right: TValue): Integer;
+var
+  LMethod: TRttiMethod;
+  i: Integer;
+begin
+  Result := Left.GetArrayLength - Right.GetArrayLength;
+
+  if Result = 0 then begin
+    for i := 0 to Left.GetArrayLength - 1 do begin
+      Result := CompareValue(Left.GetArrayElement(i), Right.GetArrayElement(i));
+      if Result <> 0 then
+        Exit;
+    end;
+  end;
 end;
 
 function CompareValue_Record(const Left, Right: TValue): Integer;
@@ -190,6 +210,11 @@ function TValueHelper.GetRttiType: TRttiType;
 begin
    Result := Context.GetType(TypeInfo);
 
+end;
+
+function TValueHelper.IsArray: Boolean;
+begin
+  Result := Kind in [tkArray, tkDynArray];
 end;
 
 function TValueHelper.IsBoolean: Boolean;
