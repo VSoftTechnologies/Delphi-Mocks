@@ -958,7 +958,7 @@ var
   interfaceV : IVerify;
 begin
   //Verify ourselves.
-  Verify;
+  Verify(message);
 
   //Now verify all our children.
   for proxy in FInterfaceProxies.Values.ToArray do

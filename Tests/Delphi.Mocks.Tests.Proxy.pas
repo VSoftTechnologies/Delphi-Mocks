@@ -15,6 +15,8 @@ type
   published
     [Test, Ignore]
     procedure Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
+    [Test]
+    procedure VerifyAllRespectsMessage;
   end;
   {$M-}
 
@@ -26,13 +28,34 @@ uses
   Delphi.Mocks.MethodData,
   classes;
 
-
+type
+  TSimpleClass = class
+  public
+    procedure DoTest; virtual; abstract;
+  end;
 
 { TTestMock }
 
 procedure TTestMock.Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
 begin
   Assert.NotImplemented;
+end;
+
+procedure TTestMock.VerifyAllRespectsMessage;
+var
+  m: TMock<TSimpleClass>;
+begin
+  m := TMock<TSimpleClass>.Create;
+  m.Setup.Expect.Once.When.DoTest;
+  try
+    m.VerifyAll('test');
+  except
+    on E: EMockVerificationException do begin
+      Assert.IsTrue(E.Message.StartsWith('test'));
+      Exit;
+    end;
+  end;
+  Assert.Fail('Verifyall does not respect message');
 end;
 
 initialization
