@@ -157,6 +157,7 @@ type
     //IVerify
     procedure Verify(const message : string = '');
     procedure VerifyAll(const message : string = '');
+    procedure ResetCalls;
 
     function CheckExpectations: string;
 
@@ -691,6 +692,16 @@ begin
       Exit;
   finally
     FQueryingInterface := False;
+  end;
+end;
+
+procedure TProxy<T>.ResetCalls;
+var
+  methodData : IMethodData;
+begin
+  for methodData in FMethodData.Values do
+  begin
+    methodData.ResetCalls;
   end;
 end;
 

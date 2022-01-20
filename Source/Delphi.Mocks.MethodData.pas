@@ -96,6 +96,7 @@ type
     procedure After(const AAfterMethodName : string);
 
     function Verify(var report : string) : boolean;
+    procedure ResetCalls;
   public
     constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
@@ -529,6 +530,16 @@ begin
 
   if returnType <> nil then
     Result := returnValue;
+end;
+
+procedure TMethodData.ResetCalls;
+var
+  expectation : IExpectation;
+begin
+  for expectation in FExpectations do
+  begin
+    expectation.ResetCalls;
+  end;
 end;
 
 procedure TMethodData.StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
