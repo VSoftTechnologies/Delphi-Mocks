@@ -112,6 +112,7 @@ type
     procedure Before(const ABeforeMethodName : string);
     procedure AfterWhen(const AAfterMethodName : string;const Args : TArray<TValue>; const matchers : TArray<IMatcher>);
     procedure After(const AAfterMethodName : string);
+    procedure ClearExpectations;
 
     //Verification
     function Verify(var report : string) : boolean;

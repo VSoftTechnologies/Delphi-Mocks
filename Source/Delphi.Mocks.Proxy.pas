@@ -192,6 +192,8 @@ type
 
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
+
+    procedure Clear;
   public
     constructor Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); virtual;
     destructor Destroy; override;
@@ -370,6 +372,16 @@ begin
         Result := Result + #13#10;
       Result := Result + report ;
     end;
+  end;
+end;
+
+procedure TProxy<T>.Clear;
+var
+  methodData : IMethodData;
+begin
+  for methodData in FMethodData.Values do
+  begin
+    methodData.ClearExpectations;
   end;
 end;
 

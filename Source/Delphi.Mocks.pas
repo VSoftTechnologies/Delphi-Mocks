@@ -70,6 +70,8 @@ type
 
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
+
+    procedure Clear;
   end;
 
   IWhen<T> = interface

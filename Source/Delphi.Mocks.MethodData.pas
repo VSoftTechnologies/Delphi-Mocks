@@ -97,6 +97,7 @@ type
 
     function Verify(var report : string) : boolean;
     procedure ResetCalls;
+    procedure ClearExpectations;
   public
     constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
@@ -118,6 +119,11 @@ uses
 
 { TMethodData }
 
+
+procedure TMethodData.ClearExpectations;
+begin
+  FExpectations.Clear;
+end;
 
 constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
 begin

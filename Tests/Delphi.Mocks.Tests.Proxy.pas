@@ -19,6 +19,8 @@ type
     procedure VerifyAllRespectsMessage;
     [Test]
     procedure ResetCallsWorks;
+    [Test]
+    procedure ClearExpectationsWorks;
   end;
   {$M-}
 
@@ -37,6 +39,17 @@ type
   end;
 
 { TTestMock }
+
+procedure TTestMock.ClearExpectationsWorks;
+var
+  m: TMock<TSimpleClass>;
+begin
+  m := TMock<TSimpleClass>.Create;
+  m.Setup.Expect.Once.When.DoTest;
+  Assert.WillRaise(procedure begin m.VerifyAll() end, EMockVerificationException);
+  m.Setup.Expect.Clear;
+  Assert.WillNotRaise(procedure begin m.VerifyAll() end);
+end;
 
 procedure TTestMock.Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
 begin
