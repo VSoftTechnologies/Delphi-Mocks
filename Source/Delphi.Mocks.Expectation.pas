@@ -59,6 +59,7 @@ type
     function Report : string;
     function ArgsToString : string;
     procedure CopyArgs(const Args: TArray<TValue>);
+    procedure ResetCalls;
     constructor Create(const AMethodName : string);
     constructor CreateWhen(const AMethodName : string; const Args: TArray<TValue>; const matchers : TArray<IMatcher>);
   public
@@ -407,6 +408,12 @@ begin
     result := 'Expectation [ ' + result + ' ] was not met.';
   end;
 
+end;
+
+procedure TExpectation.ResetCalls;
+begin
+  FHitCount := 0;
+  CheckExpectationMet;
 end;
 
 end.

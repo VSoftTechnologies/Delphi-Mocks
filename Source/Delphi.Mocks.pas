@@ -70,6 +70,8 @@ type
 
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
+
+    procedure Clear;
   end;
 
   IWhen<T> = interface
@@ -209,6 +211,7 @@ type
     procedure Verify(const message : string = ''); overload;
     procedure Verify<I : IInterface>(const message : string = ''); overload;
     procedure VerifyAll(const message : string = '');
+    procedure ResetCalls;
 
     function CheckExpectations: string;
     procedure Implement<I : IInterface>; overload;
@@ -460,6 +463,18 @@ begin
   CheckCreated;
 
   result := TValue.From<I>(Self.Instance<I>);
+end;
+
+procedure TMock<T>.ResetCalls;
+var
+  interfaceV : IVerify;
+begin
+  CheckCreated;
+
+  if Supports(FProxy.Setup, IVerify, interfaceV) then
+    interfaceV.ResetCalls
+  else
+    raise EMockException.Create('Could not cast Setup to IVerify interface!');
 end;
 
 function TMock<T>.Setup: IMockSetup<T>;
