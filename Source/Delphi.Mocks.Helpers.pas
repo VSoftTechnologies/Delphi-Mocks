@@ -144,7 +144,6 @@ end;
 
 function CompareValue_Array(const Left, Right: TValue): Integer;
 var
-  LMethod: TRttiMethod;
   i: Integer;
 begin
   Result := Left.GetArrayLength - Right.GetArrayLength;
