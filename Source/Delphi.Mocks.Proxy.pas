@@ -157,6 +157,7 @@ type
     //IVerify
     procedure Verify(const message : string = '');
     procedure VerifyAll(const message : string = '');
+    procedure ResetCalls;
 
     function CheckExpectations: string;
 
@@ -191,6 +192,8 @@ type
 
     function After(const AMethodName : string) : IWhen<T>;overload;
     procedure After(const AMethodName : string; const AAfterMethodName : string);overload;
+
+    procedure Clear;
   public
     constructor Create(const AAutoMocker : IAutoMock = nil; const AIsStubOnly : boolean = false); virtual;
     destructor Destroy; override;
@@ -369,6 +372,16 @@ begin
         Result := Result + #13#10;
       Result := Result + report ;
     end;
+  end;
+end;
+
+procedure TProxy<T>.Clear;
+var
+  methodData : IMethodData;
+begin
+  for methodData in FMethodData.Values do
+  begin
+    methodData.ClearExpectations;
   end;
 end;
 
@@ -694,6 +707,16 @@ begin
   end;
 end;
 
+procedure TProxy<T>.ResetCalls;
+var
+  methodData : IMethodData;
+begin
+  for methodData in FMethodData.Values do
+  begin
+    methodData.ResetCalls;
+  end;
+end;
+
 procedure TProxy<T>.SetBehaviorMustBeDefined(const value: boolean);
 begin
   FBehaviorMustBeDefined := value;
@@ -958,7 +981,7 @@ var
   interfaceV : IVerify;
 begin
   //Verify ourselves.
-  Verify;
+  Verify(message);
 
   //Now verify all our children.
   for proxy in FInterfaceProxies.Values.ToArray do

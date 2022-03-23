@@ -74,6 +74,7 @@ type
     function GetExpectationMet : boolean;
     function Match(const Args : TArray<TValue>) : boolean;
     procedure RecordHit;
+    procedure ResetCalls;
     function Report : string;
     property ExpectationType : TExpectationType read GetExpectationType;
     property ExpectationMet : boolean read GetExpectationMet;
@@ -111,11 +112,13 @@ type
     procedure Before(const ABeforeMethodName : string);
     procedure AfterWhen(const AAfterMethodName : string;const Args : TArray<TValue>; const matchers : TArray<IMatcher>);
     procedure After(const AAfterMethodName : string);
+    procedure ClearExpectations;
 
     //Verification
     function Verify(var report : string) : boolean;
+    procedure ResetCalls;
 
-    function BehaviorDefined: Boolean;
+    function FindBestBehavior(const Args: TArray<TValue>) : IBehavior;
   end;
 
   IVerify = interface
@@ -123,6 +126,7 @@ type
     procedure Verify(const message : string = '');
     procedure VerifyAll(const message : string = '');
     function CheckExpectations: string;
+    procedure ResetCalls;
   end;
 
 implementation

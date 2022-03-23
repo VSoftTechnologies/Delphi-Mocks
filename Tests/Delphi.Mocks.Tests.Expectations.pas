@@ -39,6 +39,7 @@ type
     //ExpectationMet after record hit tests
     procedure ExpectationMet_With_OnceWhen_CalledOnce;
     procedure ExpectationNotMet_With_OnceWhen_CalledNever;
+    procedure ExpectationNotMet_With_OnceWhen_CalledOnceAndResetCalls;
 
     procedure ExpectationMet_With_Never_CalledNever;
     procedure ExpectationNotMet_With_Never_CalledOnce;
@@ -273,6 +274,17 @@ begin
   Assert.IsFalse(expectation.ExpectationMet, 'Exception met for OnceWhen being not called');
 end;
 
+procedure TTestExpectations.ExpectationNotMet_With_OnceWhen_CalledOnceAndResetCalls;
+var
+  expectation : IExpectation;
+begin
+  expectation := TExpectation.CreateOnceWhen('', nil, FMatchers);
+
+  expectation.RecordHit;
+  Assert.IsTrue(expectation.ExpectationMet, 'Exception not met for OnceWhen being called once');
+  expectation.ResetCalls;
+  Assert.IsFalse(expectation.ExpectationMet, 'Exception not met for OnceWhen being called once, after ResetCalls');
+end;
 
 procedure TTestExpectations.ExpectationNotMet_With_Between_1to4_CalledNever;
 var

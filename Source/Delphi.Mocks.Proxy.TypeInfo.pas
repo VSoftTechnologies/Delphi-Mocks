@@ -111,6 +111,7 @@ type
     //IVerify
     procedure Verify(const message : string = '');
     procedure VerifyAll(const message : string = '');
+    procedure ResetCalls;
 
     function CheckExpectations: string;
 
@@ -545,6 +546,16 @@ begin
   end;
 end;
 
+procedure TProxy.ResetCalls;
+var
+  methodData : IMethodData;
+begin
+  for methodData in FMethodData.Values do
+  begin
+    methodData.ResetCalls;
+  end;
+end;
+
 procedure TProxy.SetBehaviorMustBeDefined(const AValue: boolean);
 begin
   FBehaviorMustBeDefined := AValue;
@@ -772,7 +783,7 @@ var
   interfaceV : IVerify;
 begin
   //Verify ourselves.
-  Verify;
+  Verify(message);
 
   //Now verify all our children.
   for proxy in FInterfaceProxies.Values.ToArray do

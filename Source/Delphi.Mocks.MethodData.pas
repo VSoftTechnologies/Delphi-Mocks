@@ -96,8 +96,8 @@ type
     procedure After(const AAfterMethodName : string);
 
     function Verify(var report : string) : boolean;
-
-    function BehaviorDefined: Boolean;
+    procedure ResetCalls;
+    procedure ClearExpectations;
   public
     constructor Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
     destructor Destroy;override;
@@ -119,6 +119,11 @@ uses
 
 { TMethodData }
 
+
+procedure TMethodData.ClearExpectations;
+begin
+  FExpectations.Clear;
+end;
 
 constructor TMethodData.Create(const ATypeName : string; const AMethodName : string; const ASetupParameters: TSetupMethodDataParameters; const AAutoMocker : IAutoMock = nil);
 begin
@@ -263,11 +268,6 @@ begin
       exit;
     end;
   end;
-end;
-
-function TMethodData.BehaviorDefined: Boolean;
-begin
-  Result := (FBehaviors.Count <> 0);
 end;
 
 procedure TMethodData.MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
@@ -536,6 +536,16 @@ begin
 
   if returnType <> nil then
     Result := returnValue;
+end;
+
+procedure TMethodData.ResetCalls;
+var
+  expectation : IExpectation;
+begin
+  for expectation in FExpectations do
+  begin
+    expectation.ResetCalls;
+  end;
 end;
 
 procedure TMethodData.StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);

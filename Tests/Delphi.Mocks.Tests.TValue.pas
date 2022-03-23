@@ -10,6 +10,7 @@ type
   TValueTests = class
   published
     procedure Test_IsRecord;
+    procedure Test_IsArray;
   end;
   {$M-}
 
@@ -24,6 +25,12 @@ type
   TMyRec = record
     Value: String;
   end;
+
+procedure TValueTests.Test_IsArray;
+begin
+  Assert.IsFalse(TValue.From<string>('test').IsArray);
+  Assert.IsTrue(TValue.From<TArray<string>>(['a', 'b']).IsArray);
+end;
 
 procedure TValueTests.Test_IsRecord;
 var
