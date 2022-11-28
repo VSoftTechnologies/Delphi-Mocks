@@ -55,6 +55,9 @@ begin
   mock := TMock<IFoo>.Create;
   stub := TStub<IFoo>.Create;
 
+  //Setup our stub.
+  stub.Setup.WillReturnDefault('Bar', 'You called Bar on the stub and this is the default return value.' );
+
   //Setup the behavior of our mock.
 
   //setup a default return value for method Bar
@@ -116,6 +119,7 @@ begin
 
   mock.Setup.Expect.Exactly('Bar',5);
 
+
  //Now use our mock object
   mock.Instance.MyProp := 'hello';
   mock.Instance.IndexedProp[1] := 'hello';
@@ -136,7 +140,7 @@ begin
   WriteLn('Calling1 ReturnObject : ' + mock.Instance.ReturnObject.ClassName);
 
 
-  stub.Instance.Bar(1234);
+  WriteLn(stub.Instance.Bar(1234));
 
 
   //Test the implicit operator by calling a method that expects IFoo

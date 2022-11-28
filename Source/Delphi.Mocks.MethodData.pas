@@ -55,7 +55,6 @@ type
     FExpectations   : TList<IExpectation>;
     FSetupParameters: TSetupMethodDataParameters;
     FAutoMocker     : IAutoMock;
-    procedure StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
     procedure MockNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType : TRttiType; out Result : TValue);
   protected
 
@@ -304,7 +303,7 @@ begin
   end;
 
   //If we have no return type defined, and the default return type is empty
-  if (returnType <> nil) and (FReturnDefault.IsEmpty) then
+  if (returnType <> nil) and (FReturnDefault.IsEmpty) and (not FSetupParameters.IsStub) then
     //Say we didn't have a default return value
     raise EMockException.Create(Format('[%s] has no default return value or return type was defined for method [%s]', [FTypeName, FMethodName]));
 
@@ -527,11 +526,11 @@ begin
   if behavior <> nil then
     returnValue := behavior.Execute(Args, returnType)
   else begin
-    if FSetupParameters.IsStub then
-      StubNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue)
-    else
-      if (method = nil) or method.IsAbstract or (not method.IsVirtual) then
-        MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue);
+    if FSetupParameters.IsStub or (method = nil) or method.IsAbstract or (not method.IsVirtual) then
+      MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue);
+//    else
+//      if (method = nil) or method.IsAbstract or (not method.IsVirtual) then
+//        MockNoBehaviourRecordHit(Args, expectationHitCtr, returnType, returnValue);
   end;
 
   if returnType <> nil then
@@ -548,24 +547,6 @@ begin
   end;
 end;
 
-procedure TMethodData.StubNoBehaviourRecordHit(const Args: TArray<TValue>; const AExpectationHitCtr : Integer; const returnType: TRttiType; out Result: TValue);
-begin
-  MockNoBehaviourRecordHit(Args, AExpectationHitCtr, returnType, Result);
-
-//
-//  //If we have no return type defined, and the default return type is empty
-//  if (returnType <> nil) and (FReturnDefault.IsEmpty) then
-//  begin
-//    //Return the default value for the passed in return type
-//    Result := GetDefaultValue(returnType);
-//  end
-//  else if FSetupParameters.BehaviorMustBeDefined and (AExpectationHitCtr = 0) and (FReturnDefault.IsEmpty) then
-//  begin
-//    //If we must have default behaviour defined, and there was nothing defined raise a mock exception.
-//    raise EMockException.Create(Format('[%s] has no behaviour or expectation defined for method [%s]', [FTypeName, FMethodName]));
-//  end;
-//  result := FReturnDefault;
-end;
 
 function TMethodData.Verify(var report : string) : boolean;
 var
