@@ -90,7 +90,14 @@ end;
 
 function TMatcher<T>.Match(const value: TValue): boolean;
 begin
-  result := FPredicate(value.AsType<T>);
+  try
+    result := FPredicate(value.AsType<T>);
+  except
+    on E: EInvalidCast do
+      Result := False
+    else
+      raise;
+  end;
 end;
 
 class constructor TMatcherFactory.Create;
