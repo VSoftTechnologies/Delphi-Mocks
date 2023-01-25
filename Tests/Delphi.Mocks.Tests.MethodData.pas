@@ -16,6 +16,19 @@ type
   end;
   {$M-}
 
+  TObjectToTest = class
+  private
+    FPropertyToTest: Integer;
+  public
+    FieldToTest: Integer;
+
+    property PropertyToTest: Integer read FPropertyToTest write FPropertyToTest;
+  end;
+
+  TAnotherObject = class(TObjectToTest);
+
+  TAndAnotherObject = class(TObjectToTest);
+
   {$M+}
   [TestFixture]
   TTestMethodData = class
@@ -34,6 +47,10 @@ type
     procedure BehaviourMustBeDefined_IsFalse_AndBehaviourIsNotDefined_RaisesNoException;
     [Test]
     procedure BehaviourMustBeDefined_IsTrue_AndBehaviourIsNotDefined_RaisesException;
+    [Test]
+    procedure AllowRedefineBehaviorDefinitions_IsTrue_NoExceptionIsThrown_WhenMatcherAreDifferent;
+    [Test]
+    procedure Expectations_NoExceptionIsThrown_WhenMatcherAreDifferent;
   end;
   {$M-}
 
@@ -42,10 +59,48 @@ implementation
 uses
   Delphi.Mocks.Helpers,
   Delphi.Mocks.MethodData,
-  classes, System.TypInfo, StrUtils;
+  classes, System.TypInfo, StrUtils, Delphi.Mocks.ParamMatcher;
 
 
 { TTestMethodData }
+
+procedure TTestMethodData.Expectations_NoExceptionIsThrown_WhenMatcherAreDifferent;
+var
+  methodData  : IMethodData;
+  someParam,
+  someValue1,
+  someValue2  : TValue;
+  LObjectToTest : TObjectToTest;
+  LAnotherObject: TAnotherObject;
+  LAndAnotherObject: TAndAnotherObject;
+begin
+  LObjectToTest := TObjectToTest.Create;
+  LAnotherObject := TAnotherObject.Create;
+  LAndAnotherObject := TAndAnotherObject.Create;
+  try
+    someValue1 := TValue.From<TAnotherObject>(LAnotherObject);
+    someValue2 := TValue.From<TAndAnotherObject>(LAndAnotherObject);
+    someParam := TValue.From<TObjectToTest>(LObjectToTest);
+
+    methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
+    methodData.NeverWhen([nil, someParam], [TMatcher<TAnotherObject>.Create(function(value : TAnotherObject) : boolean
+    begin
+      result := true;
+    end)]);
+
+    Assert.WillNotRaise(procedure
+    begin
+      methodData.NeverWhen([nil, someParam], [TMatcher<TAndAnotherObject>.Create(function(value : TAndAnotherObject) : boolean
+      begin
+        result := true;
+      end)]);
+    end, EMockSetupException);
+  finally
+    LObjectToTest.Free;
+    LAnotherObject.Free;
+    LAndAnotherObject.Free;
+  end;
+end;
 
 procedure TTestMethodData.Expectation_Before_Verifies_To_True_When_Prior_Method_Called_Atleast_Once;
 begin
@@ -96,10 +151,47 @@ begin
   someValue1 := TValue.From<Integer>(1);
   someValue2 := TValue.From<Integer>(2);
   methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue1), someValue1, nil);
-  methodData.WillReturnWhen(TArray<TValue>.Create(someValue2), someValue2, nil);
+  methodData.WillReturnWhen([nil, someValue1], someValue1, nil);
+  methodData.WillReturnWhen([nil, someValue2], someValue2, nil);
 
   Assert.IsTrue(True);
+end;
+
+procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsTrue_NoExceptionIsThrown_WhenMatcherAreDifferent;
+var
+  methodData  : IMethodData;
+  someParam,
+  someValue1,
+  someValue2  : TValue;
+  LObjectToTest : TObjectToTest;
+  LAnotherObject: TAnotherObject;
+  LAndAnotherObject: TAndAnotherObject;
+begin
+  LObjectToTest := TObjectToTest.Create;
+  LAnotherObject := TAnotherObject.Create;
+  LAndAnotherObject := TAndAnotherObject.Create;
+  try
+    someValue1 := TValue.From<TAnotherObject>(LAnotherObject);
+    someValue2 := TValue.From<TAndAnotherObject>(LAndAnotherObject);
+    someParam := TValue.From<TObjectToTest>(LObjectToTest);
+
+    methodData := TMethodData.Create('x', 'x', TSetupMethodDataParameters.Create(FALSE, FALSE, FALSE));
+    methodData.WillReturnWhen([nil, someParam], someValue1, [TMatcher<TAnotherObject>.Create(function(value : TAnotherObject) : boolean
+    begin
+      result := true;
+    end)]);
+
+    Assert.WillNotRaise(procedure
+    begin
+      methodData.WillReturnWhen([nil, someParam], someValue2, [TMatcher<TAndAnotherObject>.Create(function(value : TAndAnotherObject) : boolean
+      begin
+        result := true;
+      end)]);
+    end, EMockSetupException);
+  finally
+    LAnotherObject.Free;
+    LAndAnotherObject.Free;
+  end;
 end;
 
 procedure TTestMethodData.AllowRedefineBehaviorDefinitions_IsTrue_OldBehaviorIsDeleted;
