@@ -17,6 +17,10 @@ type
     property PropertyToTest: Integer read FPropertyToTest write FPropertyToTest;
   end;
 
+  TAnotherObject = class(TObjectToTest);
+
+  TAndAnotherObject = class(TObjectToTest);
+
   TRecordToTest = record
   private
     internalValue: String;
@@ -72,6 +76,12 @@ type
     procedure Record_with_equality_comparer;
     [Test]
     procedure Record_with_operator_overloaded_comparer;
+  end;
+
+  [TestFixture]
+  TItClassTests = class
+    [Test]
+    procedure Class_descendant_matches_on_exact_type;
   end;
 
 implementation
@@ -257,9 +267,38 @@ begin
   Assert.IsTrue(LMatchers[3].Match(TValue.From<TRecordToTest>('test3')));
 end;
 
+{ TItClassTests }
+
+procedure TItClassTests.Class_descendant_matches_on_exact_type;
+var
+  LMatchers: TArray<IMatcher>;
+  LAnotherObject: TAnotherObject;
+  LAndAnotherObject: TAndAnotherObject;
+begin
+  Assert.AreEqual(0, Length(LMatchers));
+
+  It(0).IsAny<TAnotherObject>();
+  It(1).IsAny<TAndAnotherObject>();
+
+  LMatchers := TMatcherFactory.GetMatchers();
+
+  LAnotherObject := TAnotherObject.Create;
+  LAndAnotherObject := TAndAnotherObject.Create;
+  try
+    Assert.IsTrue(LMatchers[0].Match(TValue.From<TAnotherObject>(LAnotherObject)));
+    Assert.IsTrue(LMatchers[1].Match(TValue.From<TAndAnotherObject>(LAndAnotherObject)));
+
+    Assert.IsFalse(LMatchers[1].Match(TValue.From<TAndAnotherObject>(TAndAnotherObject(LAnotherObject))));
+  finally
+    LAnotherObject.Free;
+    LAndAnotherObject.Free;
+  end;
+end;
+
 initialization
   TDUnitX.RegisterTestFixture(TExample_MatchersTests);
   TDUnitX.RegisterTestFixture(TItRecTests);
+  TDUnitX.RegisterTestFixture(TItClassTests);
 
 end.
 

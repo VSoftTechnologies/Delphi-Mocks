@@ -74,11 +74,11 @@ var
 begin
   //Note : Args[0] is the Self Ptr for the proxy, we do not want to keep
   //a reference to it so it is ignored here.
-  l := Length(args);
-  if l > 0 then
+  l := Length(Args) -1;
+  if l > 0  then
   begin
     SetLength(FArgs,l);
-    CopyArray(@FArgs[0],@args[0],TypeInfo(TValue),l);
+    CopyArray(@FArgs[0],@args[1],TypeInfo(TValue),l);
   end;
 end;
 
@@ -178,11 +178,12 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
     i : integer;
   begin
     result := False;
-    if Length(Args) <> (Length(FArgs)) then
+    if Length(Args) <> (Length(FArgs) + 1 ) then
       exit;
-    for i := 0 to Length(args) -1 do
+    //start at 1 as we don't care about matching the first arg (self)
+    for i := 1 to Length(args) -1 do
     begin
-      if not FArgs[i].Equals(args[i]) then
+      if not FArgs[i -1].Equals(args[i]) then
         exit;
     end;
     result := True;
@@ -204,24 +205,23 @@ function TBehavior.Match(const Args: TArray<TValue>): Boolean;
 begin
   result := False;
 
-  if (Length(FMatchers) > 0) and (Length(Args) = (Length(FMatchers) + 1)) then
+  if Length(FMatchers) > 0 then
   begin
     result := MatchWithMatchers;
-    exit;
-  end;
-
-  case FBehaviorType of
-    WillReturn      : result := MatchArgs;
-    ReturnDefault   : result := True;
-    WillRaise       :
-    begin
-      result := MatchArgs;
-      if FExceptClass <> nil then
-        raise FExceptClass.Create('Raised by Mock');
+  end else begin
+    case FBehaviorType of
+      WillReturn      : result := MatchArgs;
+      ReturnDefault   : result := True;
+      WillRaise       :
+      begin
+        result := MatchArgs;
+        if FExceptClass <> nil then
+          raise FExceptClass.Create('Raised by Mock');
+      end;
+      WillRaiseAlways : result := True;
+      WillExecuteWhen : result := MatchArgs;
+      WillExecute     : result := True;
     end;
-    WillRaiseAlways : result := True;
-    WillExecuteWhen : result := MatchArgs;
-    WillExecute     : result := True;
   end;
 end;
 
