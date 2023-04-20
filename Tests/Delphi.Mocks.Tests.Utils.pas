@@ -30,6 +30,9 @@ type
 
     procedure Test_CompareValue_ArrayEquals;
     procedure Test_CompareValue_ArrayNotEquals;
+
+    procedure Test_CompareValue_ObjectEquals;
+    procedure Test_CompareValue_ObjectNotEquals;
   end;
   {$M-}
 
@@ -40,9 +43,16 @@ uses
 
 type
   TMyClass = class
+  private
+    FValue: Integer;
+  public
     procedure NormalMethod;
     procedure AbstractMethod; virtual; abstract;
     procedure VirtualMethod; virtual;
+
+    constructor Create(AValue: Integer);
+
+    function Equals(AItem: TObject): Boolean; override;
   end;
 
   TMyRec = record
@@ -126,6 +136,38 @@ begin
   a1 := ['a'];
   a2 := [];
   Assert.AreNotEqual(0, CompareValue(TValue.From(a1), TValue.From(a2)));
+end;
+
+procedure TTestTValue.Test_CompareValue_ObjectEquals;
+var
+  o1, o2: TMyClass;
+begin
+  o1 := TMyClass.Create(1);
+  o2 := TMyClass.Create(1);
+  try
+    Assert.AreEqual(0, CompareValue(TValue.From<TMyClass>(o1), TValue.From<TMyClass>(o1)));
+    Assert.AreEqual(0, CompareValue(TValue.From<TMyClass>(o2), TValue.From<TMyClass>(o2)));
+    Assert.AreEqual(0, CompareValue(TValue.From<TMyClass>(o1), TValue.From<TMyClass>(o2)));
+  finally
+    o1.Free;
+    o2.Free;
+  end;
+end;
+
+procedure TTestTValue.Test_CompareValue_ObjectNotEquals;
+var
+  o1, o2: TMyClass;
+begin
+  o1 := TMyClass.Create(1);
+  o2 := TMyClass.Create(2);
+  try
+    Assert.AreEqual(0, CompareValue(TValue.From<TMyClass>(o1), TValue.From<TMyClass>(o1)));
+    Assert.AreEqual(0, CompareValue(TValue.From<TMyClass>(o2), TValue.From<TMyClass>(o2)));
+    Assert.AreNotEqual(0, CompareValue(TValue.From<TMyClass>(o1), TValue.From<TMyClass>(o2)));
+  finally
+    o1.Free;
+    o2.Free;
+  end;
 end;
 
 procedure TTestTValue.Test_CompareValue_RecordEquals;
@@ -225,6 +267,18 @@ begin
 end;
 
 { TMyClass }
+
+constructor TMyClass.Create(AValue: Integer);
+begin
+  FValue := AValue;
+end;
+
+function TMyClass.Equals(AItem: TObject): Boolean;
+begin
+  Result := AItem is TMyClass;
+  if Result then
+    Result := TMyClass(AItem).FValue = Self.FValue;
+end;
 
 procedure TMyClass.NormalMethod;
 begin
