@@ -59,7 +59,7 @@ type
     function AtMost(const times : Cardinal) : IWhen<T>;overload;
     procedure AtMost(const AMethodName : string; const times : Cardinal);overload;
 
-    function Between(const a,b : Cardinal) : IWhen<T>;overload;
+    function Between(const a, b : Cardinal) : IWhen<T>;overload;
     procedure Between(const AMethodName : string; const a,b : Cardinal);overload;
 
     function Exactly(const times : Cardinal) : IWhen<T>;overload;
@@ -380,7 +380,7 @@ begin
   //Push the proxy into the result we are returning.
   if proxy.QueryInterface(GetTypeData(TypeInfo(IProxy<T>)).Guid, Result.FProxy) <> 0 then
     //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
-    raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt IProxy<T>');
+    raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implement IProxy<T>');
 
   //The record has been created!
   Result.FCreated := True;
@@ -617,7 +617,7 @@ begin
   //Push the proxy into the result we are returning.
   if proxy.QueryInterface(GetTypeData(TypeInfo(IStubProxy<T>)).Guid, Result.FProxy) <> 0 then
     //TODO: This raise seems superfluous as the only types which are created are controlled by us above. They all implement IProxy<T>
-    raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implememnt IProxy<T>');
+    raise EMockNoProxyException.Create('Error casting to interface ' + pInfo.NameStr + ' , proxy does not appear to implement IProxy<T>');
 end;
 
 procedure TStub<T>.Free;
@@ -818,7 +818,7 @@ begin
       result := false;
       for value in values do
       begin
-        result := comparer.Equals(param,value);
+        result := comparer.Equals(param, value);
         if result then
           exit;
       end;
@@ -852,7 +852,7 @@ begin
       result := true;
       for value in values do
       begin
-        if comparer.Equals(param,value) then
+        if comparer.Equals(param, value) then
           exit(false);
       end;
     end);
@@ -870,7 +870,7 @@ begin
       result := true;
       for value in values do
       begin
-        if comparer.Equals(param,value) then
+        if comparer.Equals(param, value) then
           exit(false);
       end;
     end);
@@ -887,7 +887,7 @@ begin
   TMatcherFactory.Create<T>(ParamIndex,
     function(param : T) : boolean
     begin
-      result := not comparer.Equals(param,Default(T));
+      result := not comparer.Equals(param, Default(T));
     end);
 end;
 
@@ -908,7 +908,7 @@ begin
   TMatcherFactory.Create<string>(ParamIndex,
     function(param : string) : boolean
     begin
-      result := TRegEx.IsMatch(param,regex,options)
+      result := TRegEx.IsMatch(param, regex, options)
     end);
 end;
 
