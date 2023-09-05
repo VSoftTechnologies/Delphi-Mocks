@@ -102,10 +102,6 @@ type
     destructor Destroy;override;
   end;
 
-  {$IFNDEF DELPHI_XE_UP}
-  ENotImplemented = class(Exception);
-  {$ENDIF}
-
 implementation
 
 uses

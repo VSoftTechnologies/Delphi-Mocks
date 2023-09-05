@@ -312,7 +312,7 @@ uses
   Delphi.Mocks.AutoMock,
   Delphi.Mocks.Validation,
   Delphi.Mocks.Helpers
-{$IFDEF DELPHI_XE8_UP}
+{$IFDEF HAS_SYSTEM_HASH}
   ,System.Hash
 {$ENDIF};
 
@@ -741,7 +741,7 @@ begin
         end,
         function(const Value: T): Integer
         begin
-{$IFDEF DELPHI_XE8_UP}
+{$IFDEF HAS_SYSTEM_HASH}
           Result := THashBobJenkins.GetHashValue(Value, SizeOf(Value));
 {$ELSE}
           Result := BobJenkinsHash(Value, SizeOf(Value), 0);
