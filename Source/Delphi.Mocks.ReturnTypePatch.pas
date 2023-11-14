@@ -72,7 +72,7 @@ procedure PatchMethodReturnType(AMethod: TRttiMethod; AReturnType: PTypeInfo); o
 implementation
 
 uses
-  Windows;
+  Winapi.Windows;
 
 type
   TRttiIntfMethod = class(TRttiMethod)
