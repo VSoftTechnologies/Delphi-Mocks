@@ -332,7 +332,6 @@ end;
 
 function TMock<T>.CheckExpectations: string;
 var
-  su : IMockSetup<T>;
   v : IVerify;
 begin
   CheckCreated;

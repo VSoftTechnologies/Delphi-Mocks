@@ -440,7 +440,6 @@ end;
 
 procedure TProxy<T>.DoInvoke(Method: TRttiMethod; const Args: TArray<TValue>; out Result: TValue);
 var
-  returnVal : TValue;
   methodData : IMethodData;
   behavior : IBehavior;
   pInfo : PTypeInfo;
@@ -578,7 +577,6 @@ end;
 function TProxy<T>.GetMethodData(const AMethodName: string; const ATypeName: string): IMethodData;
 var
   methodName : string;
-  pInfo : PTypeInfo;
   setupParams: TSetupMethodDataParameters;
 begin
   methodName := LowerCase(AMethodName);
@@ -674,7 +672,7 @@ end;
 function TProxy<T>.Proxy: T;
 var
   pInfo : PTypeInfo;
-  virtualProxy : IInterface;
+//  virtualProxy : IInterface;
 begin
   pInfo := TypeInfo(T);
 
@@ -784,7 +782,6 @@ end;
 function TProxy<T>.ProxyInterface: IInterface;
 var
   pInfo : PTypeInfo;
-  virtualProxy : IInterface;
 begin
   pInfo := TypeInfo(T);
 
