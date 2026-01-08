@@ -373,4 +373,10 @@ begin
   Result := DispatchKind = dkVtable;
 end;
 
+initialization
+  Context := TRttiContext.Create;
+
+finalization
+  Context.Free;
+
 end.

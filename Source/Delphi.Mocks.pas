@@ -359,7 +359,11 @@ var
   pInfo : PTypeInfo;
 begin
   //Make sure that we start off with a clean mock
-  FillChar(Result, SizeOf(Result), 0);
+  //NOTE: Do NOT use FillChar here! Due to return value optimization,
+  //Result may be the same memory as the caller's variable, and FillChar
+  //would bypass finalization of managed fields (causing memory leaks).
+  //Use Default() which properly handles managed types.
+  Result := Default(TMock<T>);
 
   //By default we don't auto mock TMock<T>. It changes when TAutoMock is used.
   Result.FAutomocker := AAutoMock;
@@ -577,8 +581,11 @@ var
   proxy : IInterface;
   pInfo : PTypeInfo;
 begin
-  //Make sure that we start off with a clean mock
-  FillChar(Result, SizeOf(Result), 0);
+  //Make sure that we start off with a clean stub
+  //NOTE: Do NOT use FillChar here! Due to return value optimization,
+  //Result may be the same memory as the caller's variable, and FillChar
+  //would bypass finalization of managed fields (causing memory leaks).
+  Result := Default(TStub<T>);
 
   //By default we don't auto mock TMock<T>. It changes when TAutoMock is used.
   Result.FAutomocker := nil;
@@ -659,7 +666,10 @@ end;
 
 class function TAutoMockContainer.Create: TAutoMockContainer;
 begin
-  FillChar(Result, SizeOf(Result), 0);
+  //NOTE: Do NOT use FillChar here! Due to return value optimization,
+  //Result may be the same memory as the caller's variable, and FillChar
+  //would bypass finalization of managed fields (causing memory leaks).
+  Result := Default(TAutoMockContainer);
 
   Result.FAutoMocker := TAutoMock.Create;
 end;
