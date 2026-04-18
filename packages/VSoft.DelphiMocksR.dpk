@@ -1,0 +1,51 @@
+package VSoft.DelphiMocksR;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl;
+
+contains
+  Delphi.Mocks.AutoMock in '..\Source\Delphi.Mocks.AutoMock.pas',
+  Delphi.Mocks.Behavior in '..\Source\Delphi.Mocks.Behavior.pas',
+  Delphi.Mocks.Expectation in '..\Source\Delphi.Mocks.Expectation.pas',
+  Delphi.Mocks.Helpers in '..\Source\Delphi.Mocks.Helpers.pas',
+  Delphi.Mocks.Interfaces in '..\Source\Delphi.Mocks.Interfaces.pas',
+  Delphi.Mocks.MethodData in '..\Source\Delphi.Mocks.MethodData.pas',
+  Delphi.Mocks.ObjectProxy in '..\Source\Delphi.Mocks.ObjectProxy.pas',
+  Delphi.Mocks.ParamMatcher in '..\Source\Delphi.Mocks.ParamMatcher.pas',
+  Delphi.Mocks in '..\Source\Delphi.Mocks.pas',
+  Delphi.Mocks.Proxy in '..\Source\Delphi.Mocks.Proxy.pas',
+  Delphi.Mocks.Proxy.TypeInfo in '..\Source\Delphi.Mocks.Proxy.TypeInfo.pas',
+  Delphi.Mocks.ReturnTypePatch in '..\Source\Delphi.Mocks.ReturnTypePatch.pas',
+  Delphi.Mocks.Utils in '..\Source\Delphi.Mocks.Utils.pas',
+  Delphi.Mocks.Validation in '..\Source\Delphi.Mocks.Validation.pas',
+  Delphi.Mocks.WeakReference in '..\Source\Delphi.Mocks.WeakReference.pas',
+  Delphi.Mocks.When in '..\Source\Delphi.Mocks.When.pas';
+
+end.
