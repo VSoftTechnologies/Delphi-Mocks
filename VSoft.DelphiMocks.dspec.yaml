@@ -14,7 +14,7 @@ metadata:
   readme: README.md
   copyright: Vincent Parrett and contributors
   tags: [ mocking, unit testing ]
-  repositoryCommit: Id:3c40b652a0088f076f969c6e4a0c4b6b6e601d16
+  repositoryCommit: #HASH#
 
 # package folder names are a mess. 
 targetPlatforms:
