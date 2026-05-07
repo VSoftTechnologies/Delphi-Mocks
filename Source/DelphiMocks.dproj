@@ -23,6 +23,11 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Linux64' and '$(Base)'=='true') or '$(Base_Linux64)'!=''">
+			<Base_Linux64>true</Base_Linux64>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
 			<Cfg_1>true</Cfg_1>
 			<CfgParent>Base</CfgParent>
@@ -60,6 +65,9 @@
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base_Linux64)'!=''">
+			<DCC_Namespace>Winapi;$(DCC_Namespace)</DCC_Namespace>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -147,20 +155,12 @@
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madBasic\BDS9\win32\madBasic_.bpl">madBasic 1.2.7  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madBasic\BDS9\win32\madHelp_.bpl">madHelp 1.1.1  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madDisAsm\BDS9\win32\madDisAsm_.bpl">madDisAsm 2.2.6  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptIde_.bpl">madExceptIde 1.1.0  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExcept_.bpl">madExcept 5.1.0  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptVcl_.bpl">madExceptVcl 2.1.0  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptWizard_.bpl">madExceptWizard 3.1.8  -  www.madshi.net</Excluded_Packages>
-					</Excluded_Packages>
 				</Delphi.Personality>
 				<Deployment/>
 				<Platforms>
 					<Platform value="Win64">True</Platform>
 					<Platform value="Win32">True</Platform>
+					<Platform value="Linux64">True</Platform>
 				</Platforms>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>

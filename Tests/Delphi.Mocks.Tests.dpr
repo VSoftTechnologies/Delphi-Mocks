@@ -20,10 +20,11 @@ program Delphi.Mocks.Tests;
 {$WARN DUPLICATE_CTOR_DTOR OFF}
 
 uses
-  Forms,
+  {$IFDEF MSWINDOWS}
+  DUnitX.Windows.Console,
+  {$ENDIF MSWINDOWS}
   DUnitX.TestFramework,
   DUnitX.Loggers.Console,
-  DUnitX.Windows.Console,
   DUnitX.Loggers.XML.NUnit,
   SysUtils,
   Sample1Main in '..\Examples\Sample1Main.pas',

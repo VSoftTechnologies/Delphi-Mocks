@@ -233,7 +233,7 @@ procedure TItRecTests.Record_with_equality_comparer;
 var
   LMatchers: TArray<IMatcher>;
 begin
-  Assert.AreEqual(0, Length(LMatchers));
+  Assert.AreEqual(Integer(0), Integer(Length(LMatchers)));
 
   It(0).IsEqualTo<TRecordToTest>('test1', TRecordToTest.EqualityComparer);
   It(1).IsIn<TRecordToTest>(['test1', 'test2'], TRecordToTest.EqualityComparer);
@@ -252,7 +252,7 @@ procedure TItRecTests.Record_with_operator_overloaded_comparer;
 var
   LMatchers: TArray<IMatcher>;
 begin
-  Assert.AreEqual(0, Length(LMatchers));
+  Assert.AreEqual(Integer(0), Integer(Length(LMatchers)));
 
   It(0).IsEqualTo<TRecordToTest>('test1');
   It(1).IsIn<TRecordToTest>(['test1', 'test2']);
@@ -275,7 +275,7 @@ var
   LAnotherObject: TAnotherObject;
   LAndAnotherObject: TAndAnotherObject;
 begin
-  Assert.AreEqual(0, Length(LMatchers));
+  Assert.AreEqual(Integer(0), Integer(Length(LMatchers)));
 
   It(0).IsAny<TAnotherObject>();
   It(1).IsAny<TAndAnotherObject>();

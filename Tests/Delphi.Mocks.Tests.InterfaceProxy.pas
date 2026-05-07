@@ -231,7 +231,7 @@ begin
   mock.Setup.WillExecute(
     function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
     begin
-      Assert.AreEqual(2, Length(Args), 'Args Length');
+      Assert.AreEqual(Integer(2), Integer(Length(Args)), 'Args Length');
       //Argument Zero is Self Instance
       args[1] := RETURN_MSG;
     end
@@ -258,7 +258,7 @@ begin
   mock.Setup.WillExecute(
     function (const args : TArray<TValue>; const ReturnType : TRttiType) : TValue
     begin
-      Assert.AreEqual(2, Length(Args), 'Args Length');
+      Assert.AreEqual(Integer(2), Integer(Length(Args)), 'Args Length');
       //Argument Zero is Self Instance
       args[1] := RETURN_MSG;
     end

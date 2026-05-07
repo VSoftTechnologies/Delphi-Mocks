@@ -23,6 +23,11 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Linux64' and '$(Base)'=='true') or '$(Base_Linux64)'!=''">
+			<Base_Linux64>true</Base_Linux64>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
 			<Cfg_1>true</Cfg_1>
 			<CfgParent>Base</CfgParent>
@@ -59,10 +64,10 @@
 			<BRCC_Defines>_ISCONSOLE;_XMLOUTPUT;$(BRCC_Defines)</BRCC_Defines>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<VerInfo_Locale>3081</VerInfo_Locale>
-			<DCC_UnitSearchPath>..\Source;$(DUNITX);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>..\Source;..\Source\$(Platform)\$(Config);$(DUNITX);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>bindcompfmx;dsnap;fmx;rtl;IndySystem;IndyCore;dbrtl;bindcomp;inetdb;fmxase;inet;fmxobj;xmlrtl;inetdbxpress;IndyProtocols;fmxdae;bindengine;soaprtl;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-			<DCC_DcuOutput>.</DCC_DcuOutput>
+			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
 			<DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_E>false</DCC_E>
 			<DCC_N>false</DCC_N>
@@ -84,6 +89,9 @@
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base_Linux64)'!=''">
+			<DCC_Namespace>Winapi;$(DCC_Namespace)</DCC_Namespace>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
@@ -183,15 +191,6 @@
 					<Source>
 						<Source Name="MainSource">Delphi.Mocks.Tests.dpr</Source>
 					</Source>
-					<Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madBasic\BDS9\win32\madBasic_.bpl">madBasic 1.2.7  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madBasic\BDS9\win32\madHelp_.bpl">madHelp 1.1.1  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madDisAsm\BDS9\win32\madDisAsm_.bpl">madDisAsm 2.2.6  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptIde_.bpl">madExceptIde 1.1.0  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExcept_.bpl">madExcept 5.0.0  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptVcl_.bpl">madExceptVcl 2.1.0  -  www.madshi.net</Excluded_Packages>
-						<Excluded_Packages Name="I:\FBAT_HG_LIBS8\madCollection\madExcept\BDS9\win32\madExceptWizard_.bpl">madExceptWizard 3.1.8  -  www.madshi.net</Excluded_Packages>
-					</Excluded_Packages>
 				</Delphi.Personality>
 				<Deployment>
 					<DeployFile Class="ProjectOutput" Configuration="Debug" LocalName="Win32\Debug\Delphi.Mocks.Tests.exe">
@@ -534,6 +533,7 @@
 					<Platform value="OSX32">False</Platform>
 					<Platform value="Win64">True</Platform>
 					<Platform value="Win32">True</Platform>
+					<Platform value="Linux64">True</Platform>
 				</Platforms>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
