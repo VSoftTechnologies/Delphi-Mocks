@@ -1,0 +1,9 @@
+{
+	"name": "delphi-mocks",
+	"description": "Simple mocking framework for Delphi XE2 or later",
+	"version": "0.3.1",
+	"homepage": "https://github.com/VSoftTechnologies/Delphi-Mocks",
+	"mainsrc": "./Source",
+	"projects": [],
+	"dependencies": {}
+}
