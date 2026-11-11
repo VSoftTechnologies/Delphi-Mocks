@@ -33,13 +33,48 @@ type
 
     procedure Test_CompareValue_ObjectEquals;
     procedure Test_CompareValue_ObjectNotEquals;
+
+    procedure Test_CompareValue_InterfaceNotEquals_AddressesFarApart;
   end;
   {$M-}
 
 implementation
 
 uses
+  {$IFDEF CPU64BITS}
+  Windows,
+  {$ENDIF}
   SysUtils;
+
+{$IFDEF CPU64BITS}
+// Fake interface: an IInterface method table whose methods do nothing. It allows creating an interface reference
+// at any chosen address without creating a real object.
+function FakeQueryInterface(Self: Pointer; const IID: TGUID; out Obj): HResult; stdcall;
+begin
+  Pointer(Obj) := nil;
+  Result := E_NOINTERFACE;
+end;
+
+function FakeAddRef(Self: Pointer): Integer; stdcall;
+begin
+  Result := 1;
+end;
+
+function FakeRelease(Self: Pointer): Integer; stdcall;
+begin
+  Result := 1;
+end;
+
+const
+  FakeVTable: array[0..2] of Pointer = (@FakeQueryInterface, @FakeAddRef, @FakeRelease);
+
+// The comparison is in a separate function so that the temporary TValues (and their references) are released before the
+// memory of the fakes is freed in the test.
+function CompareFakeInterfaces(const AInterface1, AInterface2: IInterface): Integer;
+begin
+  Result := CompareValue(TValue.From<IInterface>(AInterface1), TValue.From<IInterface>(AInterface2));
+end;
+{$ENDIF}
 
 type
   TMyClass = class
@@ -169,6 +204,48 @@ begin
     o2.Free;
   end;
 end;
+
+procedure TTestTValue.Test_CompareValue_InterfaceNotEquals_AddressesFarApart;
+{$IFDEF CPU64BITS}
+const
+  cBaseAddress = UInt64($20000000);
+  cFarAddress = UInt64($120000000); // exactly 4 GB further: truncating the address difference to 32 bits gives 0
+var
+  lFake1, lFake2: PPointer;
+  lIntf1, lIntf2: IInterface;
+begin
+  // The address difference does not fit in an Integer. With range checking enabled this raises ERangeError, without it the
+  // truncated difference is 0 and different interfaces would be considered equal.
+  lFake1 := VirtualAlloc(Pointer(NativeUInt(cBaseAddress)), 4096, MEM_RESERVE or MEM_COMMIT, PAGE_READWRITE);
+  lFake2 := VirtualAlloc(Pointer(NativeUInt(cFarAddress)), 4096, MEM_RESERVE or MEM_COMMIT, PAGE_READWRITE);
+  try
+    if (lFake1 = nil) or (lFake2 = nil) then
+      Assert.Pass('Could not reserve memory at the required addresses');
+    lFake1^ := @FakeVTable;
+    lFake2^ := @FakeVTable;
+    Pointer(lIntf1) := lFake1;
+    Pointer(lIntf2) := lFake2;
+    try
+      Assert.AreNotEqual(0, CompareFakeInterfaces(lIntf1, lIntf2));
+      Assert.IsTrue(CompareFakeInterfaces(lIntf1, lIntf2) < 0);
+      Assert.IsTrue(CompareFakeInterfaces(lIntf2, lIntf1) > 0);
+      Assert.AreEqual(0, CompareFakeInterfaces(lIntf1, lIntf1));
+    finally
+      Pointer(lIntf1) := nil;
+      Pointer(lIntf2) := nil;
+    end;
+  finally
+    if lFake1 <> nil then
+      VirtualFree(lFake1, 0, MEM_RELEASE);
+    if lFake2 <> nil then
+      VirtualFree(lFake2, 0, MEM_RELEASE);
+  end;
+end;
+{$ELSE}
+begin
+  Assert.Pass('This test applies to Win64 only');
+end;
+{$ENDIF}
 
 procedure TTestTValue.Test_CompareValue_RecordEquals;
 var
