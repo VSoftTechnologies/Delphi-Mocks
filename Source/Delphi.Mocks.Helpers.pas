@@ -121,13 +121,13 @@ begin
   else if left.IsString and right.IsString then
     Result := System.SysUtils.AnsiCompareStr(left.AsString, right.AsString)
   else if left.IsObject and right.IsObject then begin
-    Result := NativeInt(left.AsObject) - NativeInt(right.AsObject);
+    Result := System.Math.CompareValue(UInt64(NativeUInt(left.AsObject)), UInt64(NativeUInt(right.AsObject)));
     if Result <> 0 then begin
       if left.AsObject.Equals(right.AsObject) then
         Result := 0;
     end;
   end else if Left.IsInterface and Right.IsInterface then
-    Result := NativeInt(left.AsInterface) - NativeInt(right.AsInterface) // TODO: instance comparer
+    Result := System.Math.CompareValue(UInt64(NativeUInt(left.AsInterface)), UInt64(NativeUInt(right.AsInterface))) // TODO: instance comparer
   else if Left.IsRecord and Right.IsRecord then
     Result := CompareValue_Record(Left, Right)
   else if Left.IsArray and Right.IsArray then
