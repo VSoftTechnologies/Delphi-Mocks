@@ -93,8 +93,9 @@ function GetVirtualMethodCount(AClass: TClass): Integer;
 begin
   //Note that this returns all virtual methods in the class, including those from the base class.
   //Therefore anything that inherits from TObject will have atleast 12 virtual methods already
-  Result := (PInteger(Integer(AClass) + vmtClassName)^ -
-    (Integer(AClass) + vmtParent) - SizeOf(Pointer)) div SizeOf(Pointer);
+  //NativeInt instead of Integer - on Win64 casting the class pointer to Integer truncates it
+  Result := (PNativeInt(NativeInt(AClass) + vmtClassName)^ -
+    (NativeInt(AClass) + vmtParent) - SizeOf(Pointer)) div SizeOf(Pointer);
 end;
 
 //TODO : There must be a better way than this. How does Default(X) work? Couldn't find the implementation.
